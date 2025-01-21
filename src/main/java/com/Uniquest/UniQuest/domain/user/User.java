@@ -18,6 +18,7 @@ public class User {
     private String id;
     private String name;
     private String username;
+    private String nickname;
     private String email;
     private String password;
 
@@ -39,6 +40,14 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public void setUsername(String username) {
