@@ -17,8 +17,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String name;
-    private String username;
-    private String nickname;
     private String email;
     private String password;
 
@@ -36,22 +34,6 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getEmail() {
