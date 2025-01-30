@@ -2,14 +2,14 @@ package com.Uniquest.UniQuest.domain.user;
 
 import com.Uniquest.UniQuest.domain.proof.Proof;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class InteractionUser {
 
     @Id

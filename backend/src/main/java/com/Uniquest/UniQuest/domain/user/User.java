@@ -14,8 +14,14 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserProfile userProfile; //Um usuário tem um perfil.
+
+
     private String name;
     private String email;
     private String password;
+
 
 }

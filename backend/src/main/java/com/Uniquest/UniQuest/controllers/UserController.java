@@ -11,6 +11,7 @@ import com.Uniquest.UniQuest.service.UserService;
 import com.Uniquest.UniQuest.utils.GenericResponse;
 import com.Uniquest.UniQuest.utils.UrlUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,26 +27,23 @@ import static com.Uniquest.UniQuest.utils.UrlUtil.getAppUrl;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private JavaMailSender mailSender;
     private final EmailService emailService;
     private GenericResponse message;
 
-    @Autowired
+
     private final UserRepository repository;
-    @Autowired
+
     private final PasswordEncoder passwordEncoder;
-    @Autowired
+
     private final TokenService tokenService;
 
-    public UserController(UserService userService, JavaMailSenderImpl mailSender, EmailService emailService, UserRepository repository, PasswordEncoder passwordEncoder, TokenService tokenService) {
-        this.userService = userService;
-        this.mailSender = mailSender;
-        this.emailService = emailService;
-        this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
+    @GetMapping
+    public ResponseEntity<String> getUser(){
+        return ResponseEntity.ok("Sucesso!");
     }
 
     @PostMapping("/resetPassword")
