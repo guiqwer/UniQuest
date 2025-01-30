@@ -12,7 +12,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Proof {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "prrof_type", discriminatorType = DiscriminatorType.STRING)
+public abstract class Proof {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
