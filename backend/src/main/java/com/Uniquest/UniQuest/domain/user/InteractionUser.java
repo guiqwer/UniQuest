@@ -1,6 +1,6 @@
 package com.Uniquest.UniQuest.domain.user;
 
-import com.Uniquest.UniQuest.domain.proof.Proof;
+import com.Uniquest.UniQuest.domain.exam.Exam;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +20,7 @@ public class InteractionUser {
     private User user;
 
     @ManyToOne
-    private Proof proof;
+    private Exam exam;
     private boolean liked;
 
 
