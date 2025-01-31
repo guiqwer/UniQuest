@@ -1,4 +1,4 @@
-package com.Uniquest.UniQuest.domain.Exam;
+package com.Uniquest.UniQuest.domain.exam;
 
 import jakarta.persistence.Entity;
 

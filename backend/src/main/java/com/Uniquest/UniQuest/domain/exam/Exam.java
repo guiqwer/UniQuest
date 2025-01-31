@@ -1,4 +1,4 @@
-package com.Uniquest.UniQuest.domain.Exam;
+package com.Uniquest.UniQuest.domain.exam;
 
 import com.Uniquest.UniQuest.domain.user.User;
 import jakarta.persistence.*;
@@ -28,5 +28,6 @@ public abstract class Exam {
 
     @ManyToOne
     private User author;
+
 
 }
