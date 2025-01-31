@@ -1,4 +1,4 @@
-package com.Uniquest.UniQuest.domain.proof;
+package com.Uniquest.UniQuest.domain.Exam;
 
 import com.Uniquest.UniQuest.domain.user.User;
 import jakarta.persistence.*;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "prrof_type", discriminatorType = DiscriminatorType.STRING)
-public abstract class Proof {
+public abstract class Exam {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
