@@ -1,6 +1,5 @@
 package com.Uniquest.UniQuest.controllers;
 
-
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.LoginRequestDTO;
 import com.Uniquest.UniQuest.dto.ResponseDTO;
@@ -13,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.Uniquest.UniQuest.dto.ErrorResponse;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/auth")
@@ -42,5 +43,15 @@ public class AuthController {
         return ResponseEntity.badRequest().build();
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        if ("User not found".equals(ex.getMessage())) { // Verifica se é um erro de usuário não encontrado através da mensagem, não é a melhor das implementações.
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(ex.getMessage()));
+        }
+        // Para outras exceções, você pode customizar conforme a necessidade
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("Acesso negado"));
+    }
 
 }
