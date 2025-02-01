@@ -3,6 +3,7 @@ package com.Uniquest.UniQuest.controllers;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.LoginRequestDTO;
 import com.Uniquest.UniQuest.dto.ResponseDTO;
+import com.Uniquest.UniQuest.exceptions.IncorrectPasswordException;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,8 @@ public class AuthController {
             String token = this.tokenService.generateToken(user);
             return ResponseEntity.ok(new ResponseDTO(user.getName(), token));
         }
-        return ResponseEntity.badRequest().build();
+
+        throw new IncorrectPasswordException();
     }
 
 }
