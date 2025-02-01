@@ -67,7 +67,7 @@ public class UserService {
     }
 
     //Metodo para deleter avatar.
-    public void deleteUserAvatar(Long userID) {
+    public static void deleteUserAvatar(Long userID) {
         User userProfile = User.findById(userID)
                 .orElseThrow(() -> new RuntimeException("Perfil não encontrado"));
         // Definir o avatar como null para "deletar" o avatar

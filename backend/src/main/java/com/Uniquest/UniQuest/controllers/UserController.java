@@ -96,8 +96,8 @@ public class UserController {
 
     //Endpoint para editar o perfil do usuário
     @PutMapping("/edit-profile/")
-    public ResponseEntity<UserProfile> updateProfile(@RequestBody UserProfileDTO userProfileDTO, @RequestParam Long userId){
-        UserProfile updateProfile = userProfileService.updateUserProfile(userId, userProfileDTO);
+    public ResponseEntity<User> updateProfile(@RequestBody UserProfileDTO userProfileDTO, @RequestParam Long userId){
+        User updateProfile = userService.updateUserProfile(userId, userProfileDTO);
 
         if(updateProfile != null){
             return ResponseEntity.ok(updateProfile);
@@ -108,10 +108,10 @@ public class UserController {
 
 
     @PutMapping("/{userID}/upload-avatar")
-    public ResponseEntity<UserProfile> updateAvatar(@PathVariable Long userID,
+    public ResponseEntity<User> updateAvatar(@PathVariable Long userID,
                                                     @RequestBody UserProfileDTO avatarFileDTO){
         try {
-            UserProfile updateProfile = userProfileService.updateUserProfile(userID, avatarFileDTO);
+            User updateProfile = userService.updateUserProfile(userID, avatarFileDTO);
             return ResponseEntity.ok(updateProfile);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(null); //Tratar melhor o ERRO depois.
@@ -122,7 +122,8 @@ public class UserController {
     @DeleteMapping("/{userID}/delete-avatar")
     public ResponseEntity<String> deleteAvatar(@PathVariable Long userID) {
         try {
-            userProfileService.deleteUserAvatar(userID);
+
+            UserService.deleteUserAvatar(userID);
             return ResponseEntity.ok("Avatar deletado com sucesso!");
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body("Erro ao deletar avatar");
