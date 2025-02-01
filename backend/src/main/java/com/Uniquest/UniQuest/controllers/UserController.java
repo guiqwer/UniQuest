@@ -4,6 +4,8 @@ package com.Uniquest.UniQuest.controllers;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.RegisterRequestDTO;
 import com.Uniquest.UniQuest.dto.ResponseDTO;
+import com.Uniquest.UniQuest.exceptions.ServerErrorException;
+import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.EmailService;
@@ -18,6 +20,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 
 
 import java.util.Optional;
@@ -49,17 +52,24 @@ public class UserController {
     @PostMapping("/resetPassword")
     public GenericResponse resetPassword(HttpServletRequest request,
                                          @RequestParam("email") String userEmail) {
+
         User user = userService.findUserByEmail(userEmail);
+
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException();
         }
+
         String token = UUID.randomUUID().toString();
         userService.createPasswordResetTokenForUser(user, token);
 
-        // Passar o appUrl para o método constructResetTokenEmail
-        mailSender.send(emailService.constructResetTokenEmail(getAppUrl(request), request.getLocale(), token, user));
+        try {
+            // Passar o appUrl para o método constructResetTokenEmail
+            mailSender.send(emailService.constructResetTokenEmail(getAppUrl(request), request.getLocale(), token, user));
+            return new GenericResponse(message.getMessage());
+        } catch (RuntimeException e) {
+            throw new ServerErrorException();
+        }
 
-        return new GenericResponse(message.getMessage());
     }
 
     @PostMapping("/register")

@@ -15,6 +15,13 @@ public class ServerErrorException extends RuntimeException implements HttpExcept
     public ServerErrorException(Throwable cause) {super(DEFAULT_MESSAGE, cause);}
     public ServerErrorException(String message, Throwable cause) {super(message, cause);}
 
+    public ServerErrorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public ServerErrorException(RuntimeException cause) {
+        super(DEFAULT_MESSAGE, cause);
+    }
     @Override
     public HttpStatus getDefaultCode() {
         return DEFAULT_CODE;
