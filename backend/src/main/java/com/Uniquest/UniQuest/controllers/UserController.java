@@ -2,8 +2,10 @@ package com.Uniquest.UniQuest.controllers;
 
 
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.domain.user.UserProfile;
 import com.Uniquest.UniQuest.dto.RegisterRequestDTO;
 import com.Uniquest.UniQuest.dto.ResponseDTO;
+import com.Uniquest.UniQuest.dto.UserProfileDTO;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 import com.Uniquest.UniQuest.infra.security.TokenService;
@@ -49,6 +51,8 @@ public class UserController {
         return ResponseEntity.ok("Sucesso!");
     }
 
+
+
     @PostMapping("/resetPassword")
     public GenericResponse resetPassword(HttpServletRequest request,
                                          @RequestParam("email") String userEmail) {
@@ -87,6 +91,42 @@ public class UserController {
             return ResponseEntity.ok(new ResponseDTO(newUser.getName(), token));
         }
         return ResponseEntity.badRequest().build();
+    }
+
+
+    //Endpoint para editar o perfil do usuário
+    @PutMapping("/edit-profile/")
+    public ResponseEntity<UserProfile> updateProfile(@RequestBody UserProfileDTO userProfileDTO, @RequestParam Long userId){
+        UserProfile updateProfile = userProfileService.updateUserProfile(userId, userProfileDTO);
+
+        if(updateProfile != null){
+            return ResponseEntity.ok(updateProfile);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @PutMapping("/{userID}/upload-avatar")
+    public ResponseEntity<UserProfile> updateAvatar(@PathVariable Long userID,
+                                                    @RequestBody UserProfileDTO avatarFileDTO){
+        try {
+            UserProfile updateProfile = userProfileService.updateUserProfile(userID, avatarFileDTO);
+            return ResponseEntity.ok(updateProfile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(null); //Tratar melhor o ERRO depois.
+        }
+    }
+
+
+    @DeleteMapping("/{userID}/delete-avatar")
+    public ResponseEntity<String> deleteAvatar(@PathVariable Long userID) {
+        try {
+            userProfileService.deleteUserAvatar(userID);
+            return ResponseEntity.ok("Avatar deletado com sucesso!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body("Erro ao deletar avatar");
+        }
     }
 
 
