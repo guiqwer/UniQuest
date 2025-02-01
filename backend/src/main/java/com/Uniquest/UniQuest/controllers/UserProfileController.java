@@ -1,7 +1,6 @@
 package com.Uniquest.UniQuest.controllers;
 
 import com.Uniquest.UniQuest.domain.user.UserProfile;
-import com.Uniquest.UniQuest.dto.UserProfileAvatarDTO;
 import com.Uniquest.UniQuest.dto.UserProfileDTO;
 import com.Uniquest.UniQuest.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,10 @@ public class UserProfileController {
     @Autowired
     private UserProfileService userProfileService;
 
+
+
     //Endpoint para editar o perfil do usuário
-    @PutMapping("/edit-profile/{userId}")
+    @PutMapping("/edit-profile/")
     public ResponseEntity<UserProfile> updateProfile(@RequestBody UserProfileDTO userProfileDTO, @RequestParam Long userId){
         UserProfile updateProfile = userProfileService.updateUserProfile(userId, userProfileDTO);
 
@@ -27,18 +28,18 @@ public class UserProfileController {
         }
     }
 
-    @PutMapping("/upload-avatar/{userID}")
+    @PutMapping("/{userID}/upload-avatar")
     public ResponseEntity<UserProfile> updateAvatar(@PathVariable Long userID,
-                                                    @RequestBody UserProfileAvatarDTO avatarFileDTO){
+                                                    @RequestBody UserProfileDTO avatarFileDTO){
         try {
-            UserProfile updateProfile = userProfileService.updateUserAvatar(userID, avatarFileDTO);
+            UserProfile updateProfile = userProfileService.updateUserProfile(userID, avatarFileDTO);
             return ResponseEntity.ok(updateProfile);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(null); //Tratar melhor o ERRO depois.
         }
     }
 
-    @DeleteMapping("/delete-avatar/{userID}")
+    @DeleteMapping("/{userID}/delete-avatar")
     public ResponseEntity<String> deleteAvatar(@PathVariable Long userID) {
         try {
             userProfileService.deleteUserAvatar(userID);
