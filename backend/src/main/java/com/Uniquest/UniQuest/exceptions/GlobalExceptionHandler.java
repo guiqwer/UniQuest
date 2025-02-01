@@ -14,12 +14,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        // Utilizamos UserNotFoundException.getDefaultCode() por se tratar de um método estatico (recomendacao do Intelijei)
-        return ResponseEntity.status(UserNotFoundException.getDefaultCode()).body(error);
+        return ResponseEntity.status(ex.getDefaultCode()).body(error);
     }
     @ExceptionHandler(IncorrectPasswordException.class)
     public ResponseEntity<ErrorResponse> handleIncorrectPasswordException(IncorrectPasswordException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.status(IncorrectPasswordException.getDefaultCode()).body(error);
+        return ResponseEntity.status(ex.getDefaultCode()).body(error);
     }
 }

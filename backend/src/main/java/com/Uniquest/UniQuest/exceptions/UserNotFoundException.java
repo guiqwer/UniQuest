@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
  * Esta exceção é uma RuntimeException, indicando que é uma condição de erro
  * Pode aceitar uma mensagem personalizada.
  */
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends RuntimeException implements HttpException {
 
     private static final String DEFAULT_MESSAGE = "User not found.";
     private static final long serialVersionUID = 1L;
@@ -30,7 +30,8 @@ public class UserNotFoundException extends RuntimeException {
         super(message, cause);
     }
 
-    public static HttpStatus getDefaultCode() {
+    @Override
+    public HttpStatus getDefaultCode() {
         return DEFAULT_CODE;
     }
 }
