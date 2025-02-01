@@ -9,17 +9,16 @@ import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.EmailService;
 import com.Uniquest.UniQuest.service.UserService;
 import com.Uniquest.UniQuest.utils.GenericResponse;
-import com.Uniquest.UniQuest.utils.UrlUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,8 +41,39 @@ public class UserController {
     private final TokenService tokenService;
 
     @GetMapping
-    public ResponseEntity<String> getUser(){
-        return ResponseEntity.ok("Sucesso!");
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+        // Extrai o token do cabeçalho da requisição
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Token não fornecido ou inválido");
+        }
+
+        String token = authHeader.replace("Bearer ", "");
+
+        // Valida o token e extrai o email do usuário
+        String userEmail = tokenService.validateToken(token);
+
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Token inválido ou expirado");
+        }
+
+        // Busca o usuário no banco de dados pelo email
+        Optional<User> userOptional = repository.findByEmail(userEmail);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body("Usuário não encontrado");
+        }
+
+        User user = userOptional.get();
+
+        // Cria um Map para retornar apenas as informações necessárias
+        Map<String, String> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("name", user.getName());
+        userInfo.put("email", user.getEmail());
+
+        return ResponseEntity.ok(userInfo);
     }
 
     @PostMapping("/resetPassword")
