@@ -32,25 +32,24 @@ public class UserService {
     }
 
     //Método para atualizar o perfil do usuário
-    public User updateUserProfile(Long userID, UserProfileDTO updateUserProfile) {
-        //verificar se o usuário tem um perfil
-        Optional<User> optinalUserProfile = User.findById(userID);
-        if(optinalUserProfile.isPresent()) {
-            User userProfile = optinalUserProfile.get();
-            //Atualizar os campos conforme necessário
-            userProfile.setEducation(updateUserProfile.education());
-            userProfile.setFavoriteSubject(updateUserProfile.favoriteSubject());
-            userProfile.setAreaOfInterest(updateUserProfile.areaOfInterest());
-            return User.save(userProfile);
+    public User updateUserProfile(String userID, UserProfileDTO updateUserProfile) {
+        Optional<User> optionalUser = userRepository.findById(userID);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setEducation(updateUserProfile.education());
+            user.setFavoriteSubject(updateUserProfile.favoriteSubject());
+            user.setAreaOfInterest(updateUserProfile.areaOfInterest());
+            return userRepository.save(user); // Salva no banco de dados
         } else {
-            throw new RuntimeException("Perfil não encontrado para o usuário com ID" + userID);
+            throw new RuntimeException("Perfil não encontrado para o usuário com ID " + userID);
         }
     }
 
 
     //Método para dar upload no avatar.
-    public User updateUserAvatar(Long userID, UserProfileAvatarDTO avatarFileDTO) {
-        Optional<User> optionalUserProfile = User.findById(userID);
+    public User updateUserAvatar(String userID, UserProfileAvatarDTO avatarFileDTO) {
+        Optional<User> optionalUserProfile = userRepository.findById(userID);
+
         if (optionalUserProfile.isPresent()) {
             User userProfile = optionalUserProfile.get();
             try {
@@ -60,20 +59,21 @@ public class UserService {
             } catch (IOException e) {
                 throw new RuntimeException("Erro ao processar a imagem", e);
             }
-            return User.save(userProfile);
+
+            // Salva o usuário atualizado no banco de dados
+            return userRepository.save(userProfile);
         } else {
             throw new RuntimeException("Perfil não encontrado para o usuário com ID " + userID);
         }
     }
 
-    //Metodo para deleter avatar.
-    public static void deleteUserAvatar(Long userID) {
-        User userProfile = User.findById(userID)
+    public void deleteUserAvatar(String userID) {
+        User userProfile = userRepository.findById(userID)
                 .orElseThrow(() -> new RuntimeException("Perfil não encontrado"));
         // Definir o avatar como null para "deletar" o avatar
         userProfile.setAvatar(null);
         // Salvar as alterações no banco de dados
-        User.save(userProfile);
+        userRepository.save(userProfile);
     }
 
 }
