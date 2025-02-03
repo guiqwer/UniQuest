@@ -91,7 +91,6 @@ public class UserController {
 
         try {
             // Passar o appUrl para o método constructResetTokenEmail
-            mailSender.send(emailService.constructResetTokenEmail(getAppUrl(request), request.getLocale(), token, user));
             return new GenericResponse(message.getMessage());
         } catch (RuntimeException e) {
             throw new ServerErrorException();
