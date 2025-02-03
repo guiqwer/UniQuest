@@ -20,7 +20,6 @@ public class GroqChatService {
     }
 
     public String getChatResponse(String prompt) {
-        //Aqui você pode aplicar regras de negócio ou tratamento de exceções, se necessário
         return groqChatClient.generateResponse(prompt);
     }
 
@@ -38,7 +37,7 @@ public class GroqChatService {
         - Enunciados com problemas aplicados ao desenvolvimento de sistemas reais
         - Alternativas plausíveis com nuances técnicas
         - Mantenha coerência entre enunciado complexo e alternativas técnicas
-        - Cada questão deve ter entre 3 e 5 opções de resposta
+        - Cada questão deve ter entre 4 opções de resposta
         - Elas devem ser de nível difícil e adequadas para vestibulares/avaliações/concursos públicos
         - Priorize situações-problema que exijam aplicação conjunta dos conceitos.
         
@@ -70,7 +69,7 @@ public class GroqChatService {
         return this.getChatResponse(prompt);
     }
 
-    public List<String> handleTagsForPrompt(ArrayList<String> tags) {
+    public List<String> handleTagsForPrompt(List<String> tags) {
         String prompt = """
                 Você é um especialista em análise de dados acadêmicos
                 e seleção de conteúdo relevante para elaboração de provas.
