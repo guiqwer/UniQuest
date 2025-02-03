@@ -32,12 +32,13 @@ const Login = ({ navigate }) => {
     <div className="container">
       <h2>UniQuest</h2>
       <p>Acesse sua conta</p>
+      {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleLogin}>
         <div className="form-group">
-          <input type="text" placeholder="Email*" required />
+          <input type="text" placeholder="Email*" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div className="form-group">
-          <input type="password" placeholder="Senha*" required />
+          <input type="password" placeholder="Senha*" required value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div>
         <button type="submit" className="btn-login">
           Entrar
