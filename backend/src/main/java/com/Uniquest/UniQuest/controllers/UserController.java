@@ -87,7 +87,7 @@ public class UserController {
         }
 
         String token = UUID.randomUUID().toString();
-        userService.createPasswordResetTokenForUser(user, token);
+        userService.createPasswordResetCodeForUser(token, user);
 
         try {
             // Passar o appUrl para o método constructResetTokenEmail
