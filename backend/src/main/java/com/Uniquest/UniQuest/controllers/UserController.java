@@ -15,22 +15,19 @@ import com.Uniquest.UniQuest.service.UserService;
 import com.Uniquest.UniQuest.utils.GenericResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.Uniquest.UniQuest.services.PasswordResetService;
 
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.Uniquest.UniQuest.utils.UrlUtil.getAppUrl;
 
 @RestController
 @RequestMapping("/user")
@@ -47,6 +44,10 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     private final TokenService tokenService;
+
+    private final PasswordResetService passwordResetService;
+
+
 
     @GetMapping
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
@@ -150,7 +151,25 @@ public class UserController {
         }
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        var codeOpt = passwordResetService.createPasswordResetCode(email);
+        if (codeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Email não encontrado.");
+        }
+        return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
+    }
 
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
+        String resetCode = request.get("resetCode");
+        String newPassword = request.get("newPassword");
 
+        if (passwordResetService.resetPassword(resetCode, newPassword)) {
+            return ResponseEntity.ok("Senha redefinida com sucesso.");
+        }
+        return ResponseEntity.badRequest().body("Código inválido ou expirado.");
+    }
 }
