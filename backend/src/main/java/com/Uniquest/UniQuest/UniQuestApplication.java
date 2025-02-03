@@ -6,6 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SpringBootApplication
 public class UniQuestApplication {
 
@@ -18,8 +21,15 @@ public class UniQuestApplication {
 	public CommandLineRunner demo(GroqChatService groqChatService) {
 		return args -> {
 			// Teste simples
-			String prompt = "Me conte uma piada bem engraçada. Sobre programação ou ciência da computação.";
-			String response = groqChatService.getChatResponse(prompt);
+			ArrayList<String> tags = new ArrayList<>();
+
+
+			tags.add("Maçã");
+			tags.add("POO");
+			tags.add("IFCE");
+			tags.add("Ciência da Computação");
+			tags.add("Java");
+            String response = String.valueOf(groqChatService.handleTagsForPrompt(tags));
 			System.out.println("\n--- Resposta do Groq ---");
 			System.out.println(response);
 		};
