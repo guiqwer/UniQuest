@@ -33,8 +33,9 @@ public class UniQuestApplication {
 //			String response = String.valueOf(tagsFiltradas);
 //			System.out.println("\n--- Resposta do Groq ---");
 //			System.out.println(response);
-//			response = groqChatService.generateTest(tagsFiltradas, 10);
-			System.out.println("\n\n\n--- Prova do Groq ---");
+//			response = groqChatService.generateTest(tagsFiltradas, 3);
+//			System.out.println("\n\n\n--- Prova do Groq ---");
+//			System.out.println(response);
 		};
 	}
 }
