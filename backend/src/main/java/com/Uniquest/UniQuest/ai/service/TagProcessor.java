@@ -2,18 +2,19 @@ package com.Uniquest.UniQuest.ai.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TagProcessor {
-    public static String getJsonFromList(String texto) {
+    //Métodos para tratamento das tags após serem filtradas pelo LLM.
+
+    public static String getJsonFromList(String text) {
         // Localiza a última ocorrência de '[' e ']'
-        int posInicio = texto.lastIndexOf('[');
-        int posFim = texto.lastIndexOf(']');
+        int posInicio = text.lastIndexOf('[');
+        int posFim = text.lastIndexOf(']');
         if (posInicio >= 0 && posFim > posInicio) {
-            // Retorna o trecho que vai de '[' até ']', inclusive
-            return texto.substring(posInicio, posFim + 1);
+            // Retorna o trecho que vai de '[' até ']'
+            return text.substring(posInicio, posFim + 1);
         }
-        return "";
+        throw new RuntimeException();
     }
 
     public static List<String> convertJsonToList(String jsonList) {
