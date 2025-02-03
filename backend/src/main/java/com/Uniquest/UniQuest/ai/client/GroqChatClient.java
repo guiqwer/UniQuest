@@ -9,14 +9,15 @@ public class GroqChatClient {
 
     private final ChatClient chatClient;
 
-    // O Spring pode injetar o builder (já configurado via properties ou manualmente)
+    //O Spring pode injetar o builder (já configurado via properties ou manualmente)
     @Autowired
     public GroqChatClient(ChatClient.Builder builder) {
-        // O builder já pode ter sido configurado (por exemplo, via application.properties)
+        //O builder já pode ter sido configurado (por exemplo, via application.properties)
+        //o Spring AI já aplica as configurações definidas no application.properties
         this.chatClient = builder.build();
     }
 
-    // Método para enviar prompts e obter respostas
+    //Método para enviar prompts e obter respostas
     public String generateResponse(String message) {
         return chatClient.prompt()
                 .user(message)

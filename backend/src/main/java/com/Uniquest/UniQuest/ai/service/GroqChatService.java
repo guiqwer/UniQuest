@@ -16,7 +16,7 @@ public class GroqChatService {
     }
 
     public String getChatResponse(String prompt) {
-        // Aqui você pode aplicar regras de negócio ou tratamento de exceções, se necessário
+        //Aqui você pode aplicar regras de negócio ou tratamento de exceções, se necessário
         return groqChatClient.generateResponse(prompt);
     }
 
