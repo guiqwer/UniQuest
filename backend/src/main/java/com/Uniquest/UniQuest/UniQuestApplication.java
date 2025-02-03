@@ -24,13 +24,17 @@ public class UniQuestApplication {
 			ArrayList<String> tags = new ArrayList<>();
 
 
-			tags.add("Maçã");
+			tags.add("FUTEBOL");
 			tags.add("POO");
-			tags.add("IFCE");
-			tags.add("Ciência da Computação");
+			tags.add("CAFE");
 			tags.add("Java");
-            String response = String.valueOf(groqChatService.handleTagsForPrompt(tags));
+			tags.add("JABUTI");
+			List<String> tagsFiltradas = groqChatService.handleTagsForPrompt(tags);
+			String response = String.valueOf(tagsFiltradas);
 			System.out.println("\n--- Resposta do Groq ---");
+			System.out.println(response);
+			response = groqChatService.generateTest(tagsFiltradas, 2);
+			System.out.println("\n\n\n--- Prova do Groq ---");
 			System.out.println(response);
 		};
 	}
