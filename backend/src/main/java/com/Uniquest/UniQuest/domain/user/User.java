@@ -1,13 +1,13 @@
 package com.Uniquest.UniQuest.domain.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.Optional;
 
 @Entity
-@Table(name = "users")
+@Data
+@Table(name = "\"user\"")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,57 +16,23 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
     private String name;
-    private String username;
-    private String nickname;
     private String email;
     private String password;
+    private String education; //escolaridade
+    private String areaOfInterest;
+    private String favoriteSubject;
 
-    public String getId() {
-        return id;
+    @Lob // Marcar que é binário
+    @Column(columnDefinition = "BYTEA") // Definição específica pro Postgres
+    private byte[] avatar;
+
+    public static Optional<User> findById(Long userID) {
+        return null;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public static User save(User userProfile) {
+        return null;
     }
 }
