@@ -1,12 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import "../App.css";
+import axiosInstance from "../axios"
 
 const Login = ({ navigate }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  
+  const handleLogin = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await axiosInstance.post("/login", {
+        email,
+        password,
+      });
+
+      const token = response.data.token;
+      if (token) {
+        sessionStorage.setItem("token", token);
+        axiosInstance.defaults.headers["Authorization"] = 'Bearer ${token}';
+        navigate("home");
+      }
+    } catch(error){
+      setError("Email ou senha inválidos");
+      console.error("Erro no login:", error);
+    }
+  };
+  
   return (
     <div className="container">
       <h2>UniQuest</h2>
       <p>Acesse sua conta</p>
-      <form>
+      <form onSubmit={handleLogin}>
         <div className="form-group">
           <input type="text" placeholder="Email*" required />
         </div>
