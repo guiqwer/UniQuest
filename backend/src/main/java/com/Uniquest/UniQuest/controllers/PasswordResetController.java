@@ -1,6 +1,5 @@
 package com.Uniquest.UniQuest.controllers;
 
-import com.Uniquest.UniQuest.domain.user.PasswordResetCode;
 import com.Uniquest.UniQuest.services.PasswordResetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

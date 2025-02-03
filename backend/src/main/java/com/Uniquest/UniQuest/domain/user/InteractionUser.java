@@ -23,5 +23,4 @@ public class InteractionUser {
     private Exam exam;
     private boolean liked;
 
-
 }
