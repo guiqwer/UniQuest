@@ -7,13 +7,13 @@ import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.Uniquest.UniQuest.services.PasswordResetService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,8 +27,10 @@ public class UserController {
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final PasswordResetService passwordResetService;
 
-    // Endpoint para mostar dados do usuario
+
+    
     @GetMapping
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         // Extrai o token do cabeçalho da requisição
@@ -56,7 +58,7 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-
+    
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterRequestDTO body){
         Optional<User> user = this.repository.findByEmail(body.email());
@@ -105,5 +107,28 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        var codeOpt = passwordResetService.createPasswordResetCode(email);
+        if (codeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Email não encontrado.");
+        }
+        return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
+    }
+
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
+        String resetCode = request.get("resetCode");
+        String newPassword = request.get("newPassword");
+
+        if (passwordResetService.resetPassword(resetCode, newPassword)) {
+            return ResponseEntity.ok("Senha redefinida com sucesso.");
+        }
+        return ResponseEntity.badRequest().body("Código inválido ou expirado.");
     }
 }
