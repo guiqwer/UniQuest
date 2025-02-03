@@ -24,6 +24,51 @@ public class GroqChatService {
         return groqChatClient.generateResponse(prompt);
     }
 
+    public String generateTest(List<String> tags, Integer numQuestions){
+        String tagsForTest = String.valueOf(tags);
+        String prompt = """
+        Gere um JSON rigorosamente estruturado com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
+        
+        1. Contexto Técnico:
+        - Combinação obrigatória dos conceitos: %s
+        
+        - 40%% das questões devem integrar múltiplos tópicos simultaneamente
+        
+        2. Engenharia de Questões:
+        - Enunciados com problemas aplicados ao desenvolvimento de sistemas reais
+        - Alternativas plausíveis com nuances técnicas
+        - Mantenha coerência entre enunciado complexo e alternativas técnicas
+        - Cada questão deve ter entre 3 e 5 opções de resposta
+        - Elas devem ser de nível difícil e adequadas para vestibulares/avaliações/concursos públicos
+        - Priorize situações-problema que exijam aplicação conjunta dos conceitos.
+        
+        3. Estrutura Imutável:
+        Formato ABSOLUTO:
+        [
+          {
+            "questao": (número sequencial),
+            "enunciado": ("enunciado"),
+            "opcoes": [
+              {
+                "ordem": (número sequencial),
+                "enunciado": ("enunciado")
+              },...
+            ]
+          },...
+        ]
+        
+        4. Regras Estritas:
+        - Nenhum markdown ou texto extra fora do JSON
+        - Não invente informações.
+        
+        5. Otimização para Reuso:
+        - Padronização terminológica
+        - Variação sistemática de domínios de problema (gestão acadêmica, sistemas embarcados, etc)
+        
+        Saída EXCLUSIVA: APENAS o JSON válido, pronto para desserialização imediata, sem comentários.
+        """.formatted(numQuestions, tagsForTest);
+        return this.getChatResponse(prompt);
+    }
 
     public List<String> handleTagsForPrompt(ArrayList<String> tags) {
         String prompt = """
