@@ -59,12 +59,13 @@ public class GroqChatService {
                 portanto, cada tag deve ter utilidade prática nesse contexto. Analise a lista fornecida agora e
                 aplique os critérios rigorosamente:"
                 """ + tags;
+
         String response = this.getChatResponse(prompt);
-        List<String> ListTags = this.getTagsFromResponse(response);
-        return ListTags;
+
+        return this.getTagsFromResponse(response);
     }
 
-    public static String extrairJsonLista(String texto) {
+    public static String getJsonFromList(String texto) {
         // Localiza a última ocorrência de '[' e ']'
         int posInicio = texto.lastIndexOf('[');
         int posFim = texto.lastIndexOf(']');
@@ -75,29 +76,26 @@ public class GroqChatService {
         return "";
     }
 
-    public static List<String> converterJsonParaLista(String jsonLista) {
-        List<String> resultado = new ArrayList<>();
+    public static List<String> convertJsonToList(String jsonList) {
+        List<String> result = new ArrayList<>();
         // Remove os colchetes do início e do fim
-        String conteudo = jsonLista.substring(1, jsonLista.length() - 1).trim();
-        if (conteudo.isEmpty()) {
-            return resultado;
+        String content = jsonList.substring(1, jsonList.length() - 1).trim();
+        if (content.isEmpty()) {
+            return result;
         }
         // Divide o conteúdo pela vírgula
-        String[] itens = conteudo.split(",");
-        for (String item : itens) {
+        String[] items = content.split(",");
+        for (String item : items) {
             // Remove as aspas (no início e fim) e espaços extras
-            String valor = item.trim().replaceAll("^\"|\"$", "");
-            resultado.add(valor);
+            String value = item.trim().replaceAll("^\"|\"$", "");
+            result.add(value);
         }
-        return resultado;
+        return result;
     }
 
     public List<String> getTagsFromResponse(String response) {
-        String jsonLista = extrairJsonLista(response);
-        System.out.println("Trecho extraído: " + jsonLista);
-        List<String> listaFiltrada = converterJsonParaLista(jsonLista);
-        System.out.println("Lista filtrada: " + listaFiltrada);
-        return listaFiltrada;
+        String jsonList = getJsonFromList(response);
+        return convertJsonToList(jsonList);
     }
 
 
