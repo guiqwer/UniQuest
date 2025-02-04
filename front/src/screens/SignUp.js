@@ -17,7 +17,7 @@ function SignUp({ navigate }) {
       return;
     }
     try {
-      const response = await axiosInstance.post("/register", {
+      const response = await axiosInstance.post("/user/register", {
         name,
         email,
         password

@@ -11,7 +11,7 @@ const Login = ({ navigate }) => {
     event.preventDefault();
 
     try {
-      const response = await axiosInstance.post("/login", {
+      const response = await axiosInstance.post("/auth/login", {
         email,
         password,
       });
@@ -19,12 +19,13 @@ const Login = ({ navigate }) => {
       const token = response.data.token;
       if (token) {
         sessionStorage.setItem("token", token);
-        axiosInstance.defaults.headers["Authorization"] = 'Bearer ${token}';
+        axiosInstance.defaults.headers["Authorization"] = `Bearer ${token}`;
+        console.log("Salvo no sessionStorage", sessionStorage.getItem("token"))
         navigate("home");
       }
     } catch(error){
       setError("Email ou senha inválidos");
-      console.error("Erro no login:", error);
+      console.error("Erro no login:", error.response);
     }
   };
   
