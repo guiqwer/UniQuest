@@ -45,12 +45,14 @@ public class GroqChatService {
         Formato ABSOLUTO:
         [
           {
-            "questao": (número sequencial),
-            "enunciado": ("enunciado"),
-            "opcoes": [
+            "question": (número sequencial),
+            "statement": ("enunciado"),
+            "options": [
               {
-                "ordem": (número sequencial),
-                "enunciado": ("enunciado")
+                "a. (primeira opcao),
+                "b. (segunda opcao),
+                "c. (terceira opcao)",
+                "d. (quarta opcao)"
               },...
             ]
           },...
