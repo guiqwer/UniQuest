@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Typography, Paper, Link, Box } from "@mui/material";
 import axiosInstance from "../axios";
 
@@ -6,6 +6,13 @@ const Login = ({ navigate }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+      const token = sessionStorage.getItem("token");
+      if (token) {
+        navigate("home");
+      }
+    }, [navigate]);
 
     const handleLogin = async (event) => {
       event.preventDefault();
@@ -20,7 +27,7 @@ const Login = ({ navigate }) => {
         if (token) {
           sessionStorage.setItem("token", token);
           axiosInstance.defaults.headers["Authorization"] = `Bearer ${token}`;
-          //navigate("home"); 
+          navigate("home"); 
         }
       } catch (error) {
         setError("Email ou senha inválidos");
