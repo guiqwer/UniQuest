@@ -5,6 +5,7 @@ import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
+import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.service.ExamService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,22 @@ public class ExamController {
             return ResponseEntity.ok("PDF enviado com sucesso!");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao fazer upload do PDF.");
+        }
+    }
+
+    @PostMapping("/upload/text")
+    public ResponseEntity<String> uploadTextExam(@RequestParam String title,
+                                                 @RequestBody String description,
+                                                 @RequestBody List<String> tags,
+                                                 @RequestBody List<QuestionDTO> text, // Alterado para @RequestBody
+                                                 @AuthenticationPrincipal User loggedUser) {
+        System.out.println("PASSSOUU");
+        try {
+            examService.uploadTextExam(title, description, tags, text, loggedUser);
+            return ResponseEntity.ok("Prova textual salva com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao salvar prova textual: " + e.getMessage());
         }
     }
 
