@@ -5,9 +5,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
+import lombok.*;
+
 import java.util.List;
 
 @Entity
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ExamText extends Exam {
 
     private Integer totalQuestions;
