@@ -26,6 +26,16 @@ public class GroqChatService {
     }
 
     public List<QuestionDTO> generateTest(List<String> tags, Integer numQuestions){
+        List<QuestionDTO> questions = new ArrayList<>();
+        for (int i = 0; i < numQuestions; i++) {
+            List<QuestionDTO> generatedQuestions = this.generateTest(tags);
+            questions.addAll(generatedQuestions);
+        }
+        return questions;
+    }
+
+    public List<QuestionDTO> generateTest(List<String> tags){
+        Integer numQuestions = 1;
         String tagsForTest = String.valueOf(tags);
         String prompt = """
         Gere um JSON rigorosamente estruturado, sem qualquer caractere de escape desnecessário, com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
