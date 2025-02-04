@@ -145,13 +145,11 @@ public class ExamController {
                         exam.getTitle(),
                         exam.getDescription(),
                         exam.getTags(),
-                        exam.getAuthor() != null ? exam.getAuthor().getName() : null // Pega apenas o nome do autor
+                        exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Pega apenas o nome do autor
+                        exam.getLikesCount() // Inclui o likesCount aqui
                 )
         ).collect(Collectors.toList());
 
         return ResponseEntity.ok(examDTOs);
     }
-
-
-
 }
