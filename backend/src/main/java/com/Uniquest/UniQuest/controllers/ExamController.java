@@ -3,11 +3,14 @@ package com.Uniquest.UniQuest.controllers;
 import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
+import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.service.ExamService;
+import com.Uniquest.UniQuest.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.Uniquest.UniQuest.repositories.ExamRepository;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -23,13 +28,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/exam")
+@RequiredArgsConstructor
 public class ExamController {
 
     private final ExamService examService;
+    private final ExamRepository examRepository;
 
-    public ExamController(ExamService examService) {
-        this.examService = examService;
-    }
 
     @PostMapping("/upload/image")
     public ResponseEntity<String> uploadImageExam(@RequestParam String title,
@@ -77,29 +81,58 @@ public class ExamController {
         }
     }
 
+//     PS: Não existe a necessidade de uma rota para visualizar cada tipo de objeto, uma única rota basta, através do ID
+//     será possível saber qual tipo de prova É. As rotas abaixo comentadas devem ser removidas posteriormente.
+//    @GetMapping("/view/pdf/{id}")
+//    public ResponseEntity<byte[]> getPDFExam(@PathVariable Long id) {
+//        Optional<ExamPdf> exam = examService.getPDFExam(id);
+//        if (exam.isPresent()) {
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam.pdf")
+//                    .contentType(MediaType.APPLICATION_PDF)
+//                    .body(exam.get().getPdfData());
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+//
+//    @GetMapping("/view/image/{id}")
+//    public ResponseEntity<byte[]> getImageExam(@PathVariable Long id) {
+//        Optional<ExamImage> exam = examService.getImageExam(id);
+//        if (exam.isPresent()) {
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.IMAGE_PNG)
+//                    .body(exam.get().getImageData());
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 
-    @GetMapping("/view/pdf/{id}")
-    public ResponseEntity<byte[]> getPDFExam(@PathVariable Long id) {
-        Optional<ExamPdf> exam = examService.getPDFExam(id);
-        if (exam.isPresent()) {
+
+    @GetMapping("/view/{id}")
+    public ResponseEntity<?> getExam(@PathVariable Long id) {
+        Optional<Exam> exam = examRepository.findById(id);
+
+
+        if (exam.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Exam foundExam = exam.get();
+
+        if (foundExam instanceof ExamPdf) {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam.pdf")
                     .contentType(MediaType.APPLICATION_PDF)
-                    .body(exam.get().getPdfData());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/view/image/{id}")
-    public ResponseEntity<byte[]> getImageExam(@PathVariable Long id) {
-        Optional<ExamImage> exam = examService.getImageExam(id);
-        if (exam.isPresent()) {
+                    .body(((ExamPdf) foundExam).getPdfData());
+        } else if (foundExam instanceof ExamImage) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(exam.get().getImageData());
+                    .contentType(MediaType.IMAGE_PNG) // Ajuste conforme o tipo da imagem
+                    .body(((ExamImage) foundExam).getImageData());
+        } else if (foundExam instanceof ExamText) {
+            return ResponseEntity.ok(foundExam); // Retorna JSON para provas textuais
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body("Tipo de prova desconhecido.");
         }
     }
 
