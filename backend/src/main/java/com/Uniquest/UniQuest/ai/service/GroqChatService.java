@@ -1,12 +1,14 @@
 package com.Uniquest.UniQuest.ai.service;
 
 import com.Uniquest.UniQuest.ai.client.GroqChatClient;
+import com.Uniquest.UniQuest.dto.QuestionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.Uniquest.UniQuest.ai.service.ExamProcessor.parseJsonToQuestionDTO;
 import static com.Uniquest.UniQuest.ai.service.TagProcessor.*;
 
 @Service
@@ -23,7 +25,7 @@ public class GroqChatService {
         return groqChatClient.generateResponse(prompt);
     }
 
-    public String generateTest(List<String> tags, Integer numQuestions){
+    public List<QuestionDTO> generateTest(List<String> tags, Integer numQuestions){
         String tagsForTest = String.valueOf(tags);
         String prompt = """
         Gere um JSON rigorosamente estruturado, sem qualquer caractere de escape desnecessário, com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
@@ -45,7 +47,7 @@ public class GroqChatService {
         Formato ABSOLUTO:
         [
           {
-            "question": (número sequencial),
+            "order": (número sequencial),
             "statement": ("enunciado"),
             "options":
               {
@@ -67,13 +69,12 @@ public class GroqChatService {
         
         Saída EXCLUSIVA: APENAS o JSON válido, pronto para desserialização imediata, sem comentários.
         """.formatted(numQuestions, tagsForTest);
-        return this.getChatResponse(sanitizeJson(prompt));
+        String response = this.getChatResponse(prompt);
+        System.out.println(response);
+        return parseJsonToQuestionDTO(response);
     }
 
-    private String sanitizeJson(String json) {
-        // Exemplo: substituir "\*" por "*" para corrigir o escape inválido.
-        return json.replace("\\*", "*");
-    }
+
     public List<String> handleTagsForPrompt(List<String> tags) {
         String prompt = """
                 Você é um especialista em análise de dados acadêmicos
