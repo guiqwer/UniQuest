@@ -5,6 +5,7 @@ import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
+import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.service.ExamService;
 import org.springframework.http.HttpHeaders;
@@ -59,14 +60,16 @@ public class ExamController {
     }
 
     @PostMapping("/upload/text")
-    public ResponseEntity<String> uploadTextExam(@RequestParam String title,
-                                                 @RequestBody String description,
-                                                 @RequestBody List<String> tags,
-                                                 @RequestBody List<QuestionDTO> text, // Alterado para @RequestBody
+    public ResponseEntity<String> uploadTextExam(@RequestBody ExamTextRequestDTO request,
                                                  @AuthenticationPrincipal User loggedUser) {
-        System.out.println("PASSSOUU");
         try {
-            examService.uploadTextExam(title, description, tags, text, loggedUser);
+            examService.uploadTextExam(
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getTags(),
+                    (List<QuestionDTO>) request.getText(),
+                    loggedUser
+            );
             return ResponseEntity.ok("Prova textual salva com sucesso!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
