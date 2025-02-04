@@ -5,6 +5,7 @@ import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.ExamGenerateRequestDTO;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
@@ -81,6 +82,16 @@ public class ExamController {
         }
     }
 
+    @PostMapping("/generate/text")
+    public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
+        try{
+            examService.generateTextExam(request.getId());
+            return ResponseEntity.ok("Prova gerada com sucesso!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @GetMapping("/view/{id}")
     public ResponseEntity<?> getExam(@PathVariable Long id) {
         Optional<Exam> exam = examRepository.findById(id);
@@ -91,6 +102,7 @@ public class ExamController {
         }
 
         Exam foundExam = exam.get();
+
 
         if (foundExam instanceof ExamPdf) {
             return ResponseEntity.ok()
