@@ -81,34 +81,6 @@ public class ExamController {
         }
     }
 
-//     PS: Não existe a necessidade de uma rota para visualizar cada tipo de objeto, uma única rota basta, através do ID
-//     será possível saber qual tipo de prova É. As rotas abaixo comentadas devem ser removidas posteriormente.
-//    @GetMapping("/view/pdf/{id}")
-//    public ResponseEntity<byte[]> getPDFExam(@PathVariable Long id) {
-//        Optional<ExamPdf> exam = examService.getPDFExam(id);
-//        if (exam.isPresent()) {
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam.pdf")
-//                    .contentType(MediaType.APPLICATION_PDF)
-//                    .body(exam.get().getPdfData());
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-//
-//    @GetMapping("/view/image/{id}")
-//    public ResponseEntity<byte[]> getImageExam(@PathVariable Long id) {
-//        Optional<ExamImage> exam = examService.getImageExam(id);
-//        if (exam.isPresent()) {
-//            return ResponseEntity.ok()
-//                    .contentType(MediaType.IMAGE_PNG)
-//                    .body(exam.get().getImageData());
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-
-
     @GetMapping("/view/{id}")
     public ResponseEntity<?> getExam(@PathVariable Long id) {
         Optional<Exam> exam = examRepository.findById(id);
