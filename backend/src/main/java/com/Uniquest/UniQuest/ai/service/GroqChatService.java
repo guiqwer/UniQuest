@@ -26,7 +26,7 @@ public class GroqChatService {
     public String generateTest(List<String> tags, Integer numQuestions){
         String tagsForTest = String.valueOf(tags);
         String prompt = """
-        Gere um JSON rigorosamente estruturado com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
+        Gere um JSON rigorosamente estruturado, sem qualquer caractere de escape desnecessário, com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
         
         1. Contexto Técnico:
         - Combinação obrigatória dos conceitos: %s
@@ -47,14 +47,13 @@ public class GroqChatService {
           {
             "question": (número sequencial),
             "statement": ("enunciado"),
-            "options": [
+            "options":
               {
-                "a. (primeira opcao),
-                "b. (segunda opcao),
-                "c. (terceira opcao)",
-                "d. (quarta opcao)"
+                "A": "Texto A",
+                "B": "Texto B",
+                "C": "Texto C",
+                "D": "Texto D"
               },...
-            ]
           },...
         ]
         
@@ -68,9 +67,13 @@ public class GroqChatService {
         
         Saída EXCLUSIVA: APENAS o JSON válido, pronto para desserialização imediata, sem comentários.
         """.formatted(numQuestions, tagsForTest);
-        return this.getChatResponse(prompt);
+        return this.getChatResponse(sanitizeJson(prompt));
     }
 
+    private String sanitizeJson(String json) {
+        // Exemplo: substituir "\*" por "*" para corrigir o escape inválido.
+        return json.replace("\\*", "*");
+    }
     public List<String> handleTagsForPrompt(List<String> tags) {
         String prompt = """
                 Você é um especialista em análise de dados acadêmicos
