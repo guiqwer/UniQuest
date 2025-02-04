@@ -1,38 +1,26 @@
 package com.Uniquest.UniQuest.service;
 
-import com.Uniquest.UniQuest.domain.user.PasswordResetCode;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.UserProfileAvatarDTO;
-import com.Uniquest.UniQuest.dto.UserProfileDTO;
-import com.Uniquest.UniQuest.repositories.PasswordResetCodeRepository;
+import com.Uniquest.UniQuest.dto.UserEditProfileDTO;
 import com.Uniquest.UniQuest.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.Optional;
 
 @Service
 public class UserService {
-    private final PasswordResetCodeRepository passwordResetTokenRepository;
+
+    @Autowired
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository, PasswordResetCodeRepository passwordResetTokenRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
-    }
-
-    public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
-    }
-
-    public void createPasswordResetCodeForUser(String token, User user) {
-        PasswordResetCode mytoken = new PasswordResetCode(user);
-        passwordResetTokenRepository.save(mytoken);
     }
 
     //Método para atualizar o perfil do usuário
-    public User updateUserProfile(String userID, UserProfileDTO updateUserProfile) {
+    public User updateUserProfile(String userID, UserEditProfileDTO updateUserProfile) {
         Optional<User> optionalUser = userRepository.findById(userID);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -44,7 +32,6 @@ public class UserService {
             throw new RuntimeException("Perfil não encontrado para o usuário com ID " + userID);
         }
     }
-
 
     //Método para dar upload no avatar.
     public User updateUserAvatar(String userID, UserProfileAvatarDTO avatarFileDTO) {
