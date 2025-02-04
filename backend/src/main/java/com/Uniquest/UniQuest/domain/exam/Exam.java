@@ -27,8 +27,8 @@ public abstract class Exam {
     @ElementCollection
     private List<String> tags = new ArrayList<>(); // Inicializa a lista de tags
 
-
     @ManyToOne
     private User author;
 
+    private int likesCount;
 }
