@@ -3,13 +3,18 @@ package com.Uniquest.UniQuest.service;
 import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
+import com.Uniquest.UniQuest.domain.exam.ExamText;
+import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
+import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExamService {
@@ -42,6 +47,38 @@ public class ExamService {
         examRepository.save(examPdf); // Salva a prova no banco
     }
 
+    public void uploadTextExam(String title, String description, List<String> tags,
+                               List<QuestionDTO> questions, User loggedUser) {
+        System.out.println("Passou aqui");
+        ExamText examText = new ExamText();
+        examText.setTitle(title);
+        examText.setDescription(description);
+        examText.setTags(tags);
+        examText.setAuthor(loggedUser);
+        examText.setTotalQuestions(questions.size());
+
+        List<Question> questionList = questions.stream().map(q -> {
+            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+            objQuestion.setStatement(q.getStatement());
+            objQuestion.setOrder(q.getQuestion());
+            objQuestion.setExamText(examText);
+
+            // Processar opções mantendo a ordem original
+            List<String> formattedOptions = q.getOptions().stream()
+                    .map(opcao -> {
+                        // Remove qualquer formatação numérica existente
+                        String cleanOption = opcao.replaceFirst("^\\d+[\\.\\s]*", "");
+                        return cleanOption;
+                    })
+                    .collect(Collectors.toList());
+
+            objQuestion.setOptions(formattedOptions);
+            return objQuestion;
+        }).collect(Collectors.toList());
+
+        examText.setQuestions(questionList);
+        examRepository.save(examText);
+    }
 
     public Optional<ExamImage> getImageExam(Long id) {
         return examRepository.findById(id).map(exam -> (ExamImage) exam);
