@@ -3,12 +3,11 @@ import axios from "axios";
 const token = sessionStorage.getItem("token");
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://localhost:8080",
   timeout: 3000,
   headers: {
-    "Authorization": token ? `Bearer ${token}` : "",
     "Content-Type": "application/json",
-  },
+  }
 });
 
 axiosInstance.interceptors.request.use((config) => {
