@@ -1,5 +1,6 @@
 package com.Uniquest.UniQuest.domain.user;
 
+
 import com.Uniquest.UniQuest.domain.exam.Exam;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-public class LikeUser {
+public class CommentUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +22,7 @@ public class LikeUser {
 
     @ManyToOne
     private Exam exam;
-    private boolean liked;
+
+    private String text;
+
 }
