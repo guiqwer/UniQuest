@@ -164,6 +164,23 @@ const PinInput = ({ navigate }) => {
           >
             Confirmar Código
           </Button>
+          <Button
+          fullWidth
+          variant="text"
+          sx={{
+            mt: 2,
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: '#1976d2',
+            textTransform: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
+          }}
+          onClick={() => navigate("forgotPassword")}
+          >
+            Não recebeu o código? Reenviar
+            </Button>
         </form>
       </Paper>
     </Box>
