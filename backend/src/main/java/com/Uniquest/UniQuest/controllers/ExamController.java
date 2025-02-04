@@ -82,15 +82,15 @@ public class ExamController {
         }
     }
 
-    @PostMapping("/generate/text")
-    public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
-        try{
-            examService.generateTextExam(request.getId());
-            return ResponseEntity.ok("Prova gerada com sucesso!");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    @PostMapping("/generate/text")
+//    public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
+//        try{
+//            examService.generateTextExam(request.getId());
+//            return ResponseEntity.ok("Prova gerada com sucesso!");
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     @GetMapping("/view/{id}")
     public ResponseEntity<?> getExam(@PathVariable Long id) {

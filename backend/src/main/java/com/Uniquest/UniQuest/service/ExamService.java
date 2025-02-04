@@ -62,88 +62,89 @@ public class ExamService {
     }
 
     public void uploadTextExam(String title, String description, List<String> tags,
-                               List<QuestionDTO> questions, User loggedUser) {
+                               List<QuestionDTO> questionsDTO, User loggedUser) {
         ExamText examText = new ExamText();
         examText.setTitle(title);
         examText.setDescription(description);
         examText.setTags(tags);
         examText.setAuthor(loggedUser);
-        examText.setTotalQuestions(questions.size());
+        examText.setTotalQuestions(questionsDTO.size());
 
-        List<Question> questionList = questions.stream().map(q -> {
-            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
-            objQuestion.setStatement(q.getStatement());
-            objQuestion.setOrder(q.getQuestion());
-            objQuestion.setExamText(examText);
+        /// Converta cada QuestionDTO para ObjectiveQuestion (subclasse de Question)
+        List<ObjectiveQuestion> objectiveQuestions = questionsDTO.stream()
+                .map(dto -> convertToQuestion(dto, examText))
+                .toList();
+        List<Question> questions = new ArrayList<>(objectiveQuestions);
+        examText.setQuestions(questions);
 
-            // Extrai as opções ordenadas (a, b, c, d)
-            List<String> formattedOptions = q.getOptions().entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
-
-            objQuestion.setOptions(formattedOptions);
-            return objQuestion;
-        }).collect(Collectors.toList());
-
-        examText.setQuestions(questionList);
         examRepository.save(examText);
     }
 
-    public void generateTextExam(Long id){
-        Optional<Exam> examOptional = examRepository.findById(id);
-        if (examOptional.isEmpty()) {
-            throw new ServerErrorException("Exam not found");
-        }
-
-        Exam foundExam = examOptional.get();
-        List<String> tags = foundExam.getTags();  // Pegando as tags do exame
-
-        if (tags == null || tags.isEmpty()) {
-            throw new ServerErrorException("Exam has no tags to generate questions.");
-        }
-
-        // Filtrando tags
-        List<String> filteredTags = groqChatService.handleTagsForPrompt(tags);
-        if (filteredTags.isEmpty()) {
-            throw new ServerErrorException("No relevant tags found for question generation.");
-        }
-
-        int numQuestions = 5;
-
-        // Gerando questões
-        String jsonResponse = groqChatService.generateTest(filteredTags, numQuestions);
-        System.out.println(jsonResponse);
-        // Converter JSON para List<QuestionDTO> (assumindo que exista um método para isso)
-        List<QuestionDTO> questions = parseJsonToQuestionDTO(jsonResponse);
-
-        // Criando e salvando um novo ExamText
-        ExamText examText = new ExamText();
-        examText.setTitle(foundExam.getTitle());
-        examText.setDescription(foundExam.getDescription());
-        examText.setTags(filteredTags);
-        examText.setAuthor(foundExam.getAuthor());
-        examText.setTotalQuestions(questions.size());
-
-        List<Question> questionList = questions.stream().map(q -> {
-            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
-            objQuestion.setStatement(q.getStatement());
-            objQuestion.setOrder(q.getQuestion());
-            objQuestion.setExamText(examText);
-
-            // Extrai as opções ordenadas (a, b, c, d)
-            List<String> formattedOptions = q.getOptions().entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
-
-            objQuestion.setOptions(formattedOptions);
-            return objQuestion;
-        }).collect(Collectors.toList());
-
-        examText.setQuestions(questionList);
-        examRepository.save(examText);
+    private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
+        ObjectiveQuestion question = new ObjectiveQuestion();
+        question.setStatement(dto.statement());
+        question.setOrder(dto.order());
+        List<String> optionsList = new ArrayList<>(dto.options().values());
+        question.setOptions(optionsList);
+        question.setExamText(examText);
+        return question;
     }
+
+//    public void generateTextExam(Long id){
+//        Optional<Exam> examOptional = examRepository.findById(id);
+//        if (examOptional.isEmpty()) {
+//            throw new ServerErrorException("Exam not found");
+//        }
+//
+//        Exam foundExam = examOptional.get();
+//        List<String> tags = foundExam.getTags();  // Pegando as tags do exame
+//
+//        if (tags == null || tags.isEmpty()) {
+//            throw new ServerErrorException("Exam has no tags to generate questions.");
+//        }
+//
+//        // Filtrando tags
+//        List<String> filteredTags = groqChatService.handleTagsForPrompt(tags);
+//        if (filteredTags.isEmpty()) {
+//            throw new ServerErrorException("No relevant tags found for question generation.");
+//        }
+//
+//        int numQuestions = 5;
+//
+//        // Gerando questões
+//        String jsonResponse = groqChatService.generateTest(filteredTags, numQuestions);
+//        System.out.println(jsonResponse);
+//        // Converter JSON para List<QuestionDTO> (assumindo que exista um método para isso)
+//        List<QuestionDTO> questions = parseJsonToQuestionDTO(jsonResponse);
+//
+//        // Criando e salvando um novo ExamText
+//        ExamText examText = new ExamText();
+//        examText.setTitle(foundExam.getTitle());
+//        examText.setDescription(foundExam.getDescription());
+//        examText.setTags(filteredTags);
+//        examText.setAuthor(foundExam.getAuthor());
+//        examText.setTotalQuestions(questions.size());
+//        examText.setQuestions(questions);
+//
+//        List<Question> questionList = questions.stream().map(q -> {
+//            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+//            objQuestion.setStatement(q.getStatement());
+//            objQuestion.setOrder(q.getQuestion());
+//            objQuestion.setExamText(examText);
+//
+//            // Extrai as opções ordenadas (a, b, c, d)
+//            List<String> formattedOptions = q.getOptions().entrySet().stream()
+//                    .sorted(Map.Entry.comparingByKey())
+//                    .map(Map.Entry::getValue)
+//                    .collect(Collectors.toList());
+//
+//            objQuestion.setOptions(formattedOptions);
+//            return objQuestion;
+//        }).collect(Collectors.toList());
+//
+//        examText.setQuestions(questionList);
+//        examRepository.save(examText);
+//    }
 
     /**
      * Método que converte o JSON retornado pelo GroqChatService para uma lista de QuestionDTO.
