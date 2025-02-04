@@ -13,5 +13,5 @@ import java.util.Map;
 @Setter
 public class ObjectiveQuestion extends Question {
     List<String> options;
-    private String correctAnswer;
+    List<String> correctAnswer;
 }
