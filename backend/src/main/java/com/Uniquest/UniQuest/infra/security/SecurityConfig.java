@@ -39,9 +39,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/forgot-password").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/reset-password").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Libera pré-flight requests
+                        .requestMatchers(HttpMethod.POST, "/user/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/reset-password").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
