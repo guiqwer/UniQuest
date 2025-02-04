@@ -1,6 +1,7 @@
 package com.Uniquest.UniQuest.domain.exam;
 
 import com.Uniquest.UniQuest.domain.question.Question;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
@@ -26,5 +27,6 @@ public class ExamText extends Exam {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
+    @JsonManagedReference
     private List<Question> questions;
 }

@@ -1,6 +1,7 @@
 package com.Uniquest.UniQuest.domain.question;
 
 import com.Uniquest.UniQuest.domain.exam.ExamText;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,5 +25,6 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.LAZY) // Define o lado "many" do relacionamento
     @JoinColumn(name = "exam_text_id") // Nome da coluna de chave estrangeira
+    @JsonBackReference
     private ExamText examText;
 }
