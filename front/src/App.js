@@ -2,25 +2,23 @@ import React, { useState } from "react";
 import Login from "./screens/Login";
 import SignUp from "./screens/SignUp";
 import ForgotPassword from "./screens/ForgotPassword";
-import "./App.css";
+import NavBar from "./screens/NavBar";
 
-function App() {
-  const [currentPage, setCurrentPage] = useState("login");
+const App = () => {
+  const [screen, setScreen] = useState("login");
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case "login":
-        return <Login navigate={setCurrentPage} />;
-      case "signup":
-        return <SignUp navigate={setCurrentPage} />;
-      case "forgotPassword":
-        return <ForgotPassword navigate={setCurrentPage} />;
-      default:
-        return <Login navigate={setCurrentPage} />;
-    }
+  const navigate = (page) => {
+    setScreen(page);
   };
 
-  return <div className="app-container">{renderPage()}</div>;
-}
+  return (
+    <>
+      {screen === "login" && <Login navigate={navigate} />}
+      {screen === "forgotPassword" && <ForgotPassword navigate={navigate} />}
+      {screen === "signup" && <SignUp navigate={navigate} />}
+      {screen === "navbar" && <NavBar navigate={navigate} />}
+    </>
+  );
+};
 
 export default App;

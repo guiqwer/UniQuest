@@ -1,25 +1,111 @@
-import React from "react";
+import React from 'react';
+import { TextField, Button, Typography, Paper, Link, Box } from "@mui/material";
 
-function ForgotPassword({ navigate }) {
-  return (
-    <div className="container">
-      <h2>Recuperação de Senha</h2>
-      <p>Insira seu email para redefinir sua senha.</p>
-      <form>
-        <div className="form-group">
-          <input type="email" placeholder="Email*" required />
-        </div>
-        <button type="submit" className="btn-login">
-          Enviar
-        </button>
-      </form>
-      <div className="form-actions">
-        <a onClick={() => navigate("login")} href="#">
-          Voltar para o login
-        </a>
-      </div>
-    </div>
-  );
-}
+const ForgotPassword = ({ navigate }) => {
+    return (
+        <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
+            p: 2
+        }}>
+            <Paper elevation={6} sx={{ 
+                width: '100%', 
+                maxWidth: '450px', 
+                p: 4, 
+                borderRadius: 4, 
+                background: 'rgba(255, 255, 255, 0.95)', 
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+            }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    mb: 4 
+                }}>
+                    <img 
+                        src="https://ifce.edu.br/prpi/documentos-1/semic/2018/logo-ifce-vertical.png" 
+                        alt="Logo IFCE" 
+                        style={{ height: '100px', objectFit: 'contain' }} 
+                    />
+                </Box>
+                <Typography variant="h4" sx={{ 
+                    fontWeight: 700, 
+                    color: '#2e7d32',
+                    textAlign: 'center',
+                    mb: 1
+                }}>
+                    Redefinir Senha
+                </Typography>
+                <Typography variant="body1" sx={{ 
+                    color: '#616161', 
+                    textAlign: 'center', 
+                    mb: 4,
+                    fontSize: '1.1rem'
+                }}>
+                    Digite seu e-mail cadastrado para redefinir senha
+                </Typography>
+                <form>
+                    <TextField 
+                        fullWidth
+                        label="E-mail"
+                        type="email"
+                        variant="outlined"
+                        required
+                        sx={{ 
+                            mb: 3,
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                            }
+                        }}
+                    />
+
+                    <Button 
+                        fullWidth
+                        variant="contained"
+                        size="large"
+                        sx={{ 
+                            mt: 1,
+                            py: 1.5,
+                            borderRadius: 2,
+                            fontSize: '1.1rem',
+                            fontWeight: 700,
+                            background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, #1976d2, #2e7d32)',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                                transition: 'all 0.3s ease'
+                            }
+                        }}
+                    >
+                        Enviar email
+                    </Button>
+                </form>
+                <Box sx={{ 
+                    textAlign: 'center', 
+                    mt: 4,
+                    '& a': {
+                        color: '#1976d2',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        '&:hover': {
+                            textDecoration: 'underline'
+                        }
+                    }
+                }}>
+                    <Link 
+                        component="button" 
+                        onClick={() => navigate("login")}
+                    >
+                        Voltar para o login
+                    </Link>
+                </Box>
+            </Paper>
+        </Box>
+    );
+};
 
 export default ForgotPassword;
