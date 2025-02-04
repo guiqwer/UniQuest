@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-public class InteractionUser {
+public class LikeUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +22,4 @@ public class InteractionUser {
     @ManyToOne
     private Exam exam;
     private boolean liked;
-
 }
