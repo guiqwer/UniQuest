@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-public class InteractionUser {
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
