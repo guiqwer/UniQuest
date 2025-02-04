@@ -58,7 +58,7 @@ public class ExamController {
     }
 
 
-    @GetMapping("/pdf/{id}")
+    @GetMapping("/view/pdf/{id}")
     public ResponseEntity<byte[]> getPDFExam(@PathVariable Long id) {
         Optional<ExamPdf> exam = examService.getPDFExam(id);
         if (exam.isPresent()) {
@@ -71,7 +71,7 @@ public class ExamController {
         }
     }
 
-    @GetMapping("/image/{id}")
+    @GetMapping("/view/image/{id}")
     public ResponseEntity<byte[]> getImageExam(@PathVariable Long id) {
         Optional<ExamImage> exam = examService.getImageExam(id);
         if (exam.isPresent()) {
