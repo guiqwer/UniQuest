@@ -8,5 +8,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DiscursiveQuestion extends Question {
-    private String rightAnswer;
+    private String expectedAnswer;
 }

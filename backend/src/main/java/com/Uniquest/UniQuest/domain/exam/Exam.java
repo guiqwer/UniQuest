@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "prrof_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "exam_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class Exam {
 
     @Id
@@ -24,10 +25,10 @@ public abstract class Exam {
     private String description;
 
     @ElementCollection
-    private List<String> tags;
+    private List<String> tags = new ArrayList<>(); // Inicializa a lista de tags
 
     @ManyToOne
     private User author;
 
-
+    private int likesCount;
 }

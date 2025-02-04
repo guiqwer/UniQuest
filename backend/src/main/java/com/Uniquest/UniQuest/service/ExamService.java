@@ -1,0 +1,94 @@
+package com.Uniquest.UniQuest.service;
+
+import com.Uniquest.UniQuest.domain.exam.Exam;
+import com.Uniquest.UniQuest.domain.exam.ExamImage;
+import com.Uniquest.UniQuest.domain.exam.ExamPdf;
+import com.Uniquest.UniQuest.domain.exam.ExamText;
+import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
+import com.Uniquest.UniQuest.domain.question.Question;
+import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.QuestionDTO;
+import com.Uniquest.UniQuest.repositories.ExamRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class ExamService {
+
+    private final ExamRepository examRepository;
+
+    public ExamService(ExamRepository examRepository) {
+        this.examRepository = examRepository;
+    }
+
+    public void uploadImageExam(String title, String description, List<String> tags, MultipartFile file, User loggedUser) throws IOException {
+        ExamImage examImage = new ExamImage();
+        examImage.setTitle(title);
+        examImage.setDescription(description);
+        examImage.setTags(tags); // Define as tags
+        examImage.setAuthor(loggedUser); // Define o autor como o usuário logado
+        examImage.setImageData(file.getBytes()); // Salva os dados da imagem
+
+        examRepository.save(examImage); // Salva a prova no banco
+    }
+
+    public void uploadPDFExam(String title, String description, List<String> tags, MultipartFile file, User loggedUser) throws IOException {
+        ExamPdf examPdf = new ExamPdf();
+        examPdf.setTitle(title);
+        examPdf.setDescription(description);
+        examPdf.setTags(tags); // Define as tags
+        examPdf.setAuthor(loggedUser); // Define o autor como o usuário logado
+        examPdf.setPdfData(file.getBytes()); // Salva os dados do PDF
+
+        examRepository.save(examPdf); // Salva a prova no banco
+    }
+
+    public void uploadTextExam(String title, String description, List<String> tags,
+                               List<QuestionDTO> questions, User loggedUser) {
+        System.out.println("Passou aqui");
+        ExamText examText = new ExamText();
+        examText.setTitle(title);
+        examText.setDescription(description);
+        examText.setTags(tags);
+        examText.setAuthor(loggedUser);
+        examText.setTotalQuestions(questions.size());
+
+        List<Question> questionList = questions.stream().map(q -> {
+            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+            objQuestion.setStatement(q.getStatement());
+            objQuestion.setOrder(q.getQuestion());
+            objQuestion.setExamText(examText);
+
+            // Processar opções mantendo a ordem original
+            List<String> formattedOptions = q.getOptions().stream()
+                    .map(opcao -> {
+                        // Remove qualquer formatação numérica existente
+                        String cleanOption = opcao.replaceFirst("^\\d+[\\.\\s]*", "");
+                        return cleanOption;
+                    })
+                    .collect(Collectors.toList());
+
+            objQuestion.setOptions(formattedOptions);
+            return objQuestion;
+        }).collect(Collectors.toList());
+
+        examText.setQuestions(questionList);
+        examRepository.save(examText);
+    }
+
+    public Optional<ExamImage> getImageExam(Long id) {
+        return examRepository.findById(id).map(exam -> (ExamImage) exam);
+    }
+
+    public Optional<ExamPdf> getPDFExam(Long id) {
+        return examRepository.findById(id).map(exam -> (ExamPdf) exam);
+    }
+
+    public List<Exam> getAllExams() {
+        return examRepository.findAll(); // Busca todas as provas
+    }
+}
