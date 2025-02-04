@@ -10,4 +10,5 @@ import java.util.List;
 @Setter
 public class ObjectiveQuestion extends Question {
     private List<String> options;
+    private String correctAnswer;
 }
