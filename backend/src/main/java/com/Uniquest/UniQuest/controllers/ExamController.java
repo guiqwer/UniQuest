@@ -6,10 +6,12 @@ import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.ExamGenerateRequestDTO;
+import com.Uniquest.UniQuest.dto.CommentResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.service.ExamService;
+import com.Uniquest.UniQuest.service.InteractionUserService;
 import com.Uniquest.UniQuest.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +36,7 @@ public class ExamController {
 
     private final ExamService examService;
     private final ExamRepository examRepository;
+    private final InteractionUserService interactionUserService;
 
 
     @PostMapping("/upload/image")
@@ -123,17 +126,22 @@ public class ExamController {
     @GetMapping("/list")
     public ResponseEntity<List<ExamResponseDTO>> getAllExams() {
         List<Exam> exams = examService.getAllExams();
-        List<ExamResponseDTO> examDTOs = exams.stream().map(exam ->
-                new ExamResponseDTO(
-                        exam.getId(),
-                        exam.getTitle(),
-                        exam.getDescription(),
-                        exam.getTags(),
-                        exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Pega apenas o nome do autor
-                        exam.getLikesCount() // Inclui o likesCount aqui
-                )
-        ).collect(Collectors.toList());
+
+        List<ExamResponseDTO> examDTOs = exams.stream().map(exam -> {
+            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
+
+            return new ExamResponseDTO(
+                    exam.getId(),
+                    exam.getTitle(),
+                    exam.getDescription(),
+                    exam.getTags(),
+                    exam.getAuthor() != null ? exam.getAuthor().getName() : null,
+                    exam.getLikesCount(),
+                    comments // Adiciona os comentários ao DTO
+            );
+        }).collect(Collectors.toList());
 
         return ResponseEntity.ok(examDTOs);
     }
+
 }
