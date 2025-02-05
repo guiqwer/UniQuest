@@ -1,12 +1,15 @@
 package com.Uniquest.UniQuest.ai.service;
 
 import com.Uniquest.UniQuest.ai.client.GroqChatClient;
+import com.Uniquest.UniQuest.dto.QuestionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static com.Uniquest.UniQuest.ai.service.ExamProcessor.parseJsonToQuestionDTO;
+import static com.Uniquest.UniQuest.ai.service.TagProcessor.*;
 
 @Service
 public class GroqChatService {
@@ -19,12 +22,72 @@ public class GroqChatService {
     }
 
     public String getChatResponse(String prompt) {
-        //Aqui você pode aplicar regras de negócio ou tratamento de exceções, se necessário
         return groqChatClient.generateResponse(prompt);
     }
 
+    public List<QuestionDTO> generateTest(List<String> tags, Integer numQuestions){
+        List<QuestionDTO> questions = new ArrayList<>();
+        for (int i = 0; i < numQuestions; i++) {
+            List<QuestionDTO> generatedQuestions = this.generateTest(tags);
+            questions.addAll(generatedQuestions);
+        }
+        return questions;
+    }
 
-    public List<String> handleTagsForPrompt(ArrayList<String> tags) {
+    public List<QuestionDTO> generateTest(List<String> tags){
+        Integer numQuestions = 1;
+        String tagsForTest = String.valueOf(tags);
+        String prompt = """
+        Gere um JSON rigorosamente estruturado, sem qualquer caractere de escape desnecessário, com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
+        
+        1. Contexto Técnico:
+        - Combinação obrigatória dos conceitos: %s
+        
+        - 40%% das questões devem integrar múltiplos tópicos simultaneamente
+        
+        2. Engenharia de Questões:
+        - Enunciados com problemas aplicados ao desenvolvimento de sistemas reais
+        - Alternativas plausíveis com nuances técnicas
+        - Mantenha coerência entre enunciado complexo e alternativas técnicas
+        - Cada questão deve ter entre 4 opções de resposta
+        - Elas devem ser de nível difícil e adequadas para vestibulares/avaliações/concursos públicos
+        - Priorize situações-problema que exijam aplicação conjunta dos conceitos.
+        
+        3. Estrutura Imutável:
+        Formato ABSOLUTO:
+        [
+          {
+            "order": (número sequencial),
+            "statement": ("enunciado"),
+            "options":
+              {
+                "A": "Texto A",
+                "B": "Texto B",
+                "C": "Texto C",
+                "D": "Texto D"
+              },
+              "correctAnswer": {"D": "Texto D"}
+              ...
+          },...
+        ]
+        
+        4. Regras Estritas:
+        - Nenhum markdown ou texto extra fora do JSON
+        - Não invente informações.
+        
+        5. Otimização para Reuso:
+        - Padronização terminológica
+        - Variação sistemática de domínios de problema (gestão acadêmica, sistemas embarcados, etc)
+        
+        Saída EXCLUSIVA: APENAS o JSON válido, pronto para desserialização imediata, sem comentários.
+        """.formatted(numQuestions, tagsForTest);
+        String response = this.getChatResponse(prompt);
+        System.out.println(response);
+        return parseJsonToQuestionDTO(response);
+    }
+
+
+    public List<String> handleTagsForPrompt(List<String> tags) {
         String prompt = """
                 Você é um especialista em análise de dados acadêmicos
                 e seleção de conteúdo relevante para elaboração de provas.
@@ -62,41 +125,11 @@ public class GroqChatService {
 
         String response = this.getChatResponse(prompt);
 
-        return this.getTagsFromResponse(response);
+        return getTagsFromResponse(response);
     }
 
-    public static String getJsonFromList(String texto) {
-        // Localiza a última ocorrência de '[' e ']'
-        int posInicio = texto.lastIndexOf('[');
-        int posFim = texto.lastIndexOf(']');
-        if (posInicio >= 0 && posFim > posInicio) {
-            // Retorna o trecho que vai de '[' até ']', inclusive
-            return texto.substring(posInicio, posFim + 1);
-        }
-        return "";
-    }
 
-    public static List<String> convertJsonToList(String jsonList) {
-        List<String> result = new ArrayList<>();
-        // Remove os colchetes do início e do fim
-        String content = jsonList.substring(1, jsonList.length() - 1).trim();
-        if (content.isEmpty()) {
-            return result;
-        }
-        // Divide o conteúdo pela vírgula
-        String[] items = content.split(",");
-        for (String item : items) {
-            // Remove as aspas (no início e fim) e espaços extras
-            String value = item.trim().replaceAll("^\"|\"$", "");
-            result.add(value);
-        }
-        return result;
-    }
 
-    public List<String> getTagsFromResponse(String response) {
-        String jsonList = getJsonFromList(response);
-        return convertJsonToList(jsonList);
-    }
 
 
 

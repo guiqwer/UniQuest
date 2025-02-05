@@ -28,11 +28,4 @@ public class User {
     @Column(columnDefinition = "BYTEA") // Definição específica pro Postgres
     private byte[] avatar;
 
-    public static Optional<User> findById(Long userID) {
-        return null;
-    }
-
-    public static User save(User userProfile) {
-        return null;
-    }
 }

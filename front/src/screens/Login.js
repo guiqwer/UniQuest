@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Typography, Paper, Link, Box } from "@mui/material";
 import axiosInstance from "../axios";
 
@@ -7,11 +7,18 @@ const Login = ({ navigate }) => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
+    useEffect(() => {
+      const token = sessionStorage.getItem("token");
+      if (token) {
+        navigate("home");
+      }
+    }, [navigate]);
+
     const handleLogin = async (event) => {
       event.preventDefault();
     
       try {
-        const response = await axiosInstance.post("/login", {
+        const response = await axiosInstance.post("/auth/login", {
           email,
           password,
         });

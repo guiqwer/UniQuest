@@ -4,9 +4,10 @@ import SignUp from "./screens/SignUp";
 import ForgotPassword from "./screens/ForgotPassword";
 import NavBar from "./screens/NavBar";
 import Feed from "./screens/Feed";
+import PinInput from "./screens/ResetCode";
 
 const App = () => {
-  const [screen, setScreen] = useState("feed");
+  const [screen, setScreen] = useState("login");
 
   const navigate = (page) => {
     setScreen(page);
@@ -23,6 +24,8 @@ const App = () => {
           <Feed />
         </>
       )}
+      {screen === "navbar" && <NavBar navigate={navigate} />}
+      {screen === "resetCode" && <PinInput navigate={navigate} />}
     </>
   );
 };

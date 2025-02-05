@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TextField, Button, Typography, Paper, Link, Box } from "@mui/material";
+import axiosInstance from "../axios";
 
 const ForgotPassword = ({ navigate }) => {
+    const [email, setEmail] = useState("");
+    const [error, setError] = useState("");
+
+    const handleResetPassword = async (event) => {
+        event.preventDefault();
+
+        try {
+            const response = await axiosInstance.post("/user/forgot-password", {
+                email
+            });
+            if (response.status === 200) {
+                navigate("resetCode")
+            }
+        } catch (error) {
+            setError("Erro ao recuperar senha. Tente novamente.");
+            console.error("Erro no forgot-password:", error.response);
+        }
+    };
     return (
         <Box sx={{ 
             display: 'flex', 
@@ -47,12 +66,19 @@ const ForgotPassword = ({ navigate }) => {
                 }}>
                     Digite seu e-mail cadastrado para redefinir senha
                 </Typography>
-                <form>
+                {error && (
+                    <Typography color="error" sx={{ mb: 2 }}>
+                        {error}
+                        </Typography>
+                    )}
+                <form onSubmit={handleResetPassword}>
                     <TextField 
                         fullWidth
                         label="E-mail"
                         type="email"
                         variant="outlined"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         sx={{ 
                             mb: 3,
@@ -66,6 +92,7 @@ const ForgotPassword = ({ navigate }) => {
                         fullWidth
                         variant="contained"
                         size="large"
+                        type="submit"
                         sx={{ 
                             mt: 1,
                             py: 1.5,

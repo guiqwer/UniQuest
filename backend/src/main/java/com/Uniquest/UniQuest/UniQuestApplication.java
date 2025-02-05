@@ -21,17 +21,21 @@ public class UniQuestApplication {
 	public CommandLineRunner demo(GroqChatService groqChatService) {
 		return args -> {
 			// Teste simples
-			ArrayList<String> tags = new ArrayList<>();
+			List<String> tags = new ArrayList<>();
 
 
-			tags.add("Maçã");
+			tags.add("FUTEBOL");
 			tags.add("POO");
-			tags.add("IFCE");
-			tags.add("Ciência da Computação");
+			tags.add("CAFE");
 			tags.add("Java");
-            String response = String.valueOf(groqChatService.handleTagsForPrompt(tags));
-			System.out.println("\n--- Resposta do Groq ---");
-			System.out.println(response);
+			tags.add("JABUTI");
+//			List<String> tagsFiltradas = groqChatService.handleTagsForPrompt(tags);
+//			String response = String.valueOf(tagsFiltradas);
+//			System.out.println("\n--- Resposta do Groq ---");
+//			System.out.println(response);
+//			response = groqChatService.generateTest(tagsFiltradas, 3);
+//			System.out.println("\n\n\n--- Prova do Groq ---");
+//			System.out.println(response);
 		};
 	}
 }
