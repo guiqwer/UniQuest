@@ -76,8 +76,8 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
 
-    //EndPoint Perfil Usuário
-    @GetMapping("/{id}")
+
+    @GetMapping("/perfil/{id}")
     public UserProfileDTO getUserById(@PathVariable String id) {
         return userService.getUserById(id);
     }
