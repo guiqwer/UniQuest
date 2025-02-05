@@ -76,6 +76,12 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
 
+    //EndPoint Perfil Usuário
+    @GetMapping("/{id}")
+    public UserProfileDTO getUserById(@PathVariable String id) {
+        return userService.getUserById(id);
+    }
+
     //Endpoint para editar o perfil do usuário
     @PutMapping("/edit-profile/{id}")
     public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserEditProfileDTO updateUserProfile) {
