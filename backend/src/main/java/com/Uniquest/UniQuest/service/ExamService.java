@@ -124,7 +124,11 @@ public class ExamService {
         ObjectiveQuestion question = new ObjectiveQuestion();
         question.setStatement(dto.statement());
         question.setOrder(dto.order());
-        List<String> optionsList = new ArrayList<>(dto.options().values());
+        String optionsString = dto.options().entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + " : " + entry.getValue())
+                .collect(Collectors.joining(", "));
+        List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
         List<String> correctAnswerList = dto.correctAnswer() != null
                 ? new ArrayList<>(dto.correctAnswer().values())
                 : new ArrayList<>();
