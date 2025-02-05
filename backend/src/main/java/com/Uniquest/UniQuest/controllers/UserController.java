@@ -77,7 +77,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/perfil/{id}")
+    @GetMapping("/profile/{id}")
     public UserProfileDTO getUserById(@PathVariable String id) {
         return userService.getUserById(id);
     }
