@@ -92,8 +92,8 @@ const PinInput = ({ navigate }) => {
           <Box sx={{
             display: 'flex',
             justifyContent: 'center',
-            gap: 4, // Aumentando o espaçamento entre os inputs
-            mb: 3
+            gap: 2, // Aumentando o espaçamento entre os inputs
+            mb: 5
           }}>
             {pin.map((digit, index) => (
               <TextField
@@ -109,7 +109,7 @@ const PinInput = ({ navigate }) => {
                   style: { textAlign: 'center', fontSize: '1.5rem' },
                 }}
                 sx={{
-                  width: '50px',
+                  width: '70px',
                   height: '50px',
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
@@ -128,7 +128,7 @@ const PinInput = ({ navigate }) => {
             onChange={(e) => setNewPassword(e.target.value)}
             required
             sx={{
-              mb: 4,
+              mb: 2,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
               }
@@ -147,7 +147,7 @@ const PinInput = ({ navigate }) => {
             variant="contained"
             size="large"
             sx={{
-              mt: 3,
+              mt: 1,
               py: 1.5,
               borderRadius: 2,
               fontSize: '1.1rem',
