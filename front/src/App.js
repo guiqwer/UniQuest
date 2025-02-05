@@ -7,7 +7,7 @@ import Feed from "./screens/Feed";
 import PinInput from "./screens/ResetCode";
 
 const App = () => {
-  const [screen, setScreen] = useState("login");
+  const [screen, setScreen] = useState("feed");
 
   const navigate = (page) => {
     setScreen(page);
