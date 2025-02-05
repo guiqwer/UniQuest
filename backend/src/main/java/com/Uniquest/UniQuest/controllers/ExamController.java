@@ -9,6 +9,7 @@ import com.Uniquest.UniQuest.dto.CommentResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
+import com.Uniquest.UniQuest.service.ExamDTOService;
 import com.Uniquest.UniQuest.service.ExamService;
 import com.Uniquest.UniQuest.service.InteractionUserService;
 import com.Uniquest.UniQuest.service.UserService;
@@ -35,8 +36,7 @@ public class ExamController {
 
     private final ExamService examService;
     private final ExamRepository examRepository;
-    private final InteractionUserService interactionUserService;
-
+    private final ExamDTOService examDTOService;
 
     @PostMapping("/upload/image")
     public ResponseEntity<String> uploadImageExam(@RequestParam String title,
@@ -143,19 +143,7 @@ public class ExamController {
     public ResponseEntity<List<ExamResponseDTO>> getAllExams() {
         List<Exam> exams = examService.getAllExams();
 
-        List<ExamResponseDTO> examDTOs = exams.stream().map(exam -> {
-            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
-
-            return new ExamResponseDTO(
-                    exam.getId(),
-                    exam.getTitle(),
-                    exam.getDescription(),
-                    exam.getTags(),
-                    exam.getAuthor() != null ? exam.getAuthor().getName() : null,
-                    exam.getLikesCount(),
-                    comments // Adiciona os comentários ao DTO
-            );
-        }).collect(Collectors.toList());
+        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOs(exams);
 
         return ResponseEntity.ok(examDTOs);
     }
