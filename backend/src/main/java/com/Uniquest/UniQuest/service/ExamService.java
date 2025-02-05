@@ -91,4 +91,10 @@ public class ExamService {
     public List<Exam> getAllExams() {
         return examRepository.findAll(); // Busca todas as provas
     }
+
+    // Pegar todas as provas de um usuário
+    public List<Exam> getExamsByUser(String userId){
+        return examRepository.findByAuthorId(userId);
+    }
+
 }
