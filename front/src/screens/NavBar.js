@@ -52,7 +52,7 @@ const FiltersContainer = styled('div')(({ theme }) => ({
   transform: 'translateY(-50%)'
 }));
 
-export default function NavBar() {
+export default function NavBar({ navigate }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [filterAnchorEl, setFilterAnchorEl] = React.useState(null);
   const [professor, setProfessor] = React.useState('');
@@ -194,7 +194,14 @@ export default function NavBar() {
           <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}>
             Perfil
           </MenuItem>
-          <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}>
+          <MenuItem 
+            onClick={() => {
+              handleMenuClose();
+              sessionStorage.removeItem("token"); 
+              navigate("login"); 
+            }} 
+            sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+          >
             Sair
           </MenuItem>
         </Menu>
