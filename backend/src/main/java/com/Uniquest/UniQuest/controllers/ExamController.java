@@ -36,8 +36,6 @@ public class ExamController {
 
     private final ExamService examService;
     private final ExamRepository examRepository;
-    private final InteractionUserService interactionUserService;
-
 
     @PostMapping("/upload/image")
     public ResponseEntity<String> uploadImageExam(@RequestParam String title,
@@ -127,19 +125,7 @@ public class ExamController {
     public ResponseEntity<List<ExamResponseDTO>> getAllExams() {
         List<Exam> exams = examService.getAllExams();
 
-        List<ExamResponseDTO> examDTOs = exams.stream().map(exam -> {
-            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
-
-            return new ExamResponseDTO(
-                    exam.getId(),
-                    exam.getTitle(),
-                    exam.getDescription(),
-                    exam.getTags(),
-                    exam.getAuthor() != null ? exam.getAuthor().getName() : null,
-                    exam.getLikesCount(),
-                    comments // Adiciona os comentários ao DTO
-            );
-        }).collect(Collectors.toList());
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
 
         return ResponseEntity.ok(examDTOs);
     }

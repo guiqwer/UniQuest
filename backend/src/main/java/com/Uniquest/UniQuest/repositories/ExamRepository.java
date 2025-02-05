@@ -13,6 +13,4 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
     // Buscar exames por autor
     List<Exam> findByAuthorId(String authorId);
-
-    // Deve-se adicinar findById aqui?
 }

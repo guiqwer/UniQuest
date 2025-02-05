@@ -3,6 +3,7 @@ package com.Uniquest.UniQuest.service;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.UserProfileAvatarDTO;
 import com.Uniquest.UniQuest.dto.UserEditProfileDTO;
+import com.Uniquest.UniQuest.dto.UserProfileDTO;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,5 +63,21 @@ public class UserService {
         // Salvar as alterações no banco de dados
         userRepository.save(userProfile);
     }
+
+    public UserProfileDTO getUserById(String id){
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        return new UserProfileDTO(
+                user.getName(),
+                user.getEmail(),
+                user.getEducation(),
+                user.getAreaOfInterest(),
+                user.getFavoriteSubject(),
+                user.getAvatar()
+        );
+    }
+
+
+
 
 }

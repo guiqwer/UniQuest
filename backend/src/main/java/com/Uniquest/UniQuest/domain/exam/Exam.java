@@ -28,6 +28,7 @@ public abstract class Exam {
     private List<String> tags = new ArrayList<>(); // Inicializa a lista de tags
 
     @ManyToOne
+    @JoinColumn(name = "author_id")
     private User author;
 
     private int likesCount;

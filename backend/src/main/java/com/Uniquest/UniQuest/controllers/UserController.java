@@ -1,9 +1,12 @@
 package com.Uniquest.UniQuest.controllers;
 
+import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
+import com.Uniquest.UniQuest.service.ExamService;
+import com.Uniquest.UniQuest.service.InteractionUserService;
 import com.Uniquest.UniQuest.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.Uniquest.UniQuest.services.PasswordResetService;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -28,9 +33,8 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final PasswordResetService passwordResetService;
+    private final ExamService examService;
 
-
-    
     @GetMapping
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         // Extrai o token do cabeçalho da requisição
@@ -74,6 +78,12 @@ public class UserController {
             return ResponseEntity.ok(new ResponseDTO(newUser.getName(), token));
         }
         return ResponseEntity.badRequest().build();
+    }
+
+
+    @GetMapping("/profile/{id}")
+    public UserProfileDTO getUserById(@PathVariable String id) {
+        return userService.getUserById(id);
     }
 
     //Endpoint para editar o perfil do usuário
@@ -131,4 +141,15 @@ public class UserController {
         }
         return ResponseEntity.badRequest().body("Código inválido ou expirado.");
     }
+
+    @GetMapping("/my-exams/{userId}")
+    public ResponseEntity<List<ExamResponseDTO>> getUserExams(@PathVariable String userId) {
+        List<Exam> exams = examService.getExamsByUser(userId); // Busca as provas do usuário
+
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
+
+        return ResponseEntity.ok(examDTOs);
+    }
+
+
 }
