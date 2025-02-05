@@ -18,6 +18,8 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @Column(name = "statement", length = 1000)
     private String statement;
 
     @Column(name = "question_order") // Renomeia a coluna no banco

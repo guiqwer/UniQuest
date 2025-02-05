@@ -1,12 +1,14 @@
 package com.Uniquest.UniQuest.ai.service;
 
 import com.Uniquest.UniQuest.ai.client.GroqChatClient;
+import com.Uniquest.UniQuest.dto.QuestionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.Uniquest.UniQuest.ai.service.ExamProcessor.parseJsonToQuestionDTO;
 import static com.Uniquest.UniQuest.ai.service.TagProcessor.*;
 
 @Service
@@ -23,10 +25,20 @@ public class GroqChatService {
         return groqChatClient.generateResponse(prompt);
     }
 
-    public String generateTest(List<String> tags, Integer numQuestions){
+    public List<QuestionDTO> generateTest(List<String> tags, Integer numQuestions){
+        List<QuestionDTO> questions = new ArrayList<>();
+        for (int i = 0; i < numQuestions; i++) {
+            List<QuestionDTO> generatedQuestions = this.generateTest(tags);
+            questions.addAll(generatedQuestions);
+        }
+        return questions;
+    }
+
+    public List<QuestionDTO> generateTest(List<String> tags){
+        Integer numQuestions = 1;
         String tagsForTest = String.valueOf(tags);
         String prompt = """
-        Gere um JSON rigorosamente estruturado com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
+        Gere um JSON rigorosamente estruturado, sem qualquer caractere de escape desnecessário, com EXATAMENTE %d questões de avaliação de alto nível técnico seguindo ESTES CRITÉRIOS CRÍTICOS:
         
         1. Contexto Técnico:
         - Combinação obrigatória dos conceitos: %s
@@ -45,14 +57,17 @@ public class GroqChatService {
         Formato ABSOLUTO:
         [
           {
-            "questao": (número sequencial),
-            "enunciado": ("enunciado"),
-            "opcoes": [
+            "order": (número sequencial),
+            "statement": ("enunciado"),
+            "options":
               {
-                "ordem": (número sequencial),
-                "enunciado": ("enunciado")
-              },...
-            ]
+                "A": "Texto A",
+                "B": "Texto B",
+                "C": "Texto C",
+                "D": "Texto D"
+              },
+              "correctAnswer": {"D": "Texto D"}
+              ...
           },...
         ]
         
@@ -66,8 +81,11 @@ public class GroqChatService {
         
         Saída EXCLUSIVA: APENAS o JSON válido, pronto para desserialização imediata, sem comentários.
         """.formatted(numQuestions, tagsForTest);
-        return this.getChatResponse(prompt);
+        String response = this.getChatResponse(prompt);
+        System.out.println(response);
+        return parseJsonToQuestionDTO(response);
     }
+
 
     public List<String> handleTagsForPrompt(List<String> tags) {
         String prompt = """
