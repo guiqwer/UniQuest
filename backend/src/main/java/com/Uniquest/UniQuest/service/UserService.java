@@ -64,7 +64,6 @@ public class UserService {
         userRepository.save(userProfile);
     }
 
-
     public UserProfileDTO getUserById(String id){
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
@@ -77,6 +76,7 @@ public class UserService {
                 user.getAvatar()
         );
     }
+
 
 
 
