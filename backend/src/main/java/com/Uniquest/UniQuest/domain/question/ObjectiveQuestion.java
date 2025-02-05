@@ -5,12 +5,13 @@ import jakarta.persistence.Entity;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @DiscriminatorValue("OBJECTIVE")
 @Getter
 @Setter
 public class ObjectiveQuestion extends Question {
-    private List<String> options;
-    private String correctAnswer;
+    List<String> options;
+    List<String> correctAnswer;
 }

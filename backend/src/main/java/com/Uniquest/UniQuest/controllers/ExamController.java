@@ -5,6 +5,7 @@ import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.ExamGenerateRequestDTO;
 import com.Uniquest.UniQuest.dto.CommentResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
@@ -84,33 +85,15 @@ public class ExamController {
         }
     }
 
-//     PS: Não existe a necessidade de uma rota para visualizar cada tipo de objeto, uma única rota basta, através do ID
-//     será possível saber qual tipo de prova É. As rotas abaixo comentadas devem ser removidas posteriormente.
-//    @GetMapping("/view/pdf/{id}")
-//    public ResponseEntity<byte[]> getPDFExam(@PathVariable Long id) {
-//        Optional<ExamPdf> exam = examService.getPDFExam(id);
-//        if (exam.isPresent()) {
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam.pdf")
-//                    .contentType(MediaType.APPLICATION_PDF)
-//                    .body(exam.get().getPdfData());
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-//
-//    @GetMapping("/view/image/{id}")
-//    public ResponseEntity<byte[]> getImageExam(@PathVariable Long id) {
-//        Optional<ExamImage> exam = examService.getImageExam(id);
-//        if (exam.isPresent()) {
-//            return ResponseEntity.ok()
-//                    .contentType(MediaType.IMAGE_PNG)
-//                    .body(exam.get().getImageData());
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-
+    @PostMapping("/generate/text")
+    public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
+        try{
+            examService.generateTextExam(request.getId());
+            return ResponseEntity.ok("Prova gerada com sucesso!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @GetMapping("/view/{id}")
     public ResponseEntity<?> getExam(@PathVariable Long id) {
@@ -122,6 +105,7 @@ public class ExamController {
         }
 
         Exam foundExam = exam.get();
+
 
         if (foundExam instanceof ExamPdf) {
             return ResponseEntity.ok()
