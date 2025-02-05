@@ -7,6 +7,8 @@ import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
 import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.CommentResponseDTO;
+import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,11 @@ import java.util.stream.Collectors;
 public class ExamService {
 
     private final ExamRepository examRepository;
+    private final InteractionUserService interactionUserService;
 
-    public ExamService(ExamRepository examRepository) {
+    public ExamService(ExamRepository examRepository, InteractionUserService interactionUserService) {
         this.examRepository = examRepository;
+        this.interactionUserService = interactionUserService;
     }
 
     public void uploadImageExam(String title, String description, List<String> tags, MultipartFile file, User loggedUser) throws IOException {
@@ -95,6 +99,22 @@ public class ExamService {
     // Pegar todas as provas de um usuário
     public List<Exam> getExamsByUser(String userId){
         return examRepository.findByAuthorId(userId);
+    }
+
+    public List<ExamResponseDTO> convertExamsToDTOs(List<Exam> exams) {
+        return exams.stream().map(exam -> {
+            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
+
+            return new ExamResponseDTO(
+                    exam.getId(),
+                    exam.getTitle(),
+                    exam.getDescription(),
+                    exam.getTags(),
+                    exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Adicionando o nome do autor
+                    exam.getLikesCount(),
+                    comments
+            );
+        }).collect(Collectors.toList());
     }
 
 }
