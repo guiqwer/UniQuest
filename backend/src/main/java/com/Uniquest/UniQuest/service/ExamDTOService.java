@@ -16,7 +16,7 @@ public class ExamDTOService {
     private final InteractionUserService interactionUserService;
 
 
-    public List<ExamResponseDTO> convertExamsToDTOs(List<Exam> exams) {
+    public List<ExamResponseDTO> convertExamsToDTOsWithComments (List<Exam> exams) {
         return exams.stream().map(exam -> {
             List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
 

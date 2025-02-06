@@ -12,8 +12,6 @@ import com.Uniquest.UniQuest.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -36,6 +33,7 @@ public class UserController {
     private final PasswordResetService passwordResetService;
     private final ExamService examService;
     private final ExamDTOService examDTOService;
+    private final InteractionUserService interactionUserService;
 
     @GetMapping
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
@@ -148,7 +146,26 @@ public class UserController {
     public ResponseEntity<List<ExamResponseDTO>> getUserExams(@PathVariable String userId) {
         List<Exam> exams = examService.getExamsByUser(userId); // Busca as provas do usuário
 
-        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOs(exams);
+        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(exams);
+
+        return ResponseEntity.ok(examDTOs);
+    }
+
+    @GetMapping("my-liked-exams/{userId}")
+    public ResponseEntity<List<ExamResponseDTO>> getLikedExams(@PathVariable String userId) {
+        List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
+
+        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(likedExams);
+
+        return ResponseEntity.ok(examDTOs);
+
+    }
+
+    @GetMapping("/my-comments-exams/{userId}")
+    public ResponseEntity<List<ExamResponseDTO>> getCommentedExams(@PathVariable String userId) {
+        List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userId);
+
+        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(commentedExams);
 
         return ResponseEntity.ok(examDTOs);
     }

@@ -5,14 +5,11 @@ import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.CommentResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.service.ExamDTOService;
 import com.Uniquest.UniQuest.service.ExamService;
-import com.Uniquest.UniQuest.service.InteractionUserService;
-import com.Uniquest.UniQuest.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,7 +24,6 @@ import com.Uniquest.UniQuest.repositories.ExamRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/exam")
@@ -143,7 +139,7 @@ public class ExamController {
     public ResponseEntity<List<ExamResponseDTO>> getAllExams() {
         List<Exam> exams = examService.getAllExams();
 
-        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOs(exams);
+        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(exams);
 
         return ResponseEntity.ok(examDTOs);
     }

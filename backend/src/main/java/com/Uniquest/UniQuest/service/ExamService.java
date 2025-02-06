@@ -80,14 +80,6 @@ public class ExamService {
         examRepository.save(examText);
     }
 
-    public Optional<ExamImage> getImageExam(Long id) {
-        return examRepository.findById(id).map(exam -> (ExamImage) exam);
-    }
-
-    public Optional<ExamPdf> getPDFExam(Long id) {
-        return examRepository.findById(id).map(exam -> (ExamPdf) exam);
-    }
-
     public List<Exam> getAllExams() {
         return examRepository.findAll(); // Busca todas as provas
     }
