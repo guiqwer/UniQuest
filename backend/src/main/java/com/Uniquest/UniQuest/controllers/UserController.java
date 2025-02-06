@@ -5,7 +5,6 @@ import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
-import com.Uniquest.UniQuest.service.ExamDTOService;
 import com.Uniquest.UniQuest.service.ExamService;
 import com.Uniquest.UniQuest.service.InteractionUserService;
 import com.Uniquest.UniQuest.service.UserService;
@@ -32,7 +31,6 @@ public class UserController {
     private final TokenService tokenService;
     private final PasswordResetService passwordResetService;
     private final ExamService examService;
-    private final ExamDTOService examDTOService;
     private final InteractionUserService interactionUserService;
 
     @GetMapping
@@ -146,7 +144,7 @@ public class UserController {
     public ResponseEntity<List<ExamResponseDTO>> getUserExams(@PathVariable String userId) {
         List<Exam> exams = examService.getExamsByUser(userId); // Busca as provas do usuário
 
-        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(exams);
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
 
         return ResponseEntity.ok(examDTOs);
     }
@@ -155,7 +153,7 @@ public class UserController {
     public ResponseEntity<List<ExamResponseDTO>> getLikedExams(@PathVariable String userId) {
         List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
 
-        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(likedExams);
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams);
 
         return ResponseEntity.ok(examDTOs);
 
@@ -165,7 +163,7 @@ public class UserController {
     public ResponseEntity<List<ExamResponseDTO>> getCommentedExams(@PathVariable String userId) {
         List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userId);
 
-        List<ExamResponseDTO> examDTOs = examDTOService.convertExamsToDTOsWithComments(commentedExams);
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams);
 
         return ResponseEntity.ok(examDTOs);
     }
