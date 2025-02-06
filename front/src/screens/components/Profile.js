@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Paper, Box, MenuItem, Avatar } from "@mui/material";
-import axiosInstance from "../axios";
+import axiosInstance from "../../axios";
 
-const Profile = ({ navigate }) => {
+const Profile = ({ navigate, handleCloseModal }) => {
     const [name, setName] = useState("Usuário Teste");
     const [displayName, setDisplayName] = useState("@teste_user");
     const [email, setEmail] = useState("usuario@email.com");
@@ -15,14 +15,7 @@ const Profile = ({ navigate }) => {
     const [memberSince] = useState("01/01/2024");
 
     return (
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
-            p: 2
-        }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
             <Paper elevation={6} sx={{
                 display: 'flex',
                 width: '100%',
@@ -68,18 +61,18 @@ const Profile = ({ navigate }) => {
                     <TextField fullWidth label="Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={password} onChange={(e) => setPassword(e.target.value)} />
                     <TextField fullWidth label="Confirmar Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                     
-                    <TextField select fullWidth label="Escolaridade" variant="outlined" sx={{ mb: 2 }} value={education} onChange={(e) => setEducation(e.target.value)}>
+                    <TextField select fullWidth label="Escolaridade" variant="outlined" sx={{ mb: 2, zIndex: 2002,}} value={education} onChange={(e) => setEducation(e.target.value)}>
                         <MenuItem value="Ensino Fundamental">Ensino Fundamental</MenuItem>
                         <MenuItem value="Ensino Médio">Ensino Médio</MenuItem>
                         <MenuItem value="Ensino Superior">Ensino Superior</MenuItem>
                     </TextField>
-                    <TextField select fullWidth label="Área de Interesse" variant="outlined" sx={{ mb: 2 }} value={address} onChange={(e) => setAddress(e.target.value)}>
+                    <TextField select fullWidth label="Área de Interesse" variant="outlined" sx={{ mb: 2, zIndex: 2002, }} value={address} onChange={(e) => setAddress(e.target.value)}>
                         <MenuItem value="Ciências da Computação">Ciências da Computação</MenuItem>
                         <MenuItem value="Eng. da Computação">Eng. da Computação</MenuItem>
                         <MenuItem value="Eng. Ambietal">Eng. Ambietal</MenuItem>
                         <MenuItem value="Ciências Sociais">Ciências Sociais</MenuItem>
                     </TextField>
-                    <TextField select fullWidth label="Disciplina Preferida" variant="outlined" sx={{ mb: 2 }} value={subject} onChange={(e) => setSubject(e.target.value)}>
+                    <TextField select fullWidth label="Disciplina Preferida" variant="outlined" sx={{ mb: 2, zIndex: 2002, }} value={subject} onChange={(e) => setSubject(e.target.value)}>
                         <MenuItem value="Arq. Computadores">Arq. Computadores</MenuItem>
                         <MenuItem value="Probabilidade e Estatística">Probabilidade e Estatística</MenuItem>
                         <MenuItem value="Programação Orientada a Objetos">Programação Orientada a Objetos</MenuItem>
