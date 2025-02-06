@@ -8,6 +8,8 @@ import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
 import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.CommentResponseDTO;
+import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.dto.QuestionResponseDTO;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
@@ -31,11 +33,13 @@ public class ExamService {
 
 
     private final ExamRepository examRepository;
+    private final InteractionUserService interactionUserService;
     private final GroqChatService groqChatService;
-
+  
     @Autowired
-    public ExamService(ExamRepository examRepository, GroqChatService groqChatService) {
+    public ExamService(ExamRepository examRepository, InteractionUserService interactionUserService, GroqChatService groqChatService) {
         this.examRepository = examRepository;
+        this.interactionUserService = interactionUserService;
         this.groqChatService = groqChatService;
     }
 
@@ -144,4 +148,26 @@ public class ExamService {
     public List<Exam> getAllExams() {
         return examRepository.findAll(); // Busca todas as provas
     }
+
+    // Pegar todas as provas de um usuário
+    public List<Exam> getExamsByUser(String userId){
+        return examRepository.findByAuthorId(userId);
+    }
+
+    public List<ExamResponseDTO> convertExamsToDTOs(List<Exam> exams) {
+        return exams.stream().map(exam -> {
+            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
+
+            return new ExamResponseDTO(
+                    exam.getId(),
+                    exam.getTitle(),
+                    exam.getDescription(),
+                    exam.getTags(),
+                    exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Adicionando o nome do autor
+                    exam.getLikesCount(),
+                    comments
+            );
+        }).collect(Collectors.toList());
+    }
+
 }
