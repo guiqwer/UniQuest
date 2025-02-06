@@ -6,10 +6,11 @@ import NavBar from "./screens/NavBar";
 import Feed from "./screens/Feed";
 import PinInput from "./screens/ResetCode";
 import Profile from "./screens/Profile";
-import Proof
- from "./screens/UploadProof";
+import Proof from "./screens/UploadProof";
+import ProfileInteractions from "./screens/ProfileInteractions";
+
 const App = () => {
-  const [screen, setScreen] = useState("feed");
+  const [screen, setScreen] = useState("interactions");
 
   const navigate = (page) => {
     setScreen(page);
@@ -28,8 +29,20 @@ const App = () => {
       )}
       {screen === "navbar" && <NavBar navigate={navigate} />}
       {screen === "resetCode" && <PinInput navigate={navigate} />}
-      {screen === "profile" && <Profile navigate={navigate} />}
       {screen === "proof" && <Proof navigate={navigate} />}
+      {screen === "interactions" && (
+    <>
+        <NavBar navigate={navigate} />
+        <ProfileInteractions navigate={navigate} /> {/* Adicione a prop navigate */}
+    </>
+)}
+
+{screen === "profile" && (
+    <>
+        <NavBar navigate={navigate} />
+        <Profile navigate={navigate} /> {/* Adicione a prop navigate */}
+    </>
+)}
     </>
   );
 };

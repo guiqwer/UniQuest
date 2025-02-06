@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Paper, Box, MenuItem, Avatar } from "@mui/material";
-import axiosInstance from "../axios";
+import { TextField, Button, Typography, Paper, Box, MenuItem, Avatar, Grid, Divider } from "@mui/material";
 
 const Profile = ({ navigate }) => {
     const [name, setName] = useState("Usuário Teste");
@@ -17,88 +16,224 @@ const Profile = ({ navigate }) => {
     return (
         <Box sx={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
             minHeight: '100vh',
             background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
             p: 2
         }}>
-            <Paper elevation={6} sx={{
-                display: 'flex',
+            <Paper sx={{
                 width: '100%',
-                maxWidth: '800px',
-                p: 4,
+                maxWidth: '1200px',
                 borderRadius: 4,
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                overflow: 'hidden',
+                background: 'rgba(255, 255, 255, 0.97)'
             }}>
-                {/* Lado Esquerdo */}
-                <Box sx={{ width: '30%', textAlign: 'center', pr: 3, borderRight: '1px solid #ddd' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#2e7d32', mb: 0 }}>
-                        {name}
-                    </Typography>
-                    <Typography variant="h7" sx={{ fontWeight: 500, color: '#2e7d32', mb: 2 }}>
-                        {displayName}
-                    </Typography>
-                    <Avatar 
-                        src="https://via.placeholder.com/150"
-                        sx={{ width: 120, height: 120, margin: '0 auto', mb: 2 }}
-                    />
-                    <Button 
+                {/* Barra de Navegação Superior */}
+                <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    mb: 4,
+                    borderBottom: '1px solid #eee',
+                    pb: 2,
+                    p: 4
+                }}>
+                    <Button
                         variant="contained"
                         sx={{
                             background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
                             '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
                         }}
                     >
-                        Alterar Avatar
+                        Perfil
                     </Button>
-                    <Typography variant="body2" sx={{ mt: 2, color: '#616161' }}>
-                        Membro desde: {memberSince}
-                    </Typography>
+                    <Button 
+                        variant="outlined"
+                        onClick={() => navigate('interactions')}
+                        sx={{
+                            color: '#2e7d32',
+                            borderColor: '#2e7d32',
+                            '&:hover': { borderColor: '#1976d2' }
+                        }}
+                    >
+                        Histórico de Interações
+                    </Button>
                 </Box>
-                
-                {/* Lado Direito */}
-                <Box sx={{ width: '70%', pl: 3 }}>
-                    <TextField fullWidth label="Nome" variant="outlined" sx={{ mb: 2 }} value={name} onChange={(e) => setName(e.target.value)} />
-                    <TextField fullWidth label="Nome de exibição" variant="outlined" sx={{ mb: 2 }} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-                    <TextField fullWidth label="Email" type="email" variant="outlined" sx={{ mb: 2 }} value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <TextField fullWidth label="Confirmar Email" type="email" variant="outlined" sx={{ mb: 2 }} value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} />
-                    <TextField fullWidth label="Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <TextField fullWidth label="Confirmar Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-                    
-                    <TextField select fullWidth label="Escolaridade" variant="outlined" sx={{ mb: 2 }} value={education} onChange={(e) => setEducation(e.target.value)}>
-                        <MenuItem value="Ensino Fundamental">Ensino Fundamental</MenuItem>
-                        <MenuItem value="Ensino Médio">Ensino Médio</MenuItem>
-                        <MenuItem value="Ensino Superior">Ensino Superior</MenuItem>
-                    </TextField>
-                    <TextField select fullWidth label="Área de Interesse" variant="outlined" sx={{ mb: 2 }} value={address} onChange={(e) => setAddress(e.target.value)}>
-                        <MenuItem value="Ciências da Computação">Ciências da Computação</MenuItem>
-                        <MenuItem value="Eng. da Computação">Eng. da Computação</MenuItem>
-                        <MenuItem value="Eng. Ambietal">Eng. Ambietal</MenuItem>
-                        <MenuItem value="Ciências Sociais">Ciências Sociais</MenuItem>
-                    </TextField>
-                    <TextField select fullWidth label="Disciplina Preferida" variant="outlined" sx={{ mb: 2 }} value={subject} onChange={(e) => setSubject(e.target.value)}>
-                        <MenuItem value="Arq. Computadores">Arq. Computadores</MenuItem>
-                        <MenuItem value="Probabilidade e Estatística">Probabilidade e Estatística</MenuItem>
-                        <MenuItem value="Programação Orientada a Objetos">Programação Orientada a Objetos</MenuItem>
-                        <MenuItem value="Programação Linear">Programação Linear</MenuItem>
-                        <MenuItem value="Fisica II">Fisica II</MenuItem>
-                    </TextField>
-                    
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                        <Button variant="contained" size="large" sx={{
-                            background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
-                            '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
+
+                <Grid container>
+                    {/* Sidebar Esquerda */}
+                    <Grid item xs={12} md={3} sx={{
+                        bgcolor: '#f8f9fa',
+                        p: 4,
+                        borderRight: '1px solid #eee',
+                        textAlign: 'center'
+                    }}>
+                        <Avatar 
+                            src="https://via.placeholder.com/150"
+                            sx={{ width: 150, height: 150, mb: 3, mx: 'auto' }}
+                        />
+                        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                            {name}
+                        </Typography>
+                        <Typography variant="h6" sx={{ mb: 3, color: '#666' }}>
+                            {displayName}
+                        </Typography>
+                        
+                        <Button 
+                            variant="contained"
+                            fullWidth
+                            sx={{
+                                mb: 2,
+                                background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
+                                '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
+                            }}
+                        >
+                            Alterar Avatar
+                        </Button>
+
+                        <Typography variant="body2" sx={{ color: '#888', mt: 2 }}>
+                            Membro desde: {memberSince}
+                        </Typography>
+                    </Grid>
+
+                    {/* Conteúdo Principal */}
+                    <Grid item xs={12} md={9} sx={{ p: 4 }}>
+                        <Typography variant="h4" sx={{ mb: 4, color: '#2e7d32' }}>
+                            Configurações do Perfil
+                        </Typography>
+
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={6}>
+                                <TextField 
+                                    fullWidth 
+                                    label="Nome" 
+                                    variant="outlined" 
+                                    value={name} 
+                                    onChange={(e) => setName(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                />
+                                <TextField 
+                                    fullWidth 
+                                    label="Nome de exibição" 
+                                    variant="outlined" 
+                                    value={displayName} 
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                />
+                                <TextField 
+                                    fullWidth 
+                                    label="Email" 
+                                    type="email" 
+                                    variant="outlined" 
+                                    value={email} 
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                />
+                                <TextField 
+                                    fullWidth 
+                                    label="Confirmar Email" 
+                                    type="email" 
+                                    variant="outlined" 
+                                    value={confirmEmail} 
+                                    onChange={(e) => setConfirmEmail(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} md={6}>
+                                <TextField 
+                                    fullWidth 
+                                    label="Senha" 
+                                    type="password" 
+                                    variant="outlined" 
+                                    value={password} 
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                />
+                                <TextField 
+                                    fullWidth 
+                                    label="Confirmar Senha" 
+                                    type="password" 
+                                    variant="outlined" 
+                                    value={confirmPassword} 
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                />
+                                
+                                <TextField 
+                                    select 
+                                    fullWidth 
+                                    label="Escolaridade" 
+                                    variant="outlined" 
+                                    value={education} 
+                                    onChange={(e) => setEducation(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                >
+                                    <MenuItem value="Ensino Fundamental">Ensino Fundamental</MenuItem>
+                                    <MenuItem value="Ensino Médio">Ensino Médio</MenuItem>
+                                    <MenuItem value="Ensino Superior">Ensino Superior</MenuItem>
+                                </TextField>
+
+                                <TextField 
+                                    select 
+                                    fullWidth 
+                                    label="Área de Interesse" 
+                                    variant="outlined" 
+                                    value={address} 
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    sx={{ mb: 3 }}
+                                >
+                                    <MenuItem value="Ciências da Computação">Ciências da Computação</MenuItem>
+                                    <MenuItem value="Eng. da Computação">Eng. da Computação</MenuItem>
+                                    <MenuItem value="Eng. Ambiental">Eng. Ambiental</MenuItem>
+                                    <MenuItem value="Ciências Sociais">Ciências Sociais</MenuItem>
+                                </TextField>
+                            </Grid>
+                        </Grid>
+
+                        <Divider sx={{ my: 4 }} />
+
+                        <TextField 
+                            select 
+                            fullWidth 
+                            label="Disciplina Preferida" 
+                            variant="outlined" 
+                            value={subject} 
+                            onChange={(e) => setSubject(e.target.value)}
+                            sx={{ mb: 4 }}
+                        >
+                            <MenuItem value="Arq. Computadores">Arq. Computadores</MenuItem>
+                            <MenuItem value="Probabilidade e Estatística">Probabilidade e Estatística</MenuItem>
+                            <MenuItem value="Programação Orientada a Objetos">Programação Orientada a Objetos</MenuItem>
+                            <MenuItem value="Programação Linear">Programação Linear</MenuItem>
+                            <MenuItem value="Fisica II">Física II</MenuItem>
+                        </TextField>
+
+                        <Box sx={{ 
+                            display: 'flex', 
+                            gap: 3,
+                            justifyContent: 'flex-end',
+                            mt: 4
                         }}>
-                            Atualizar Perfil
-                        </Button>
-                        <Button variant="outlined" size="large" color="error">
-                            Excluir Conta
-                        </Button>
-                    </Box>
-                </Box>
+                            <Button 
+                                variant="contained" 
+                                sx={{
+                                    width: 200,
+                                    background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
+                                    '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
+                                }}
+                            >
+                                Salvar Alterações
+                            </Button>
+                            <Button 
+                                variant="outlined" 
+                                color="error"
+                                sx={{ width: 200 }}
+                            >
+                                Excluir Conta
+                            </Button>
+                        </Box>
+                    </Grid>
+                </Grid>
             </Paper>
         </Box>
     );
