@@ -1,5 +1,6 @@
 package com.Uniquest.UniQuest.domain.user;
 
+import com.Uniquest.UniQuest.utils.GenerateRandomCodeUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,17 +25,15 @@ public class PasswordResetCode {
 
     private LocalDateTime expiryDate;
 
-    public PasswordResetCode(User user) {
-        this.user = user;
-        this.resetCode = generateResetCode();
-        this.expiryDate = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
-    }
-
     public PasswordResetCode() {
     }
 
-    private String generateResetCode() {
-        int code = (int) (Math.random() * 900000) + 100000; // Gera um código de 6 dígitos
-        return String.valueOf(code);
+    public PasswordResetCode(User user) {
+        this.user = user;
+        this.resetCode = GenerateRandomCodeUtil.generateRandomCode();
+        this.expiryDate = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
     }
+
+
+
 }
