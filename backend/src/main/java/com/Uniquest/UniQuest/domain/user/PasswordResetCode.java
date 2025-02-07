@@ -18,7 +18,7 @@ public class PasswordResetCode {
 
     private String resetCode;  // Código de 6 dígitos
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
