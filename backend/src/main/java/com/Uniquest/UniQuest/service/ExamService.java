@@ -14,6 +14,7 @@ import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.dto.QuestionResponseDTO;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,19 +30,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 
 @Service
+@RequiredArgsConstructor
 public class ExamService {
 
 
     private final ExamRepository examRepository;
     private final InteractionUserService interactionUserService;
     private final GroqChatService groqChatService;
-  
-    @Autowired
-    public ExamService(ExamRepository examRepository, InteractionUserService interactionUserService, GroqChatService groqChatService) {
-        this.examRepository = examRepository;
-        this.interactionUserService = interactionUserService;
-        this.groqChatService = groqChatService;
-    }
+
 
     public void uploadImageExam(String title, String description, List<String> tags, MultipartFile file, User loggedUser) throws IOException {
         ExamImage examImage = new ExamImage();
@@ -120,6 +116,21 @@ public class ExamService {
         examRepository.save(examText);
     }
 
+    public List<ExamResponseDTO> convertExamsToDTOs(List<Exam> exams) {
+        return exams.stream().map(exam -> {
+            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
+            return new ExamResponseDTO(
+                    exam.getId(),
+                    exam.getTitle(),
+                    exam.getDescription(),
+                    exam.getTags(),
+                    exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Adicionando o nome do autor
+                    exam.getLikesCount(),
+                    comments
+            );
+        }).collect(Collectors.toList());
+    }
+
     private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
         ObjectiveQuestion question = new ObjectiveQuestion();
         question.setStatement(dto.statement());
@@ -141,9 +152,6 @@ public class ExamService {
         return examRepository.findById(id).map(exam -> (ExamImage) exam);
     }
 
-    public Optional<ExamPdf> getPDFExam(Long id) {
-        return examRepository.findById(id).map(exam -> (ExamPdf) exam);
-    }
 
     public List<Exam> getAllExams() {
         return examRepository.findAll(); // Busca todas as provas
@@ -154,20 +162,5 @@ public class ExamService {
         return examRepository.findByAuthorId(userId);
     }
 
-    public List<ExamResponseDTO> convertExamsToDTOs(List<Exam> exams) {
-        return exams.stream().map(exam -> {
-            List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
-
-            return new ExamResponseDTO(
-                    exam.getId(),
-                    exam.getTitle(),
-                    exam.getDescription(),
-                    exam.getTags(),
-                    exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Adicionando o nome do autor
-                    exam.getLikesCount(),
-                    comments
-            );
-        }).collect(Collectors.toList());
-    }
 
 }
