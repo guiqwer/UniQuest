@@ -79,10 +79,12 @@ const Profile = ({ navigate, handleCloseModal }) => {
             <Paper elevation={6} sx={{
                 display: 'flex',
                 width: '100%',
-                maxWidth: '1200px',
+                maxWidth: '800px',
+                p: 4,
                 borderRadius: 4,
-                overflow: 'hidden',
-                background: 'rgba(255, 255, 255, 0.97)'
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
             }}>
                 {error && (
                     <Typography color="error" sx={{ mb: 2 }}>
@@ -108,18 +110,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                             '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
                         }}
                     >
-                        Perfil
-                    </Button>
-                    <Button 
-                        variant="outlined"
-                        onClick={() => navigate('interactions')}
-                        sx={{
-                            color: '#2e7d32',
-                            borderColor: '#2e7d32',
-                            '&:hover': { borderColor: '#1976d2' }
-                        }}
-                    >
-                        Histórico de Interações
+                        Alterar Avatar
                     </Button>
 
                     {/* Informações abaixo do avatar */}
@@ -190,26 +181,13 @@ const Profile = ({ navigate, handleCloseModal }) => {
                             background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
                             '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
                         }}>
-                            <Button 
-                                variant="contained" 
-                                sx={{
-                                    width: 200,
-                                    background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
-                                    '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
-                                }}
-                            >
-                                Salvar Alterações
-                            </Button>
-                            <Button 
-                                variant="outlined" 
-                                color="error"
-                                sx={{ width: 200 }}
-                            >
-                                Excluir Conta
-                            </Button>
-                        </Box>
-                    </Grid>
-                </Grid>
+                            Atualizar Perfil
+                        </Button>
+                        <Button variant="outlined" size="large" color="error">
+                            Excluir Conta
+                        </Button>
+                    </Box>
+                </Box>
             </Paper>
         </Box>
     );
