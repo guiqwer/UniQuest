@@ -37,6 +37,7 @@ public class UserController {
     private final InteractionUserService interactionUserService;
     private final EmailChangeService emailChangeService;
 
+
     @GetMapping
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         // Extrai o token do cabeçalho da requisição
