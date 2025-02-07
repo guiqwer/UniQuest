@@ -10,7 +10,7 @@ const Login = ({ navigate }) => {
     useEffect(() => {
       const token = sessionStorage.getItem("token");
       if (token) {
-        navigate("home");
+        navigate("feed");
       }
     }, [navigate]);
 
@@ -27,7 +27,7 @@ const Login = ({ navigate }) => {
         if (token) {
           sessionStorage.setItem("token", token);
           axiosInstance.defaults.headers["Authorization"] = `Bearer ${token}`;
-          navigate("home"); 
+          navigate("feed"); 
         }
       } catch (error) {
         setError("Email ou senha inválidos");

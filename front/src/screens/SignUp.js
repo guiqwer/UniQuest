@@ -28,7 +28,7 @@ const SignUp = ({ navigate }) => {
             if (token) {
                 sessionStorage.setItem("token", token);
                 axiosInstance.defaults.headers["Authorization"] = `Bearer ${token}`;
-                navigate("home");
+                navigate("feed");
             }
         } catch (error) {
             setError("Erro ao criar uma conta. Tente novamente.");
