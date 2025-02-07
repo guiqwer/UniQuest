@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import {
   Box, Card, CardContent, CardMedia, Typography, IconButton,
   TextField, Button, SpeedDial, SpeedDialIcon, SpeedDialAction,
-  Avatar, Chip, Divider, Collapse, Autocomplete
+  Avatar, Chip, Divider, Collapse, Autocomplete, Menu, MenuItem
 } from "@mui/material";
 import {
   FavoriteBorder, Favorite, AddPhotoAlternate,
-  Comment, Close
+  Comment, Close, MoreVert
 } from "@mui/icons-material";
 
 import { styled } from "@mui/material/styles";
@@ -46,6 +46,24 @@ const Feed = () => {
   const [openComments, setOpenComments] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
   const [openNewPostModal, setOpenNewPostModal] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
+
+  const handleDeletePost = (postId) => {
+    setPosts(posts.filter(post => post.id !== postId));
+    setAnchorEl(null);
+    setSelectedPostId(null);
+  };
+
+  const handleMenuOpen = (event, postId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedPostId(postId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedPostId(null);
+  };
 
   const toggleComments = (postId) => {
     setOpenComments((prev) => ({
@@ -93,7 +111,7 @@ const Feed = () => {
       const post = {
         id: posts.length + 1,
         user: "Usuário Atual",
-        avatar: "https://i.pravatar.cc/150?img=3",
+        avatar: "https://via.placeholder.com/150",
         ...newPost,
         type: postType,
         fileName: newPost.file?.name || 'documento.pdf',
@@ -191,60 +209,60 @@ const Feed = () => {
           </Card>
         );
 
-        case 'texto':
-  return post.questions?.map((question, index) => (
-    <Box key={index} sx={{ 
-      mb: 2,
-      p: 2,
-      border: '1px solid #e0e0e0',
-      borderRadius: 2,
-      backgroundColor: 'rgba(255,255,255,0.7)'
-    }}>
-      <Typography variant="body1" sx={{ 
-        mb: 1,
-        fontWeight: 500,
-        color: '#2d3436'
-      }}>
-        Questão {index + 1}: {question.text}
-      </Typography>
-      
-      {question.type === 'objetiva' && (
-        <Box sx={{ ml: 1 }}>
-          {question.options.map((option, optionIndex) => (
-            <Box key={optionIndex} sx={{ 
-              display: 'flex',
-              alignItems: 'center',
+      case 'texto':
+        return post.questions?.map((question, index) => (
+          <Box key={index} sx={{
+            mb: 2,
+            p: 2,
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
+            backgroundColor: 'rgba(255,255,255,0.7)'
+          }}>
+            <Typography variant="body1" sx={{
               mb: 1,
-              p: 1,
-              borderRadius: 1,
-              '&:hover': {
-                backgroundColor: 'rgba(0,0,0,0.03)'
-              }
+              fontWeight: 500,
+              color: '#2d3436'
             }}>
-              <Box sx={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                backgroundColor: '#1976d2',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 500,
-                flexShrink: 0,
-                mr: 1.5
-              }}>
-                {String.fromCharCode(65 + optionIndex)}
+              Questão {index + 1}: {question.text}
+            </Typography>
+
+            {question.type === 'objetiva' && (
+              <Box sx={{ ml: 1 }}>
+                {question.options.map((option, optionIndex) => (
+                  <Box key={optionIndex} sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 1,
+                    p: 1,
+                    borderRadius: 1,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0,0,0,0.03)'
+                    }
+                  }}>
+                    <Box sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      backgroundColor: '#1976d2',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 500,
+                      flexShrink: 0,
+                      mr: 1.5
+                    }}>
+                      {String.fromCharCode(65 + optionIndex)}
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#2d3436' }}>
+                      {option}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
-              <Typography variant="body2" sx={{ color: '#2d3436' }}>
-                {option}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      )}
-    </Box>
-  ));
+            )}
+          </Box>
+        ));
 
       default:
         return null;
@@ -307,6 +325,7 @@ const Feed = () => {
                     padding: 2,
                     background: "rgba(255,255,255,0.7)",
                     borderRadius: 3,
+                    position: 'relative'
                   }}
                 >
                   <Avatar
@@ -319,7 +338,7 @@ const Feed = () => {
                       boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     }}
                   />
-                  <Box>
+                  <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle1" fontWeight="700" color="#2d3436">
                       {post.user}
                     </Typography>
@@ -327,6 +346,12 @@ const Feed = () => {
                       {post.date}
                     </Typography>
                   </Box>
+                  <IconButton
+                    onClick={(e) => handleMenuOpen(e, post.id)}
+                    sx={{ position: 'absolute', right: 16, top: 16, color: '#636e72' }}
+                  >
+                    <MoreVert />
+                  </IconButton>
                 </Box>
 
                 {post.title && (
@@ -411,7 +436,7 @@ const Feed = () => {
                           handleAddComment(post.id, {
                             user: "Você",
                             text: e.target.value,
-                            avatar: "https://i.pravatar.cc/150?img=4",
+                            avatar: "https://via.placeholder.com/150",
                           });
                           e.target.value = "";
                         }
@@ -425,6 +450,30 @@ const Feed = () => {
           ))
         )}
       </Box>
+
+      {/* Menu de três pontos */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            minWidth: 140
+          }
+        }}
+      >
+        <MenuItem 
+          onClick={() => handleDeletePost(selectedPostId)}
+          sx={{ 
+            color: '#ff4444',
+            '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.08)' }
+          }}
+        >
+          Excluir Post
+        </MenuItem>
+      </Menu>
 
       <SpeedDial
         ariaLabel="Novo post"
@@ -726,225 +775,225 @@ const Feed = () => {
                     </Box>
                   )}
 
-{postType === "texto" && (
-  <Box sx={{ mb: 3 }}>
-    <Box sx={{ 
-      maxHeight: '40vh',
-      overflowY: 'auto',
-      border: '1px solid #e0e0e0',
-      borderRadius: 2,
-      p: 1,
-      mb: 2,
-      backgroundColor: 'white'
-    }}>
-      {newPost.questions.map((question, index) => (
-        <Box key={index} sx={{ 
-          mb: 2,
-          p: 2,
-          border: '1px solid #e0e0e0',
-          borderRadius: 2,
-          backgroundColor: '#f8f9fa',
-          '&:last-child': { mb: 0 }
-        }}>
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 1, 
-            mb: 1,
-            flexWrap: 'wrap',
-            alignItems: 'center'
-          }}>
-            <TextField
-              fullWidth
-              label={`Questão ${index + 1}`}
-              value={question.text}
-              onChange={(e) => {
-                const newQuestions = [...newPost.questions];
-                newQuestions[index].text = e.target.value;
-                setNewPost({ ...newPost, questions: newQuestions });
-              }}
-              variant="outlined"
-              InputProps={{
-                sx: { 
-                  borderRadius: 1,
-                  backgroundColor: 'white'
-                }
-              }}
-              sx={{ flex: 1, minWidth: 250 }}
-            />
-            
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant={question.type === 'aberta' ? 'contained' : 'outlined'}
-                onClick={() => {
-                  const newQuestions = [...newPost.questions];
-                  newQuestions[index].type = 'aberta';
-                  setNewPost({ ...newPost, questions: newQuestions });
-                }}
-                sx={{
-                  minWidth: 100,
-                  background: question.type === 'aberta' ? '#1976d2' : 'transparent',
-                  color: question.type === 'aberta' ? 'white' : '#1976d2',
-                  borderColor: '#1976d2'
-                }}
-              >
-                Aberta
-              </Button>
-              <Button
-                variant={question.type === 'objetiva' ? 'contained' : 'outlined'}
-                onClick={() => {
-                  const newQuestions = [...newPost.questions];
-                  newQuestions[index] = {
-                    ...question,
-                    type: 'objetiva',
-                    options: ['', '']
-                  };
-                  setNewPost({ ...newPost, questions: newQuestions });
-                }}
-                sx={{
-                  minWidth: 100,
-                  background: question.type === 'objetiva' ? '#2e7d32' : 'transparent',
-                  color: question.type === 'objetiva' ? 'white' : '#2e7d32',
-                  borderColor: '#2e7d32'
-                }}
-              >
-                Objetiva
-              </Button>
-            </Box>
-          </Box>
-
-          {question.type === 'objetiva' && (
-            <Box sx={{ ml: 2, mt: 2 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1, color: '#636e72' }}>
-                Opções:
-              </Typography>
-              
-              {question.options.map((option, optionIndex) => (
-                <Box key={optionIndex} sx={{ 
-                  display: 'flex', 
-                  gap: 1, 
-                  mb: 1,
-                  alignItems: 'center'
-                }}>
-                  <Box sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    backgroundColor: '#1976d2',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 500,
-                    flexShrink: 0
-                  }}>
-                    {String.fromCharCode(65 + optionIndex)}
-                  </Box>
-                  
-                  <TextField
-                    fullWidth
-                    value={option}
-                    onChange={(e) => {
-                      const newQuestions = [...newPost.questions];
-                      newQuestions[index].options[optionIndex] = e.target.value;
-                      setNewPost({ ...newPost, questions: newQuestions });
-                    }}
-                    variant="outlined"
-                    size="small"
-                    placeholder={`Opção ${optionIndex + 1}`}
-                    InputProps={{
-                      sx: { 
-                        borderRadius: 1,
+                  {postType === "texto" && (
+                    <Box sx={{ mb: 3 }}>
+                      <Box sx={{
+                        maxHeight: '40vh',
+                        overflowY: 'auto',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 2,
+                        p: 1,
+                        mb: 2,
                         backgroundColor: 'white'
-                      }
-                    }}
-                  />
-                  
-                  {question.options.length > 1 && (
-                    <IconButton
-                      onClick={() => {
-                        const newQuestions = [...newPost.questions];
-                        newQuestions[index].options.splice(optionIndex, 1);
-                        setNewPost({ ...newPost, questions: newQuestions });
-                      }}
-                      sx={{ color: '#ff4444' }}
-                    >
-                      <Close fontSize="small" />
-                    </IconButton>
+                      }}>
+                        {newPost.questions.map((question, index) => (
+                          <Box key={index} sx={{
+                            mb: 2,
+                            p: 2,
+                            border: '1px solid #e0e0e0',
+                            borderRadius: 2,
+                            backgroundColor: '#f8f9fa',
+                            '&:last-child': { mb: 0 }
+                          }}>
+                            <Box sx={{
+                              display: 'flex',
+                              gap: 1,
+                              mb: 1,
+                              flexWrap: 'wrap',
+                              alignItems: 'center'
+                            }}>
+                              <TextField
+                                fullWidth
+                                label={`Questão ${index + 1}`}
+                                value={question.text}
+                                onChange={(e) => {
+                                  const newQuestions = [...newPost.questions];
+                                  newQuestions[index].text = e.target.value;
+                                  setNewPost({ ...newPost, questions: newQuestions });
+                                }}
+                                variant="outlined"
+                                InputProps={{
+                                  sx: {
+                                    borderRadius: 1,
+                                    backgroundColor: 'white'
+                                  }
+                                }}
+                                sx={{ flex: 1, minWidth: 250 }}
+                              />
+
+                              <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button
+                                  variant={question.type === 'aberta' ? 'contained' : 'outlined'}
+                                  onClick={() => {
+                                    const newQuestions = [...newPost.questions];
+                                    newQuestions[index].type = 'aberta';
+                                    setNewPost({ ...newPost, questions: newQuestions });
+                                  }}
+                                  sx={{
+                                    minWidth: 100,
+                                    background: question.type === 'aberta' ? '#1976d2' : 'transparent',
+                                    color: question.type === 'aberta' ? 'white' : '#1976d2',
+                                    borderColor: '#1976d2'
+                                  }}
+                                >
+                                  Aberta
+                                </Button>
+                                <Button
+                                  variant={question.type === 'objetiva' ? 'contained' : 'outlined'}
+                                  onClick={() => {
+                                    const newQuestions = [...newPost.questions];
+                                    newQuestions[index] = {
+                                      ...question,
+                                      type: 'objetiva',
+                                      options: ['', '']
+                                    };
+                                    setNewPost({ ...newPost, questions: newQuestions });
+                                  }}
+                                  sx={{
+                                    minWidth: 100,
+                                    background: question.type === 'objetiva' ? '#2e7d32' : 'transparent',
+                                    color: question.type === 'objetiva' ? 'white' : '#2e7d32',
+                                    borderColor: '#2e7d32'
+                                  }}
+                                >
+                                  Objetiva
+                                </Button>
+                              </Box>
+                            </Box>
+
+                            {question.type === 'objetiva' && (
+                              <Box sx={{ ml: 2, mt: 2 }}>
+                                <Typography variant="subtitle2" sx={{ mb: 1, color: '#636e72' }}>
+                                  Opções:
+                                </Typography>
+
+                                {question.options.map((option, optionIndex) => (
+                                  <Box key={optionIndex} sx={{
+                                    display: 'flex',
+                                    gap: 1,
+                                    mb: 1,
+                                    alignItems: 'center'
+                                  }}>
+                                    <Box sx={{
+                                      width: 32,
+                                      height: 32,
+                                      borderRadius: '50%',
+                                      backgroundColor: '#1976d2',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: 'white',
+                                      fontWeight: 500,
+                                      flexShrink: 0
+                                    }}>
+                                      {String.fromCharCode(65 + optionIndex)}
+                                    </Box>
+
+                                    <TextField
+                                      fullWidth
+                                      value={option}
+                                      onChange={(e) => {
+                                        const newQuestions = [...newPost.questions];
+                                        newQuestions[index].options[optionIndex] = e.target.value;
+                                        setNewPost({ ...newPost, questions: newQuestions });
+                                      }}
+                                      variant="outlined"
+                                      size="small"
+                                      placeholder={`Opção ${optionIndex + 1}`}
+                                      InputProps={{
+                                        sx: {
+                                          borderRadius: 1,
+                                          backgroundColor: 'white'
+                                        }
+                                      }}
+                                    />
+
+                                    {question.options.length > 1 && (
+                                      <IconButton
+                                        onClick={() => {
+                                          const newQuestions = [...newPost.questions];
+                                          newQuestions[index].options.splice(optionIndex, 1);
+                                          setNewPost({ ...newPost, questions: newQuestions });
+                                        }}
+                                        sx={{ color: '#ff4444' }}
+                                      >
+                                        <Close fontSize="small" />
+                                      </IconButton>
+                                    )}
+                                  </Box>
+                                ))}
+
+                                <Button
+                                  variant="outlined"
+                                  onClick={() => {
+                                    const newQuestions = [...newPost.questions];
+                                    newQuestions[index].options.push('');
+                                    setNewPost({ ...newPost, questions: newQuestions });
+                                  }}
+                                  sx={{
+                                    mt: 1,
+                                    color: '#1976d2',
+                                    borderColor: '#1976d2',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(25, 118, 210, 0.04)'
+                                    }
+                                  }}
+                                >
+                                  Adicionar Opção
+                                </Button>
+                              </Box>
+                            )}
+
+                            {index > 0 && (
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                onClick={() => {
+                                  const newQuestions = [...newPost.questions];
+                                  newQuestions.splice(index, 1);
+                                  setNewPost({ ...newPost, questions: newQuestions });
+                                }}
+                                startIcon={<Close fontSize="small" />}
+                                sx={{
+                                  mt: 1,
+                                  borderColor: '#ff4444',
+                                  color: '#ff4444',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(255, 68, 68, 0.04)'
+                                  }
+                                }}
+                              >
+                                Remover Questão
+                              </Button>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+
+                      <Button
+                        variant="contained"
+                        onClick={() => setNewPost({
+                          ...newPost,
+                          questions: [...newPost.questions, {
+                            type: 'aberta',
+                            text: '',
+                            options: []
+                          }]
+                        })}
+                        sx={{
+                          width: '100%',
+                          background: 'linear-gradient(135deg, #1976d2, #2e7d32)',
+                          color: 'white',
+                          '&:hover': {
+                            opacity: 0.9
+                          }
+                        }}
+                      >
+                        Adicionar Nova Questão
+                      </Button>
+                    </Box>
                   )}
-                </Box>
-              ))}
-              
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  const newQuestions = [...newPost.questions];
-                  newQuestions[index].options.push('');
-                  setNewPost({ ...newPost, questions: newQuestions });
-                }}
-                sx={{ 
-                  mt: 1,
-                  color: '#1976d2',
-                  borderColor: '#1976d2',
-                  '&:hover': {
-                    backgroundColor: 'rgba(25, 118, 210, 0.04)'
-                  }
-                }}
-              >
-                Adicionar Opção
-              </Button>
-            </Box>
-          )}
-
-          {index > 0 && (
-            <Button
-              variant="outlined"
-              color="error"
-              size="small"
-              onClick={() => {
-                const newQuestions = [...newPost.questions];
-                newQuestions.splice(index, 1);
-                setNewPost({ ...newPost, questions: newQuestions });
-              }}
-              startIcon={<Close fontSize="small" />}
-              sx={{ 
-                mt: 1,
-                borderColor: '#ff4444',
-                color: '#ff4444',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 68, 68, 0.04)'
-                }
-              }}
-            >
-              Remover Questão
-            </Button>
-          )}
-        </Box>
-      ))}
-    </Box>
-
-    <Button
-      variant="contained"
-      onClick={() => setNewPost({
-        ...newPost,
-        questions: [...newPost.questions, {
-          type: 'aberta',
-          text: '',
-          options: []
-        }]
-      })}
-      sx={{
-        width: '100%',
-        background: 'linear-gradient(135deg, #1976d2, #2e7d32)',
-        color: 'white',
-        '&:hover': {
-          opacity: 0.9
-        }
-      }}
-    >
-      Adicionar Nova Questão
-    </Button>
-  </Box>
-)}
                   <Autocomplete
                     multiple
                     freeSolo
