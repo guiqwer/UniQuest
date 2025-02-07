@@ -3,7 +3,7 @@ import Login from "./screens/Login";
 import SignUp from "./screens/SignUp";
 import ForgotPassword from "./screens/ForgotPassword";
 import NavBar from "./screens/NavBar";
-import Feed from "./screens/components/feed/Feed";
+import Feed from "./screens/Feed";
 import PinInput from "./screens/ResetCode";
 import Profile from "./screens/components/Profile";
 
