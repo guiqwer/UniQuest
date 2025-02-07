@@ -5,12 +5,11 @@ import ForgotPassword from "./screens/ForgotPassword";
 import NavBar from "./screens/NavBar";
 import Feed from "./screens/Feed";
 import PinInput from "./screens/ResetCode";
-import Profile from "./screens/Profile";
-import Proof from "./screens/UploadProof";
-import ProfileInteractions from "./screens/ProfileInteractions";
-
+import Profile from "./screens/components/Profile";
+import Proof
+ from "./screens/UploadProof";
 const App = () => {
-  const [screen, setScreen] = useState("interactions");
+  const [screen, setScreen] = useState("navbar");
 
   const navigate = (page) => {
     setScreen(page);

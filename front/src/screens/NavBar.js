@@ -2,6 +2,8 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import { AppBar, Box, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Button, Select, FormControl, InputLabel, Chip } from "@mui/material";
 import { AccountCircle, Search, Tune } from "@mui/icons-material";
+import ProfileModal from './ProfileModal';
+import { useState } from 'react';
 
 const SearchContainer = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -54,6 +56,7 @@ const FiltersContainer = styled('div')(({ theme }) => ({
 
 export default function NavBar({ navigate }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [openProfile, setOpenProfile] = useState(false);
   const [filterAnchorEl, setFilterAnchorEl] = React.useState(null);
   const [professor, setProfessor] = React.useState('');
   const [disciplina, setDisciplina] = React.useState('');
@@ -62,6 +65,15 @@ export default function NavBar({ navigate }) {
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  
+  const handleOpenProfile = () => {
+    setOpenProfile(true);
+    handleMenuClose();
+  };
+
+  const handleCloseProfile = () => {
+    setOpenProfile(false);
+  };
 
   const handleFilterMenuOpen = (event) => setFilterAnchorEl(event.currentTarget);
   const handleFilterMenuClose = () => setFilterAnchorEl(null);
@@ -107,6 +119,7 @@ export default function NavBar({ navigate }) {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
+            onClick={() => navigate("feed")}
           >
             UniQuest
           </Typography>
@@ -191,7 +204,7 @@ export default function NavBar({ navigate }) {
             }
           }}
         >
-          <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}>
+          <MenuItem onClick={handleOpenProfile} sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}>
             Perfil
           </MenuItem>
           <MenuItem 
@@ -206,6 +219,8 @@ export default function NavBar({ navigate }) {
           </MenuItem>
         </Menu>
         
+        <ProfileModal openModal={openProfile} handleCloseModal={handleCloseProfile} />
+
         <Menu
           anchorEl={filterAnchorEl}
           open={Boolean(filterAnchorEl)}
