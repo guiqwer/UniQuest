@@ -15,7 +15,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
-
+import { axiosMultipart, axiosInstance } from "../axios";
+import { Newspaper } from "lucide-react";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PostCard = styled(Card)(({ theme }) => ({
@@ -31,11 +32,12 @@ const PostCard = styled(Card)(({ theme }) => ({
 }));
 
 const Feed = () => {
+  const [error, setError] = useState(null);
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({
     title: "",
     image: "",
-    caption: "",
+    description: "",
     tags: [],
     questions: [],
     file: null,
@@ -102,7 +104,7 @@ const Feed = () => {
   const handleAddPost = () => {
     const hasContent =
       newPost.title ||
-      newPost.caption ||
+      newPost.description ||
       newPost.image ||
       newPost.file ||
       (newPost.questions && newPost.questions.length > 0);
@@ -124,7 +126,7 @@ const Feed = () => {
       setNewPost({
         title: "",
         image: "",
-        caption: "",
+        description: "",
         tags: [],
         questions: [],
         file: null,
@@ -297,6 +299,74 @@ const Feed = () => {
     </Box>
   );
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewPost({ ...newPost, image: file }); // Armazena o arquivo original no estado
+  
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewPost((prev) => ({ ...prev, preview: reader.result })); // Apenas para pré-visualização
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitPost = async (event) => {
+          event.preventDefault();  
+          console.log(postType, newPost.title, newPost.description, newPost.tags, newPost.image)
+          try {
+            if (postType === "pdf") {
+              const response = await axiosMultipart.post("/exam/upload/pdf", {
+                title: newPost.title,
+                description: newPost.description,
+                tags: newPost.tags,
+                file: newPost.file
+            });}
+            if (postType === "imagem") {
+              const response = await axiosMultipart.post("/exam/upload/image", {
+                title: newPost.title,
+                description: newPost.description,
+                tags: newPost.tags,
+                file: newPost.image
+            });}
+            if (postType === "texto") {
+              const formattedQuestions = newPost.questions.map((question, index) => ({
+                question: index + 1,
+                statement: question.text,
+                options: question.options?.reduce((acc, option, i) => {
+                  acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
+                  return acc;
+                }, {})
+              }));
+              
+              const finalPayload = {
+                text: formattedQuestions
+              };
+              
+              console.log(finalPayload);
+              const response = await axiosInstance.post("/exam/upload/text", {
+                title: newPost.title,
+                description: newPost.description,
+                tags: newPost.tags,
+                text: finalPayload.text
+            });}
+          } catch (error) {
+              setError("Erro ao enviar a prova. Tente novamente.");
+              console.error("Erro no cadastro:", error);
+          }
+          setNewPost({
+            title: "",
+            image: "",
+            description: "",
+            tags: [],
+            questions: [],
+            file: null,
+            fileURL: ""
+          });
+          setOpenNewPostModal(false);
+          setPostType(null);
+      };
   return (
     <Box
       sx={{
@@ -363,7 +433,7 @@ const Feed = () => {
                 {renderPostContent(post)}
 
                 <Typography variant="body1" sx={{ mb: 2, color: "#2d3436" }}>
-                  {post.caption}
+                  {post.description}
                 </Typography>
 
                 <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
@@ -645,11 +715,11 @@ const Feed = () => {
 
                   <TextField
                     fullWidth
-                    label="Legenda"
+                    label="Descrição"
                     multiline
                     rows={2}
-                    value={newPost.caption}
-                    onChange={(e) => setNewPost({ ...newPost, caption: e.target.value })}
+                    value={newPost.description}
+                    onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
                     sx={{ mb: 3 }}
                     variant="outlined"
                     InputProps={{
@@ -673,21 +743,12 @@ const Feed = () => {
                         style={{ display: 'none' }}
                         id="upload-image"
                         type="file"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setNewPost({ ...newPost, image: reader.result });
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
+                        onChange={handleImageUpload}
                       />
                       <label htmlFor="upload-image">
-                        {newPost.image ? (
+                        {newPost.preview ? (
                           <img
-                            src={newPost.image}
+                            src={newPost.preview}
                             alt="Preview"
                             style={{
                               width: '100%',
@@ -1010,23 +1071,28 @@ const Feed = () => {
                     )}
                     sx={{ mb: 3 }}
                     renderTags={(value, getTagProps) =>
-                      value.map((option, index) => (
-                        <Chip
-                          {...getTagProps({ index })}
-                          label={option}
-                          size="small"
-                          sx={{
-                            m: 0.5,
-                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                            color: '#2e7d32',
-                            '& .MuiChip-deleteIcon': {
-                              fontSize: 16,
-                              color: '#2e7d32'
-                            }
-                          }}
-                        />
-                      ))
-                    }
+                      value.map((option, index) => {
+                        const { key, ...tagProps } = getTagProps({ index }); // Extrai a key antes de espalhar as props
+                    
+                        return (
+                          <Chip
+                            key={key} // ✅ Passa a key diretamente
+                            {...tagProps} // ✅ Espalha o restante das props corretamente
+                            label={option}
+                            size="small"
+                            sx={{
+                              m: 0.5,
+                              backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                              color: '#2e7d32',
+                              '& .MuiChip-deleteIcon': {
+                                fontSize: 16,
+                                color: '#2e7d32'
+                              }
+                            }}
+                          />
+                        );
+                      })
+                    }                    
                     componentsProps={{
                       popper: {
                         sx: {
@@ -1072,10 +1138,10 @@ const Feed = () => {
                     <Button
                       fullWidth
                       variant="contained"
-                      onClick={handleAddPost}
+                      onClick={handleSubmitPost}
                       disabled={
                         !newPost.title &&
-                        !newPost.caption &&
+                        !newPost.description &&
                         !newPost.image &&
                         !newPost.file &&
                         newPost.questions.length === 0
