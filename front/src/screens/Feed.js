@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   FavoriteBorder, Favorite, AddPhotoAlternate,
-  Comment, Close, MoreVert
+  Comment, Close, MoreVert, Check, Clear
 } from "@mui/icons-material";
 
 import { styled } from "@mui/material/styles";
@@ -71,7 +71,7 @@ const Feed = () => {
         .catch((error) => {
             console.error("Erro ao buscar os dados:", error);
         });
-  
+
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
     setAnchorEl(null);
@@ -122,7 +122,57 @@ const Feed = () => {
     );
   };
 
+  const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        const updatedQuestions = post.questions.map((q, qIndex) => {
+          if (qIndex === questionIndex) {
+            return {
+              ...q,
+              userAnswer: selectedOptionIndex,
+              showFeedback: true
+            };
+          }
+          return q;
+        });
+        return { ...post, questions: updatedQuestions };
+      }
+      return post;
+    }));
+  };
+
+  const handleOpenAnswer = (postId, questionIndex, answer) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        const updatedQuestions = post.questions.map((q, qIndex) => {
+          if (qIndex === questionIndex) {
+            return { ...q, userAnswer: answer };
+          }
+          return q;
+        });
+        return { ...post, questions: updatedQuestions };
+      }
+      return post;
+    }));
+  };
+
+
+
+  const isPostValid = () => {
+    const hasInvalidQuestions = newPost.questions.some(question =>
+      question.type === 'objetiva' && question.correctOption === null
+    );
+    return !hasInvalidQuestions;
+  };
+
   const handleAddPost = () => {
+    if (!isPostValid()) {
+      setError("Por favor, defina a resposta correta para todas as questões objetivas.");
+      return;
+    }
+
+    setError(null); // Limpa o erro
+
     const hasContent =
       newPost.title ||
       newPost.description ||
@@ -251,39 +301,72 @@ const Feed = () => {
 
             {question.type === 'objetiva' && (
               <Box sx={{ ml: 1 }}>
-                {question.options.map((option, optionIndex) => (
-                  <Box key={optionIndex} sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    mb: 1,
-                    p: 1,
-                    borderRadius: 1,
-                    '&:hover': {
-                      backgroundColor: 'rgba(0,0,0,0.03)'
-                    }
-                  }}>
-                    <Box sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '50%',
-                      backgroundColor: '#1976d2',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 500,
-                      flexShrink: 0,
-                      mr: 1.5
-                    }}>
-                      {String.fromCharCode(65 + optionIndex)}
+                {question.options.map((option, optionIndex) => {
+                  const isCorrect = optionIndex === question.correctOption;
+                  const isSelected = optionIndex === question.userAnswer;
+
+                  return (
+                    <Box
+                      key={optionIndex}
+                      onClick={() => handleObjectiveAnswer(post.id, index, optionIndex)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 1,
+                        p: 1,
+                        borderRadius: 1,
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderColor: isSelected
+                          ? (isCorrect ? '#4caf50' : '#ef5350')
+                          : '#e0e0e0',
+                        backgroundColor: isSelected
+                          ? (isCorrect ? '#e8f5e9' : '#ffebee')
+                          : 'transparent',
+                        '&:hover': {
+                          backgroundColor: !question.showFeedback
+                            ? 'rgba(0,0,0,0.03)'
+                            : undefined
+                        }
+                      }}
+                    >
+                      <Box sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        backgroundColor: isSelected
+                          ? (isCorrect ? '#4caf50' : '#ef5350')
+                          : '#1976d2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 500,
+                        flexShrink: 0,
+                        mr: 1.5
+                      }}>
+                        {String.fromCharCode(65 + optionIndex)}
+                      </Box>
+                      <Typography variant="body2" sx={{ color: '#2d3436' }}>
+                        {option}
+                        {question.showFeedback && isCorrect && (
+                          <span style={{ marginLeft: 8, color: '#4caf50' }}>
+                            ✓ Resposta Correta
+                          </span>
+                        )}
+                        {isSelected && !isCorrect && (
+                          <span style={{ marginLeft: 8, color: '#ef5350' }}>
+                            ✗ Sua Resposta
+                          </span>
+                        )}
+                      </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ color: '#2d3436' }}>
-                      {option}
-                    </Typography>
-                  </Box>
-                ))}
+                  );
+                })}
               </Box>
             )}
+
+
           </Box>
         ));
 
@@ -553,9 +636,9 @@ const Feed = () => {
           }
         }}
       >
-        <MenuItem 
+        <MenuItem
           onClick={() => handleDeletePost(selectedPostId)}
-          sx={{ 
+          sx={{
             color: '#ff4444',
             '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.08)' }
           }}
@@ -988,11 +1071,33 @@ const Feed = () => {
                                       }}
                                     />
 
+                                    <Button
+                                      variant={question.correctOption === optionIndex ? 'contained' : 'outlined'}
+                                      onClick={() => {
+                                        const newQuestions = [...newPost.questions];
+                                        newQuestions[index].correctOption = optionIndex;
+                                        setNewPost({ ...newPost, questions: newQuestions });
+                                      }}
+                                      sx={{
+                                        ml: 1,
+                                        backgroundColor: question.correctOption === optionIndex ? '#4caf50' : 'transparent',
+                                        color: question.correctOption === optionIndex ? 'white' : '#1976d2',
+                                        '&:hover': {
+                                          backgroundColor: question.correctOption === optionIndex ? '#43a047' : 'rgba(25, 118, 210, 0.04)'
+                                        }
+                                      }}
+                                    >
+                                      Correta
+                                    </Button>
+
                                     {question.options.length > 1 && (
                                       <IconButton
                                         onClick={() => {
                                           const newQuestions = [...newPost.questions];
                                           newQuestions[index].options.splice(optionIndex, 1);
+                                          if (question.correctOption === optionIndex) {
+                                            newQuestions[index].correctOption = null; // Remove a resposta correta se a opção for excluída
+                                          }
                                           setNewPost({ ...newPost, questions: newQuestions });
                                         }}
                                         sx={{ color: '#ff4444' }}
@@ -1147,7 +1252,7 @@ const Feed = () => {
                         borderColor: '#1976d2',
                         color: '#1976d2',
                         '&:hover': {
-                          backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                          backgroundColor: 'rgba(25, 118, 210, 0',
                           borderColor: '#2e7d32'
                         }
                       }}
