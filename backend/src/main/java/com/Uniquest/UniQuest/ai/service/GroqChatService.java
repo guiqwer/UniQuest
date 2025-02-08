@@ -66,7 +66,7 @@ public class GroqChatService {
                 "C": "Texto C",
                 "D": "Texto D"
               },
-              "correctAnswer": {"D": "Texto D"}
+              "correctAnswer": "A"
               ...
           },...
         ]
