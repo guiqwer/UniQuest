@@ -134,7 +134,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                             {userData.areaOfInterest || "Não informado."}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: '#333', mb: 2 }}>
-                            📘 Disciplina favoriteida:
+                            📘 Disciplina favorita:
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#333', mb: 2 }}>
                             {userData.favoriteSubject || "Não informado."}
@@ -168,7 +168,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                         <MenuItem value="Eng. Ambiental">Eng. Ambiental</MenuItem>
                         <MenuItem value="Ciências Sociais">Ciências Sociais</MenuItem>
                     </TextField>
-                    <TextField select fullWidth label="Disciplina favoriteida" variant="outlined" sx={{ mb: 2 }} value={editData.favoriteSubject} onChange={(e) => setEditData({ ...editData, favoriteSubject: e.target.value })}>
+                    <TextField select fullWidth label="Disciplina favorita" variant="outlined" sx={{ mb: 2 }} value={editData.favoriteSubject} onChange={(e) => setEditData({ ...editData, favoriteSubject: e.target.value })}>
                         <MenuItem value="Arq. Computadores">Arq. Computadores</MenuItem>
                         <MenuItem value="Probabilidade e Estatística">Probabilidade e Estatística</MenuItem>
                         <MenuItem value="Programação Orientada a Objetos">Programação Orientada a Objetos</MenuItem>
