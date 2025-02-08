@@ -180,8 +180,6 @@ public class ExamService {
     // Essa função irá adicionar a resposta correta de questões objetivas e discursivas da maneira que o front espera.
     // Além de cadastrar as respostas para cada tipo de questão.
     private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
-        Question question;
-
         if (dto.type() == null || "OBJECTIVE".equalsIgnoreCase(dto.type())) {
             ObjectiveQuestion objQuestion = new ObjectiveQuestion();
 
@@ -189,7 +187,12 @@ public class ExamService {
             if (dto.options() == null) {
                 throw new IllegalArgumentException("Opções não podem ser nulas para questões objetivas");
             }
-            objQuestion.setOptions(List.copyOf(dto.options().keySet()));
+
+            String optionsString = dto.options().entrySet().stream()
+                    .map(entry -> entry.getKey() + " : " + entry.getValue())
+                    .collect(Collectors.joining(", "));
+            List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
+
 
             // Valida se o correctAnswer é um Map
             if (!(dto.correctAnswer() instanceof Map<?, ?>)) {
@@ -198,7 +201,13 @@ public class ExamService {
             Map<String, String> correctAnswerMap = (Map<String, String>) dto.correctAnswer();
             objQuestion.setCorrectAnswer(List.copyOf(correctAnswerMap.keySet()));
 
-            question = objQuestion;
+            objQuestion.setStatement(dto.statement());
+            objQuestion.setOrder(dto.order());
+            objQuestion.setExamText(examText);
+            objQuestion.setOptions(optionsList);
+
+            return objQuestion;
+
 
         } else if ("DISCURSIVE".equalsIgnoreCase(dto.type())) {
             DiscursiveQuestion discursiveQuestion = new DiscursiveQuestion();
@@ -210,17 +219,14 @@ public class ExamService {
             String expectedAnswer = (String) dto.correctAnswer();
             discursiveQuestion.setExpectedAnswer(expectedAnswer != null ? expectedAnswer : "");
 
-            question = discursiveQuestion;
+            discursiveQuestion.setStatement(dto.statement());
+            discursiveQuestion.setOrder(dto.order());
+            discursiveQuestion.setExamText(examText);
+            return discursiveQuestion;
 
         } else {
             throw new IllegalArgumentException("Tipo de questão inválido: " + dto.type());
         }
-
-        question.setStatement(dto.statement());
-        question.setOrder(dto.order());
-        question.setExamText(examText);
-
-        return question;
     }
 
     public Optional<Exam> getTextExam(Long id) {
