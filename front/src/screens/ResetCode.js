@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Paper, Box } from '@mui/material';
 import { Lock } from '@mui/icons-material';
-import axiosInstance from '../axios';
+import { axiosInstance } from '../axios';
 
 const PinInput = ({ navigate }) => {
   const [pin, setPin] = useState(['', '', '', '', '', '']);

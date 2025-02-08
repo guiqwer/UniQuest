@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Paper, Link, Box } from "@mui/material";
-import axiosInstance from "../axios";
+import { axiosInstance } from '../axios';
 
 const SignUp = ({ navigate }) => {
     const [name, setName] = useState("");
