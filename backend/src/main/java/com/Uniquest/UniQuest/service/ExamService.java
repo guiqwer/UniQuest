@@ -14,18 +14,14 @@ import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import com.Uniquest.UniQuest.repositories.ExamCustomRepository;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 
 @Service
@@ -123,18 +119,50 @@ public class ExamService {
 
         return examRepository.save(examText);
     }
-
-    public List<ExamResponseDTO> convertExamsToDTOs(List<Exam> exams) {
+    private String getTypeExam(Exam exam){
+        String type = "";
+        if (exam instanceof ExamText){
+            type = "text";
+        } else if (exam instanceof ExamPdf){
+            type = "pdf";
+        } else if (exam instanceof ExamImage){
+            type = "image";
+        }
+        return type;
+    }
+    public List<ExamListResponseDTO> convertExamsToDTOs(List<Exam> exams) {
         return exams.stream().map(exam -> {
             List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
-            return new ExamResponseDTO(
+            String typeExam = getTypeExam(exam);
+
+            // Define o conteúdo a ser retornado no campo data
+            Object examData = null;
+            if (exam instanceof ExamText) {
+                // Aqui você pode optar por retornar o objeto completo ou apenas o conteúdo do texto
+                examData = exam; // ou ((ExamText) exam).getTextContent();
+            } else if (exam instanceof ExamImage) {
+                ExamImage examImage = (ExamImage) exam;
+                if (examImage.getImageData() != null) {
+                    // Converte os dados da imagem para base64
+                    examData = Base64.getEncoder().encodeToString(examImage.getImageData());
+                }
+            } else if (exam instanceof ExamPdf) {
+                ExamPdf examPdf = (ExamPdf) exam;
+                if (examPdf.getPdfData() != null) {
+                    // Converte os dados do PDF para base64
+                    examData = Base64.getEncoder().encodeToString(examPdf.getPdfData());
+                }
+            }
+            return new ExamListResponseDTO(
                     exam.getId(),
                     exam.getTitle(),
                     exam.getDescription(),
                     exam.getTags(),
                     exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Adicionando o nome do autor
                     exam.getLikesCount(),
-                    comments
+                    comments,
+                    typeExam,
+                    examData
             );
         }).collect(Collectors.toList());
     }
@@ -250,7 +278,7 @@ public class ExamService {
         return examRepository.findByAuthorId(userId);
     }
 
-
+    
     public List<Exam> getAllExamsWithFilters(ExamListRequestDTO request) {
         return examCustomRepository.findByFilters(
                 request.getTitle(),

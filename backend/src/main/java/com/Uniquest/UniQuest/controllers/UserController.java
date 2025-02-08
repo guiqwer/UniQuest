@@ -146,29 +146,29 @@ public class UserController {
     }
 
     @GetMapping("/my-exams/{userId}")
-    public ResponseEntity<List<ExamResponseDTO>> getUserExams(@PathVariable String userId) {
+    public ResponseEntity<List<ExamListResponseDTO>> getUserExams(@PathVariable String userId) {
         List<Exam> exams = examService.getExamsByUser(userId); // Busca as provas do usuário
 
-        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
 
         return ResponseEntity.ok(examDTOs);
     }
 
     @GetMapping("my-liked-exams/{userId}")
-    public ResponseEntity<List<ExamResponseDTO>> getLikedExams(@PathVariable String userId) {
+    public ResponseEntity<List<ExamListResponseDTO>> getLikedExams(@PathVariable String userId) {
         List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
 
-        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams);
 
         return ResponseEntity.ok(examDTOs);
 
     }
 
     @GetMapping("/my-comments-exams/{userId}")
-    public ResponseEntity<List<ExamResponseDTO>> getCommentedExams(@PathVariable String userId) {
+    public ResponseEntity<List<ExamListResponseDTO>> getCommentedExams(@PathVariable String userId) {
         List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userId);
 
-        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams);
 
         return ResponseEntity.ok(examDTOs);
     }

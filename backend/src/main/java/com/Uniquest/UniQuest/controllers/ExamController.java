@@ -114,9 +114,9 @@ public class ExamController {
     }
 
     @PostMapping("/list")
-    public ResponseEntity<List<ExamResponseDTO>> getAllExams(@RequestBody ExamListRequestDTO request) {
+    public ResponseEntity<List<ExamListResponseDTO>> getAllExams(@RequestBody ExamListRequestDTO request) {
         List<Exam> exams = examService.getAllExamsWithFilters(request);
-        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
         return ResponseEntity.ok(examDTOs);
     }
 
