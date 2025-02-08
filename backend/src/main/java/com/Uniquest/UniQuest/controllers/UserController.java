@@ -13,6 +13,7 @@ import com.Uniquest.UniQuest.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,25 +40,13 @@ public class UserController {
 
 
     @GetMapping
-    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
-        // Extrai o token do cabeçalho da requisição
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).body("Token não fornecido ou inválido");
-        }
-        String token = authHeader.replace("Bearer ", "");
-        // Valida o token e extrai o email do usuário
-        String userEmail = tokenService.validateToken(token);
-        if (userEmail == null) {
-            return ResponseEntity.status(401).body("Token inválido ou expirado");
-        }
-        // Busca o usuário no banco de dados pelo email
-        Optional<User> userOptional = repository.findByEmail(userEmail);
+    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal User userPrincipal) {
+        Optional<User> userOptional = repository.findById(userPrincipal.getId());
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(404).body("Usuário não encontrado");
         }
         User user = userOptional.get();
-        // Cria um Map para retornar apenas as informações necessárias
+
         Map<String, String> userInfo = new HashMap<>();
         userInfo.put("id", user.getId());
         userInfo.put("name", user.getName());
@@ -84,27 +73,27 @@ public class UserController {
     }
 
 
-    @GetMapping("/profile/{id}")
-    public UserProfileDTO getUserById(@PathVariable String id) {
-        return userService.getUserById(id);
+    @GetMapping("/profile")
+    public UserProfileDTO getUserById(@AuthenticationPrincipal User userPrincipal) {
+        return userService.getUserById(userPrincipal.getId());
     }
 
     //Endpoint para editar o perfil do usuário
-    @PutMapping("/edit-profile/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserEditProfileDTO updateUserProfile) {
-        User updatedUser = userService.updateUserProfile(id, updateUserProfile);
+    @PutMapping("/edit-profile")
+    public ResponseEntity<User> updateUser(@AuthenticationPrincipal User userPrincipal, @RequestBody UserEditProfileDTO updateUserProfile) {
+        User updatedUser = userService.updateUserProfile(userPrincipal.getId(), updateUserProfile);
         return ResponseEntity.ok(updatedUser);
     }
 
     // Endpoint para Adicionar o avatar do usuário
-    @PutMapping("/avatar/{id}")
+    @PutMapping("/avatar")
     public ResponseEntity<User> updateUserAvatar(
-            @PathVariable String id,
+            @AuthenticationPrincipal User userPrincipal,
             @RequestParam("avatarFile") MultipartFile avatarFile
     ) {
         try {
             UserProfileAvatarDTO dto = new UserProfileAvatarDTO(avatarFile);
-            User updatedUser = userService.updateUserAvatar(id, dto);
+            User updatedUser = userService.updateUserAvatar(userPrincipal.getId(), dto);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
@@ -112,10 +101,10 @@ public class UserController {
     }
 
     // Endpoint para deletar o avatar do usuário
-    @DeleteMapping("/avatar/{id}")
-    public ResponseEntity<Void> deleteUserAvatar(@PathVariable String id) {
+    @DeleteMapping("/avatar")
+    public ResponseEntity<Void> deleteUserAvatar(@AuthenticationPrincipal User userPrincipal) {
         try {
-            userService.deleteUserAvatar(id);
+            userService.deleteUserAvatar(userPrincipal.getId());
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -145,18 +134,18 @@ public class UserController {
         return ResponseEntity.badRequest().body("Código inválido ou expirado.");
     }
 
-    @GetMapping("/my-exams/{userId}")
-    public ResponseEntity<List<ExamListResponseDTO>> getUserExams(@PathVariable String userId) {
-        List<Exam> exams = examService.getExamsByUser(userId); // Busca as provas do usuário
+    @GetMapping("/my-exams")
+    public ResponseEntity<List<ExamListResponseDTO>> getUserExams(@AuthenticationPrincipal User userPrincipal) {
+        List<Exam> exams = examService.getExamsByUser(userPrincipal.getId()); // Busca as provas do usuário
 
         List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
 
         return ResponseEntity.ok(examDTOs);
     }
 
-    @GetMapping("my-liked-exams/{userId}")
-    public ResponseEntity<List<ExamListResponseDTO>> getLikedExams(@PathVariable String userId) {
-        List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
+    @GetMapping("my-liked-exams")
+    public ResponseEntity<List<ExamListResponseDTO>> getLikedExams(@AuthenticationPrincipal User userPrincipal) {
+        List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userPrincipal.getId());
 
         List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams);
 
@@ -164,9 +153,9 @@ public class UserController {
 
     }
 
-    @GetMapping("/my-comments-exams/{userId}")
-    public ResponseEntity<List<ExamListResponseDTO>> getCommentedExams(@PathVariable String userId) {
-        List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userId);
+    @GetMapping("/my-comments-exams")
+    public ResponseEntity<List<ExamListResponseDTO>> getCommentedExams(@AuthenticationPrincipal User userPrincipal) {
+        List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userPrincipal.getId());
 
         List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams);
 
