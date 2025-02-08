@@ -149,18 +149,69 @@ public class ExamService {
 //        return question;
 //    }
 
+//    private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
+//        Question question;
+//
+//        if ("OBJECTIVE".equalsIgnoreCase(dto.type())) {
+//            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+//            objQuestion.setOptions(dto.options() != null ? List.copyOf(dto.options().keySet()) : List.of());
+//            objQuestion.setCorrectAnswer(dto.correctAnswer() != null ? List.copyOf(dto.correctAnswer().keySet()) : List.of());
+//            question = objQuestion;
+//
+//
+//        } else if ("DISCURSIVE".equalsIgnoreCase(dto.type())) {
+//            DiscursiveQuestion discursiveQuestion = new DiscursiveQuestion();
+//            discursiveQuestion.setExpectedAnswer(dto.correctAnswer() != null ? dto.correctAnswer().values().stream().findFirst().orElse("") : "");
+//            question = discursiveQuestion;
+//        } else {
+//            throw new IllegalArgumentException("Tipo de questão inválido: " + dto.type());
+//        }
+//
+//        question.setStatement(dto.statement());
+//        question.setOrder(dto.order());
+//        question.setExamText(examText);
+//
+//        return question;
+//    }
+
+
+    // Essa definitivamente não é a melhor maneira de implementar isso mas vai ser o que temos por agora.
+    // Não mude essa função em hipótese alguma!!!!
+    // Essa função irá adicionar a resposta correta de questões objetivas e discursivas da maneira que o front espera.
+    // Além de cadastrar as respostas para cada tipo de questão.
     private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
         Question question;
 
         if ("OBJECTIVE".equalsIgnoreCase(dto.type())) {
             ObjectiveQuestion objQuestion = new ObjectiveQuestion();
-            objQuestion.setOptions(dto.options() != null ? List.copyOf(dto.options().keySet()) : List.of());
-            objQuestion.setCorrectAnswer(dto.correctAnswer() != null ? List.copyOf(dto.correctAnswer().keySet()) : List.of());
+
+            // Validação explícita do Map para options e correctAnswer
+            if (dto.options() == null) {
+                throw new IllegalArgumentException("Opções não podem ser nulas para questões objetivas");
+            }
+            objQuestion.setOptions(List.copyOf(dto.options().keySet()));
+
+            // Valida se o correctAnswer é um Map
+            if (!(dto.correctAnswer() instanceof Map<?, ?>)) {
+                throw new IllegalArgumentException("Resposta correta inválida para questão objetiva: esperado um Map");
+            }
+            Map<String, String> correctAnswerMap = (Map<String, String>) dto.correctAnswer();
+            objQuestion.setCorrectAnswer(List.copyOf(correctAnswerMap.keySet()));
+
             question = objQuestion;
+
         } else if ("DISCURSIVE".equalsIgnoreCase(dto.type())) {
             DiscursiveQuestion discursiveQuestion = new DiscursiveQuestion();
-            discursiveQuestion.setExpectedAnswer(dto.correctAnswer() != null ? dto.correctAnswer().values().stream().findFirst().orElse("") : "");
+
+            // Valida se o correctAnswer é uma String
+            if (!(dto.correctAnswer() instanceof String)) {
+                throw new IllegalArgumentException("Resposta correta inválida para questão discursiva: esperado uma String");
+            }
+            String expectedAnswer = (String) dto.correctAnswer();
+            discursiveQuestion.setExpectedAnswer(expectedAnswer != null ? expectedAnswer : "");
+
             question = discursiveQuestion;
+
         } else {
             throw new IllegalArgumentException("Tipo de questão inválido: " + dto.type());
         }
