@@ -11,8 +11,6 @@ import com.Uniquest.UniQuest.dto.ExamResponseDTO;
 import com.Uniquest.UniQuest.dto.ExamTextRequestDTO;
 import com.Uniquest.UniQuest.dto.QuestionDTO;
 import com.Uniquest.UniQuest.service.ExamService;
-import com.Uniquest.UniQuest.service.InteractionUserService;
-import com.Uniquest.UniQuest.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,7 +25,6 @@ import com.Uniquest.UniQuest.repositories.ExamRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/exam")

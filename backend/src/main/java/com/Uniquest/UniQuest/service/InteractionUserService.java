@@ -120,6 +120,28 @@ public class InteractionUserService {
 
      */
 
+    public List<Exam> getExamsLikedByUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        List<LikeUser> likes = likeUserRepository.findByUserAndLikedTrue(user);
+
+        return likes.stream().map(LikeUser::getExam)
+                .collect(Collectors.toList());
+    }
+
+    public List<Exam> getExamsCommentedByUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        List<CommentUser> comments = commentRepository.findByUser(user);
+
+        return comments.stream()
+                .map(CommentUser::getExam)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     public List<CommentResponseDTO> getCommentsByExam(Long examId) {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new RuntimeException("Exame não encontrado"));

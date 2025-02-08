@@ -1,27 +1,27 @@
 package com.Uniquest.UniQuest.controllers;
 
 import com.Uniquest.UniQuest.domain.exam.Exam;
+import com.Uniquest.UniQuest.domain.user.EmailChangeCode;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
+import com.Uniquest.UniQuest.service.EmailChangeService;
 import com.Uniquest.UniQuest.service.ExamService;
 import com.Uniquest.UniQuest.service.InteractionUserService;
 import com.Uniquest.UniQuest.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.Uniquest.UniQuest.services.PasswordResetService;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -34,6 +34,9 @@ public class UserController {
     private final TokenService tokenService;
     private final PasswordResetService passwordResetService;
     private final ExamService examService;
+    private final InteractionUserService interactionUserService;
+    private final EmailChangeService emailChangeService;
+
 
     @GetMapping
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
@@ -62,12 +65,12 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-    
+
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterRequestDTO body){
+    public ResponseEntity register(@RequestBody RegisterRequestDTO body) {
         Optional<User> user = this.repository.findByEmail(body.email());
 
-        if(user.isEmpty()) {
+        if (user.isEmpty()) {
             User newUser = new User();
             newUser.setPassword(passwordEncoder.encode(body.password()));
             newUser.setEmail(body.email());
@@ -118,7 +121,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
@@ -151,5 +154,46 @@ public class UserController {
         return ResponseEntity.ok(examDTOs);
     }
 
+    @GetMapping("my-liked-exams/{userId}")
+    public ResponseEntity<List<ExamResponseDTO>> getLikedExams(@PathVariable String userId) {
+        List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
 
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams);
+
+        return ResponseEntity.ok(examDTOs);
+
+    }
+
+    @GetMapping("/my-comments-exams/{userId}")
+    public ResponseEntity<List<ExamResponseDTO>> getCommentedExams(@PathVariable String userId) {
+        List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userId);
+
+        List<ExamResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams);
+
+        return ResponseEntity.ok(examDTOs);
+    }
+
+    // Endpoint para iniciar a solicitação de troca de e-mail
+    @PostMapping("/request-change")
+    public ResponseEntity<String> requestEmailChange(@RequestParam String currentEmail, @RequestParam String newEmail) {
+        Optional<EmailChangeCode> codeOpt = emailChangeService.createEmailChangeCode(currentEmail, newEmail);
+
+        if (codeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Usuário com e-mail informado não encontrado ou novo e-mail já em uso.");
+        }
+
+        return ResponseEntity.ok("Código de troca de e-mail enviado com sucesso.");
+    }
+
+    // Endpoint para confirmar a troca de e-mail com o código
+    @PostMapping("/confirm-change")
+    public ResponseEntity<String> confirmEmailChange(@RequestParam String currentEmail, @RequestParam String code, @RequestParam String newEmail) {
+        boolean success = emailChangeService.confirmEmailChange(currentEmail, code, newEmail);
+
+        if (!success) {
+            return ResponseEntity.badRequest().body("Erro ao validar o código ou o código expirado, ou novo e-mail já em uso.");
+        }
+
+        return ResponseEntity.ok("E-mail alterado com sucesso.");
+    }
 }

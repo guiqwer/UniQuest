@@ -1,6 +1,7 @@
 package com.Uniquest.UniQuest.repositories;
 
 import com.Uniquest.UniQuest.domain.exam.Exam;
+import com.Uniquest.UniQuest.domain.user.LikeUser;
 import com.Uniquest.UniQuest.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
