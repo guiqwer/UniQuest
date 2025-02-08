@@ -135,21 +135,18 @@ public class ExamService {
             List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
             String typeExam = getTypeExam(exam);
 
-            // Define o conteúdo a ser retornado no campo data
             Object examData = null;
+            
             if (exam instanceof ExamText) {
-                // Aqui você pode optar por retornar o objeto completo ou apenas o conteúdo do texto
-                examData = exam; // ou ((ExamText) exam).getTextContent();
+                examData = exam;
             } else if (exam instanceof ExamImage) {
                 ExamImage examImage = (ExamImage) exam;
                 if (examImage.getImageData() != null) {
-                    // Converte os dados da imagem para base64
                     examData = Base64.getEncoder().encodeToString(examImage.getImageData());
                 }
             } else if (exam instanceof ExamPdf) {
                 ExamPdf examPdf = (ExamPdf) exam;
                 if (examPdf.getPdfData() != null) {
-                    // Converte os dados do PDF para base64
                     examData = Base64.getEncoder().encodeToString(examPdf.getPdfData());
                 }
             }
