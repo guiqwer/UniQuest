@@ -9,5 +9,5 @@ import java.util.List;
 import java.util.Map;
 
 
-public record QuestionDTO(Integer order, @Nullable String type, String statement, @Nullable Map<String, String> options, @Nullable Object correctAnswer) {
+public record QuestionDTO(Integer order, @Nullable String type, String statement, @Nullable Map<String, String> options, @Nullable String correctAnswer) {
 }

@@ -194,12 +194,8 @@ public class ExamService {
             List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
 
 
-            // Valida se o correctAnswer é um Map
-            if (!(dto.correctAnswer() instanceof Map<?, ?>)) {
-                throw new IllegalArgumentException("Resposta correta inválida para questão objetiva: esperado um Map");
-            }
-            Map<String, String> correctAnswerMap = (Map<String, String>) dto.correctAnswer();
-            objQuestion.setCorrectAnswer(List.copyOf(correctAnswerMap.keySet()));
+
+            objQuestion.setCorrectAnswer((String) dto.correctAnswer());
 
             objQuestion.setStatement(dto.statement());
             objQuestion.setOrder(dto.order());
