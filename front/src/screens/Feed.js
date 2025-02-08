@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box, Card, CardContent, CardMedia, Typography, IconButton,
   TextField, Button, SpeedDial, SpeedDialIcon, SpeedDialAction,
@@ -50,7 +50,28 @@ const Feed = () => {
   const [openNewPostModal, setOpenNewPostModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
-
+  
+  const normalizeTags = (tags) => {
+    return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
+  };
+  
+  axiosInstance.get("/exam/list")
+        .then((response) => {
+            const formattedData = response.data.map(post => ({
+                ...post,
+                tags: normalizeTags(post.tags),
+                user: post.authorName,
+                avatar: "https://via.placeholder.com/150",
+                likes: post.likesCount,
+                liked: false,
+                date: "Agora mesmo",
+            }));
+            setPosts(formattedData);
+        })
+        .catch((error) => {
+            console.error("Erro ao buscar os dados:", error);
+        });
+  
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
     setAnchorEl(null);
@@ -314,7 +335,6 @@ const Feed = () => {
 
   const handleSubmitPost = async (event) => {
           event.preventDefault();  
-          console.log(postType, newPost.title, newPost.description, newPost.tags, newPost.image)
           try {
             if (postType === "pdf") {
               const response = await axiosMultipart.post("/exam/upload/pdf", {
@@ -344,7 +364,6 @@ const Feed = () => {
                 text: formattedQuestions
               };
               
-              console.log(finalPayload);
               const response = await axiosInstance.post("/exam/upload/text", {
                 title: newPost.title,
                 description: newPost.description,
@@ -1138,7 +1157,7 @@ const Feed = () => {
                     <Button
                       fullWidth
                       variant="contained"
-                      onClick={handleSubmitPost}
+                      onClick={handleAddPost}
                       disabled={
                         !newPost.title &&
                         !newPost.description &&
