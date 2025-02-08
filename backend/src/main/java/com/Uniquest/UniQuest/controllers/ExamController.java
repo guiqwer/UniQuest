@@ -62,14 +62,14 @@ public class ExamController {
     public ResponseEntity<String> uploadTextExam(@RequestBody ExamTextRequestDTO request,
                                                  @AuthenticationPrincipal User loggedUser) {
         try {
-            examService.uploadTextExam(
+            Long id = examService.uploadTextExam(
                     request.getTitle(),
                     request.getDescription(),
                     request.getTags(),
                     (List<QuestionDTO>) request.getText(),
                     loggedUser
             );
-            return ResponseEntity.ok("Prova textual salva com sucesso!");
+            return ResponseEntity.ok("ID: " + id);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao salvar prova textual: " + e.getMessage());
@@ -79,8 +79,7 @@ public class ExamController {
     @PostMapping("/generate/text")
     public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
         try{
-            examService.generateTextExam(request.getId());
-            return ResponseEntity.ok("Prova gerada com sucesso!");
+            return ResponseEntity.ok("ID: " + examService.generateTextExam(request.getId()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
