@@ -8,11 +8,9 @@ import com.Uniquest.UniQuest.domain.exam.ExamText;
 import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
 import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.CommentResponseDTO;
-import com.Uniquest.UniQuest.dto.ExamResponseDTO;
-import com.Uniquest.UniQuest.dto.QuestionDTO;
-import com.Uniquest.UniQuest.dto.QuestionResponseDTO;
+import com.Uniquest.UniQuest.dto.*;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
+import com.Uniquest.UniQuest.repositories.ExamCustomRepository;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,7 @@ public class ExamService {
 
 
     private final ExamRepository examRepository;
+    private final ExamCustomRepository examCustomRepository;
     private final InteractionUserService interactionUserService;
     private final GroqChatService groqChatService;
 
@@ -167,4 +166,11 @@ public class ExamService {
     }
 
 
+    public List<Exam> getAllExamsWithFilters(ExamListRequestDTO request) {
+        return examCustomRepository.findByFilters(
+                request.getTitle(),
+                request.getDescription(),
+                request.getTags()
+        );
+    }
 }
