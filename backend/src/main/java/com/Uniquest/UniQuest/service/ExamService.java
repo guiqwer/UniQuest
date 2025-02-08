@@ -5,6 +5,7 @@ import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.exam.ExamText;
+import com.Uniquest.UniQuest.domain.question.DiscursiveQuestion;
 import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
 import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
@@ -106,7 +107,7 @@ public class ExamService {
         examText.setTotalQuestions(questionsDTO.size());
 
         /// Converta cada QuestionDTO para ObjectiveQuestion (subclasse de Question)
-        List<ObjectiveQuestion> objectiveQuestions = questionsDTO.stream()
+        List<Question> objectiveQuestions = questionsDTO.stream()
                 .map(dto -> convertToQuestion(dto, examText))
                 .toList();
         List<Question> questions = new ArrayList<>(objectiveQuestions);
@@ -130,21 +131,44 @@ public class ExamService {
         }).collect(Collectors.toList());
     }
 
-    private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
-        ObjectiveQuestion question = new ObjectiveQuestion();
+//    private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
+//        ObjectiveQuestion question = new ObjectiveQuestion();
+//        question.setStatement(dto.statement());
+//        question.setOrder(dto.order());
+//        String optionsString = dto.options().entrySet()
+//                .stream()
+//                .map(entry -> entry.getKey() + " : " + entry.getValue())
+//                .collect(Collectors.joining(", "));
+//        List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
+//        List<String> correctAnswerList = dto.correctAnswer() != null
+//                ? new ArrayList<>(dto.correctAnswer().values())
+//                : new ArrayList<>();
+//        question.setOptions(optionsList);
+//        question.setCorrectAnswer(correctAnswerList);
+//        question.setExamText(examText);
+//        return question;
+//    }
+
+    private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
+        Question question;
+
+        if ("OBJECTIVE".equalsIgnoreCase(dto.type())) {
+            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+            objQuestion.setOptions(dto.options() != null ? List.copyOf(dto.options().keySet()) : List.of());
+            objQuestion.setCorrectAnswer(dto.correctAnswer() != null ? List.copyOf(dto.correctAnswer().keySet()) : List.of());
+            question = objQuestion;
+        } else if ("DISCURSIVE".equalsIgnoreCase(dto.type())) {
+            DiscursiveQuestion discursiveQuestion = new DiscursiveQuestion();
+            discursiveQuestion.setExpectedAnswer(dto.correctAnswer() != null ? dto.correctAnswer().values().stream().findFirst().orElse("") : "");
+            question = discursiveQuestion;
+        } else {
+            throw new IllegalArgumentException("Tipo de questão inválido: " + dto.type());
+        }
+
         question.setStatement(dto.statement());
         question.setOrder(dto.order());
-        String optionsString = dto.options().entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + " : " + entry.getValue())
-                .collect(Collectors.joining(", "));
-        List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
-        List<String> correctAnswerList = dto.correctAnswer() != null
-                ? new ArrayList<>(dto.correctAnswer().values())
-                : new ArrayList<>();
-        question.setOptions(optionsList);
-        question.setCorrectAnswer(correctAnswerList);
         question.setExamText(examText);
+
         return question;
     }
 
