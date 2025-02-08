@@ -5,6 +5,7 @@ import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.exam.ExamImage;
 import com.Uniquest.UniQuest.domain.exam.ExamPdf;
 import com.Uniquest.UniQuest.domain.exam.ExamText;
+import com.Uniquest.UniQuest.domain.question.DiscursiveQuestion;
 import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
 import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
@@ -106,7 +107,7 @@ public class ExamService {
         examText.setTotalQuestions(questionsDTO.size());
 
         /// Converta cada QuestionDTO para ObjectiveQuestion (subclasse de Question)
-        List<ObjectiveQuestion> objectiveQuestions = questionsDTO.stream()
+        List<Question> objectiveQuestions = questionsDTO.stream()
                 .map(dto -> convertToQuestion(dto, examText))
                 .toList();
         List<Question> questions = new ArrayList<>(objectiveQuestions);
@@ -130,22 +131,98 @@ public class ExamService {
         }).collect(Collectors.toList());
     }
 
-    private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
-        ObjectiveQuestion question = new ObjectiveQuestion();
-        question.setStatement(dto.statement());
-        question.setOrder(dto.order());
-        String optionsString = dto.options().entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + " : " + entry.getValue())
-                .collect(Collectors.joining(", "));
-        List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
-        List<String> correctAnswerList = dto.correctAnswer() != null
-                ? new ArrayList<>(dto.correctAnswer().values())
-                : new ArrayList<>();
-        question.setOptions(optionsList);
-        question.setCorrectAnswer(correctAnswerList);
-        question.setExamText(examText);
-        return question;
+//    private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
+//        ObjectiveQuestion question = new ObjectiveQuestion();
+//        question.setStatement(dto.statement());
+//        question.setOrder(dto.order());
+//        String optionsString = dto.options().entrySet()
+//                .stream()
+//                .map(entry -> entry.getKey() + " : " + entry.getValue())
+//                .collect(Collectors.joining(", "));
+//        List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
+//        List<String> correctAnswerList = dto.correctAnswer() != null
+//                ? new ArrayList<>(dto.correctAnswer().values())
+//                : new ArrayList<>();
+//        question.setOptions(optionsList);
+//        question.setCorrectAnswer(correctAnswerList);
+//        question.setExamText(examText);
+//        return question;
+//    }
+
+//    private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
+//        Question question;
+//
+//        if ("OBJECTIVE".equalsIgnoreCase(dto.type())) {
+//            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+//            objQuestion.setOptions(dto.options() != null ? List.copyOf(dto.options().keySet()) : List.of());
+//            objQuestion.setCorrectAnswer(dto.correctAnswer() != null ? List.copyOf(dto.correctAnswer().keySet()) : List.of());
+//            question = objQuestion;
+//
+//
+//        } else if ("DISCURSIVE".equalsIgnoreCase(dto.type())) {
+//            DiscursiveQuestion discursiveQuestion = new DiscursiveQuestion();
+//            discursiveQuestion.setExpectedAnswer(dto.correctAnswer() != null ? dto.correctAnswer().values().stream().findFirst().orElse("") : "");
+//            question = discursiveQuestion;
+//        } else {
+//            throw new IllegalArgumentException("Tipo de questão inválido: " + dto.type());
+//        }
+//
+//        question.setStatement(dto.statement());
+//        question.setOrder(dto.order());
+//        question.setExamText(examText);
+//
+//        return question;
+//    }
+
+
+    // Essa definitivamente não é a melhor maneira de implementar isso mas vai ser o que temos por agora.
+    // Não mude essa função em hipótese alguma!!!!
+    // Essa função irá adicionar a resposta correta de questões objetivas e discursivas da maneira que o front espera.
+    // Além de cadastrar as respostas para cada tipo de questão.
+    private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
+        if (dto.type() == null || "OBJECTIVE".equalsIgnoreCase(dto.type())) {
+            ObjectiveQuestion objQuestion = new ObjectiveQuestion();
+
+            // Validação explícita do Map para options e correctAnswer
+            if (dto.options() == null) {
+                throw new IllegalArgumentException("Opções não podem ser nulas para questões objetivas");
+            }
+
+            String optionsString = dto.options().entrySet().stream()
+                    .map(entry -> entry.getKey() + " : " + entry.getValue())
+                    .collect(Collectors.joining(", "));
+            List<String> optionsList = new ArrayList<>(List.of(optionsString.split(", ")));
+
+
+
+            objQuestion.setCorrectAnswer((String) dto.correctAnswer());
+
+            objQuestion.setStatement(dto.statement());
+            objQuestion.setOrder(dto.order());
+            objQuestion.setExamText(examText);
+            objQuestion.setOptions(optionsList);
+
+            return objQuestion;
+
+
+        } else if ("DISCURSIVE".equalsIgnoreCase(dto.type())) {
+            DiscursiveQuestion discursiveQuestion = new DiscursiveQuestion();
+
+            // Valida se o correctAnswer é uma String
+            if (!(dto.correctAnswer() instanceof String)) {
+                throw new IllegalArgumentException("Resposta correta inválida para questão discursiva: esperado uma String");
+            }
+            String expectedAnswer = (String) dto.correctAnswer();
+            discursiveQuestion.setExpectedAnswer(expectedAnswer != null ? expectedAnswer : "");
+
+            discursiveQuestion.setStatement(dto.statement());
+            discursiveQuestion.setOrder(dto.order());
+            discursiveQuestion.setExamText(examText);
+            return discursiveQuestion;
+
+        } else {
+            throw new IllegalArgumentException("Tipo de questão inválido: " + dto.type());
+        }
     }
 
     public Optional<Exam> getTextExam(Long id) {
