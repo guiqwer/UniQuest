@@ -50,27 +50,60 @@ const Feed = () => {
   const [openNewPostModal, setOpenNewPostModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
-  
+  const [fileURL, setFileURL] = useState("");
+
   const normalizeTags = (tags) => {
     return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
   };
   
-  axiosInstance.get("/exam/list")
-        .then((response) => {
-            const formattedData = response.data.map(post => ({
-                ...post,
-                tags: normalizeTags(post.tags),
-                user: post.authorName,
-                avatar: "https://via.placeholder.com/150",
-                likes: post.likesCount,
-                liked: false,
-                date: "Agora mesmo",
-            }));
-            setPosts(formattedData);
-        })
-        .catch((error) => {
-            console.error("Erro ao buscar os dados:", error);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.post("/exam/list", {
+          tags: [],
+          title: "",
+          description: ""
         });
+  
+        const formattedData = response.data.map(post => {
+          let fileURL = "";
+  
+          if (post.data && post.type === "pdf") {
+            // PDF: Converter base64 para Blob e criar URL
+            const byteCharacters = atob(post.data);
+            const byteNumbers = new Uint8Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const blob = new Blob([byteNumbers], { type: "application/pdf" });
+            fileURL = URL.createObjectURL(blob);
+          }
+  
+          if (post.data && post.type === "image") {
+            // Imagem: Criar Data URL
+            fileURL = `data:image/png;base64,${post.data}`; // Substitua "png" conforme necessário
+          }
+  
+          return {
+            ...post,
+            tags: normalizeTags(post.tags),
+            user: post.authorName,
+            avatar: "https://via.placeholder.com/150",
+            likes: post.likesCount,
+            liked: false,
+            date: "Agora mesmo",
+            fileURL, // URL do arquivo gerado
+          };
+        });
+  
+        setPosts(formattedData);
+      } catch (error) {
+        console.error("Erro ao buscar os dados:", error);
+      }
+    };
+  
+    fetchData();
+  }, []);
 
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
@@ -210,27 +243,35 @@ const Feed = () => {
 
   const renderPostContent = (post) => {
     switch (post.type) {
-      case 'imagem':
+      case 'image':
         return (
-          <Box sx={{ position: 'relative', paddingTop: '100%', height: 0, mb: 2 }}>
+          <Box
+            sx={{
+              position: 'relative',
+              mb: 2,
+              width: '100%',
+              maxWidth: '700px', // Largura máxima ajustada
+              height: '600px', // Altura ajustada
+              overflow: 'hidden',
+              borderRadius: '8px',
+              backgroundColor: '#f8f9fa',
+              display: 'flex',
+              justifyContent: 'center', // Centraliza horizontalmente
+              alignItems: 'center', // Centraliza verticalmente
+              margin: 'auto', // Garante centralização no contêiner pai
+              }}
+              >
             <CardMedia
               component="img"
-              image={post.image}
+              image={post.fileURL}
               alt="Post"
-              onClick={() => setSelectedImage(post.image)}
               sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                cursor: 'zoom-in',
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain', // Mantém proporções sem cortar
               }}
             />
-          </Box>
-        );
-
+          </Box>);
       case 'pdf':
         return (
           <Card
@@ -255,29 +296,38 @@ const Feed = () => {
 
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">
-                  {post.fileName}
+                  {post.title}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {(post.file.size / 1024).toFixed(1)} KB
+                  {((post.data.length * 3) / 4 / 1024).toFixed(1)} KB
                 </Typography>
               </Box>
-
+              
+              <embed
+              src={post.fileURL}
+              type="application/pdf"
+              width="100%"
+              height="500px"
+              />
+              
               <Button
-                variant="contained"
-                component="a"
-                href={post.fileURL}
-                download={post.fileName}
-                startIcon={<DownloadIcon />}
-                sx={{
-                  background: 'linear-gradient(135deg, #2e7d32 0%, #1976d2 100%)',
-                  color: '#fff',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #1b5e20 0%, #1565c0 100%)',
-                  },
+              variant="contained"
+              component="a"
+              href={post.fileURL}
+              download={post.fileName || "arquivo.pdf"}
+              target="_blank"
+              rel="noopener noreferrer"
+              startIcon={<DownloadIcon />}
+              sx={{
+                background: 'linear-gradient(135deg, #2e7d32 0%, #1976d2 100%)',
+                color: '#fff',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1b5e20 0%, #1565c0 100%)',
+                },
                 }}
-              >
-                Baixar
-              </Button>
+                >
+                  Baixar
+                </Button>
             </CardContent>
           </Card>
         );
@@ -481,147 +531,160 @@ const Feed = () => {
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        {posts.length === 0 ? (
-          <Typography variant="h6" align="center" sx={{ color: "#636e72" }}>
-            Nenhum post disponível. Adicione um novo post!
-          </Typography>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post.id}>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 2,
-                    padding: 2,
-                    background: "rgba(255,255,255,0.7)",
-                    borderRadius: 3,
-                    position: 'relative'
-                  }}
-                >
-                  <Avatar
-                    src={post.avatar}
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      mr: 2,
-                      border: "2px solid #fff",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    }}
-                  />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1" fontWeight="700" color="#2d3436">
-                      {post.user}
-                    </Typography>
-                    <Typography variant="caption" color="#636e72">
-                      {post.date}
-                    </Typography>
-                  </Box>
-                  <IconButton
-                    onClick={(e) => handleMenuOpen(e, post.id)}
-                    sx={{ position: 'absolute', right: 16, top: 16, color: '#636e72' }}
-                  >
-                    <MoreVert />
-                  </IconButton>
-                </Box>
+  {posts.length === 0 ? (
+    <Typography variant="h6" align="center" sx={{ color: "#636e72" }}>
+      Nenhum post disponível. Adicione um novo post!
+    </Typography>
+  ) : (
+    posts.map((post) => {
+      console.log("Post ID:", post.id); // Exibe o ID no console
 
-                {post.title && (
-                  <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: "#2d3436" }}>
-                    {post.title}
-                  </Typography>
-                )}
+      return (
+        <PostCard key={post.id}>
+          <CardContent>
+            {/* Exibe o ID do post na interface */}
+            <Typography
+              variant="caption"
+              sx={{ color: "#b2bec3", fontWeight: 600, position: "absolute", top: 8, left: 16 }}
+            >
+              ID: {post.id}
+            </Typography>
 
-                {renderPostContent(post)}
-
-                <Typography variant="body1" sx={{ mb: 2, color: "#2d3436" }}>
-                  {post.description}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 2,
+                padding: 2,
+                background: "rgba(255,255,255,0.7)",
+                borderRadius: 3,
+                position: "relative",
+              }}
+            >
+              <Avatar
+                src={post.avatar}
+                sx={{
+                  width: 56,
+                  height: 56,
+                  mr: 2,
+                  border: "2px solid #fff",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                }}
+              />
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="subtitle1" fontWeight="700" color="#2d3436">
+                  {post.user}
                 </Typography>
+                <Typography variant="caption" color="#636e72">
+                  {post.date}
+                </Typography>
+              </Box>
+              <IconButton
+                onClick={(e) => handleMenuOpen(e, post.id)}
+                sx={{ position: "absolute", right: 16, top: 16, color: "#636e72" }}
+              >
+                <MoreVert />
+              </IconButton>
+            </Box>
 
-                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                  {post.tags?.map((tag, index) => (
-                    <Chip
-                      key={index}
-                      label={`#${tag}`}
-                      size="small"
-                      sx={{
-                        background: "rgba(45, 52, 54, 0.08)",
-                        color: "#2d3436",
-                        fontWeight: 500,
-                        "&:hover": {
-                          background: "rgba(45, 52, 54, 0.12)",
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
+            {post.title && (
+              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: "#2d3436" }}>
+                {post.title}
+              </Typography>
+            )}
 
-                <Box
+            {renderPostContent(post)}
+
+            <Typography variant="body1" sx={{ mb: 2, color: "#2d3436" }}>
+              {post.description}
+            </Typography>
+
+            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+              {post.tags?.map((tag, index) => (
+                <Chip
+                  key={index}
+                  label={`#${tag}`}
+                  size="small"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    mb: 2,
-                    padding: 1,
-                    background: "rgba(255,255,255,0.7)",
-                    borderRadius: 4,
+                    background: "rgba(45, 52, 54, 0.08)",
+                    color: "#2d3436",
+                    fontWeight: 500,
+                    "&:hover": {
+                      background: "rgba(45, 52, 54, 0.12)",
+                    },
                   }}
-                >
-                  <IconButton onClick={() => handleLike(post.id)}>
-                    {post.liked ? (
-                      <Favorite sx={{ color: "#ff1744" }} />
-                    ) : (
-                      <FavoriteBorder sx={{ color: "#636e72" }} />
-                    )}
-                  </IconButton>
-                  <IconButton onClick={() => toggleComments(post.id)}>
-                    <Comment sx={{ color: openComments[post.id] ? "#1976d2" : "#636e72" }} />
-                  </IconButton>
-                  <Typography variant="body2" sx={{ color: "#636e72", ml: 0.5, fontWeight: 500 }}>
-                    {post.likes} curtidas • {post.comments?.length || 0} comentários
-                  </Typography>
-                </Box>
+                />
+              ))}
+            </Box>
 
-                <Collapse in={openComments[post.id]}>
-                  <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ maxHeight: 200, overflow: "auto" }}>
-                    {post.comments?.map((comment, index) => (
-                      <Box key={index} sx={{ display: "flex", gap: 1.5, mb: 2, padding: 1.5 }}>
-                        <Avatar src={comment.avatar} sx={{ width: 40, height: 40 }} />
-                        <Box>
-                          <Typography variant="subtitle2" color="#2d3436">
-                            {comment.user}
-                          </Typography>
-                          <Typography variant="body2" color="#636e72">
-                            {comment.text}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))}
-                    <TextField
-                      fullWidth
-                      placeholder="Adicione um comentário..."
-                      variant="outlined"
-                      size="small"
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" && e.target.value) {
-                          handleAddComment(post.id, {
-                            user: "Você",
-                            text: e.target.value,
-                            avatar: "https://via.placeholder.com/150",
-                          });
-                          e.target.value = "";
-                        }
-                      }}
-                      sx={{ mt: 1.5 }}
-                    />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                mb: 2,
+                padding: 1,
+                background: "rgba(255,255,255,0.7)",
+                borderRadius: 4,
+              }}
+            >
+              <IconButton onClick={() => handleLike(post.id)}>
+                {post.liked ? (
+                  <Favorite sx={{ color: "#ff1744" }} />
+                ) : (
+                  <FavoriteBorder sx={{ color: "#636e72" }} />
+                )}
+              </IconButton>
+              <IconButton onClick={() => toggleComments(post.id)}>
+                <Comment sx={{ color: openComments[post.id] ? "#1976d2" : "#636e72" }} />
+              </IconButton>
+              <Typography variant="body2" sx={{ color: "#636e72", ml: 0.5, fontWeight: 500 }}>
+                {post.likes} curtidas • {post.comments?.length || 0} comentários
+              </Typography>
+            </Box>
+
+            <Collapse in={openComments[post.id]}>
+              <Divider sx={{ mb: 2 }} />
+              <Box sx={{ maxHeight: 200, overflow: "auto" }}>
+                {post.comments?.map((comment, index) => (
+                  <Box key={index} sx={{ display: "flex", gap: 1.5, mb: 2, padding: 1.5 }}>
+                    <Avatar src={comment.avatar} sx={{ width: 40, height: 40 }} />
+                    <Box>
+                      <Typography variant="subtitle2" color="#2d3436">
+                        {comment.user}
+                      </Typography>
+                      <Typography variant="body2" color="#636e72">
+                        {comment.text}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Collapse>
-              </CardContent>
-            </PostCard>
-          ))
-        )}
-      </Box>
+                ))}
+                <TextField
+                  fullWidth
+                  placeholder="Adicione um comentário..."
+                  variant="outlined"
+                  size="small"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && e.target.value) {
+                      handleAddComment(post.id, {
+                        user: "Você",
+                        text: e.target.value,
+                        avatar: "https://via.placeholder.com/150",
+                      });
+                      e.target.value = "";
+                    }
+                  }}
+                  sx={{ mt: 1.5 }}
+                />
+              </Box>
+            </Collapse>
+          </CardContent>
+        </PostCard>
+      );
+    })
+  )}
+</Box>
+
 
       {/* Menu de três pontos */}
       <Menu
@@ -1262,7 +1325,7 @@ const Feed = () => {
                     <Button
                       fullWidth
                       variant="contained"
-                      onClick={handleAddPost}
+                      onClick={handleSubmitPost}
                       disabled={
                         !newPost.title &&
                         !newPost.description &&
