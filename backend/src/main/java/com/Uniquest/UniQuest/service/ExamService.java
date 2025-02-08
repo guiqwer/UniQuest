@@ -182,7 +182,7 @@ public class ExamService {
     private Question convertToQuestion(QuestionDTO dto, ExamText examText) {
         Question question;
 
-        if ("OBJECTIVE".equalsIgnoreCase(dto.type())) {
+        if (dto.type() == null || "OBJECTIVE".equalsIgnoreCase(dto.type())) {
             ObjectiveQuestion objQuestion = new ObjectiveQuestion();
 
             // Validação explícita do Map para options e correctAnswer
