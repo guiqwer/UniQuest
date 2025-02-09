@@ -3,21 +3,25 @@ package com.Uniquest.UniQuest.controllers;
 import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.user.EmailChangeCode;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.*;
+import com.Uniquest.UniQuest.dto.auth.RegisterRequestDTO;
+import com.Uniquest.UniQuest.dto.common.ResponseDTO;
+import com.Uniquest.UniQuest.dto.exam.ExamListResponseDTO;
+import com.Uniquest.UniQuest.dto.user.UserEditProfileDTO;
+import com.Uniquest.UniQuest.dto.user.UserProfileAvatarDTO;
+import com.Uniquest.UniQuest.dto.user.UserProfileDTO;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.EmailChangeService;
 import com.Uniquest.UniQuest.service.ExamService;
 import com.Uniquest.UniQuest.service.InteractionUserService;
 import com.Uniquest.UniQuest.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.Uniquest.UniQuest.services.PasswordResetService;
+import com.Uniquest.UniQuest.service.PasswordResetService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -165,24 +169,16 @@ public class UserController {
     // Endpoint para iniciar a solicitação de troca de e-mail
     @PostMapping("/request-change")
     public ResponseEntity<String> requestEmailChange(@RequestParam String currentEmail, @RequestParam String newEmail) {
-        Optional<EmailChangeCode> codeOpt = emailChangeService.createEmailChangeCode(currentEmail, newEmail);
-
-        if (codeOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Usuário com e-mail informado não encontrado ou novo e-mail já em uso.");
-        }
-
+        emailChangeService.createEmailChangeCode(currentEmail, newEmail);
         return ResponseEntity.ok("Código de troca de e-mail enviado com sucesso.");
     }
+
 
     // Endpoint para confirmar a troca de e-mail com o código
     @PostMapping("/confirm-change")
     public ResponseEntity<String> confirmEmailChange(@RequestParam String currentEmail, @RequestParam String code, @RequestParam String newEmail) {
-        boolean success = emailChangeService.confirmEmailChange(currentEmail, code, newEmail);
-
-        if (!success) {
-            return ResponseEntity.badRequest().body("Erro ao validar o código ou o código expirado, ou novo e-mail já em uso.");
-        }
-
+        emailChangeService.confirmEmailChange(currentEmail, code, newEmail);
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
+
 }

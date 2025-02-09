@@ -1,28 +1,23 @@
-package com.Uniquest.UniQuest.services;
+package com.Uniquest.UniQuest.service;
 
 import com.Uniquest.UniQuest.domain.user.PasswordResetCode;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.repositories.PasswordResetCodeRepository;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.EmailService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class PasswordResetService {
 
     private final UserRepository userRepository;
     private final PasswordResetCodeRepository codeRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-
-    public PasswordResetService(UserRepository userRepository, PasswordResetCodeRepository codeRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
-        this.userRepository = userRepository;
-        this.codeRepository = codeRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-    }
 
     public Optional<PasswordResetCode> createPasswordResetCode(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);

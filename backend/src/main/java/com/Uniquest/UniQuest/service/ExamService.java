@@ -9,7 +9,10 @@ import com.Uniquest.UniQuest.domain.question.DiscursiveQuestion;
 import com.Uniquest.UniQuest.domain.question.ObjectiveQuestion;
 import com.Uniquest.UniQuest.domain.question.Question;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.*;
+import com.Uniquest.UniQuest.dto.comment.CommentResponseDTO;
+import com.Uniquest.UniQuest.dto.exam.ExamListRequestDTO;
+import com.Uniquest.UniQuest.dto.exam.ExamListResponseDTO;
+import com.Uniquest.UniQuest.dto.question.QuestionDTO;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import com.Uniquest.UniQuest.repositories.ExamCustomRepository;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
@@ -130,6 +133,7 @@ public class ExamService {
         }
         return type;
     }
+
     public List<ExamListResponseDTO> convertExamsToDTOs(List<Exam> exams) {
         return exams.stream().map(exam -> {
             List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
@@ -261,10 +265,10 @@ public class ExamService {
     public Optional<Exam> getTextExam(Long id) {
         return examRepository.findById(id).map(exam -> (ExamImage) exam);
     }
+
     public Optional<ExamImage> getImageExam(Long id) {
         return examRepository.findById(id).map(exam -> (ExamImage) exam);
     }
-
 
     public List<Exam> getAllExams() {
         return examRepository.findAll(); // Busca todas as provas
@@ -275,7 +279,6 @@ public class ExamService {
         return examRepository.findByAuthorId(userId);
     }
 
-    
     public List<Exam> getAllExamsWithFilters(ExamListRequestDTO request) {
         return examCustomRepository.findByFilters(
                 request.getTitle(),

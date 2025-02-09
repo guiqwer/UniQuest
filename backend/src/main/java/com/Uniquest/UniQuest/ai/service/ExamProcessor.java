@@ -1,6 +1,6 @@
 package com.Uniquest.UniQuest.ai.service;
 
-import com.Uniquest.UniQuest.dto.QuestionDTO;
+import com.Uniquest.UniQuest.dto.question.QuestionDTO;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

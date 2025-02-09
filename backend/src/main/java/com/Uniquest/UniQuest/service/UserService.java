@@ -1,24 +1,21 @@
 package com.Uniquest.UniQuest.service;
 
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.UserProfileAvatarDTO;
-import com.Uniquest.UniQuest.dto.UserEditProfileDTO;
-import com.Uniquest.UniQuest.dto.UserProfileDTO;
+import com.Uniquest.UniQuest.dto.user.UserProfileAvatarDTO;
+import com.Uniquest.UniQuest.dto.user.UserEditProfileDTO;
+import com.Uniquest.UniQuest.dto.user.UserProfileDTO;
 import com.Uniquest.UniQuest.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
     private final UserRepository userRepository;
-
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     //Método para atualizar o perfil do usuário
     public User updateUserProfile(String userID, UserEditProfileDTO updateUserProfile) {
@@ -76,8 +73,4 @@ public class UserService {
                 user.getAvatar()
         );
     }
-
-
-
-
 }

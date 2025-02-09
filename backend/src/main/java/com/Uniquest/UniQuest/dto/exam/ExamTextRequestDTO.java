@@ -1,5 +1,6 @@
-package com.Uniquest.UniQuest.dto;
+package com.Uniquest.UniQuest.dto.exam;
 
+import com.Uniquest.UniQuest.dto.question.QuestionDTO;
 import lombok.Data;
 import java.util.List;
 
