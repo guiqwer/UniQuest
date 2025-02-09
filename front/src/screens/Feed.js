@@ -156,39 +156,49 @@ const Feed = () => {
   };
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        const updatedQuestions = post.questions.map((q, qIndex) => {
+    setPosts(prevPosts => prevPosts.map(post => {
+      if (post.id === postId) {  
+        // Garante que `post.data.questions` existe antes de modificar
+        if (!post.data || !post.data.questions) {
+          return post;
+        }
+  
+        const updatedQuestions = post.data.questions.map((q, qIndex) => {
           if (qIndex === questionIndex) {
-            return {
-              ...q,
-              userAnswer: selectedOptionIndex,
-              showFeedback: true
+            return { 
+              ...q, 
+              userAnswer: selectedOptionIndex, 
+              showFeedback: true 
             };
           }
           return q;
         });
-        return { ...post, questions: updatedQuestions };
+  
+        return { 
+          ...post, 
+          data: { ...post.data, questions: updatedQuestions } 
+        };
       }
       return post;
     }));
   };
-
+  
+  
   const handleOpenAnswer = (postId, questionIndex, answer) => {
     setPosts(posts.map(post => {
       if (post.id === postId) {
-        const updatedQuestions = post.questions.map((q, qIndex) => {
+        const updatedQuestions = post.data.questions.map((q, qIndex) => {
           if (qIndex === questionIndex) {
             return { ...q, userAnswer: answer };
           }
           return q;
         });
-        return { ...post, questions: updatedQuestions };
+  
+        return { ...post, data: { ...post.data, questions: updatedQuestions } };
       }
       return post;
     }));
   };
-
 
 
   const isPostValid = () => {
@@ -332,93 +342,85 @@ const Feed = () => {
           </Card>
         );
 
-      case 'text':
-        return post.questions?.map((question, index) => (
-          <Box key={index} sx={{
-            mb: 2,
-            p: 2,
-            border: '1px solid #e0e0e0',
-            borderRadius: 2,
-            backgroundColor: 'rgba(255,255,255,0.7)'
-          }}>
-            <Typography variant="body1" sx={{
-              mb: 1,
-              fontWeight: 500,
-              color: '#2d3436'
-            }}>
-              Questão {index + 1}: {question.statement}
-            </Typography>
-
-            {question.type === 'objetiva' && (
-              <Box sx={{ ml: 1 }}>
-                {question.options.map((option, optionIndex) => {
-                  const isCorrect = optionIndex === question.correctOption;
-                  const isSelected = optionIndex === question.userAnswer;
-
-                  return (
-                    <Box
-                      key={optionIndex}
-                      onClick={() => handleObjectiveAnswer(post.id, index, optionIndex)}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        mb: 1,
-                        p: 1,
-                        borderRadius: 1,
-                        cursor: 'pointer',
-                        border: '1px solid',
-                        borderColor: isSelected
-                          ? (isCorrect ? '#4caf50' : '#ef5350')
-                          : '#e0e0e0',
-                        backgroundColor: isSelected
-                          ? (isCorrect ? '#e8f5e9' : '#ffebee')
-                          : 'transparent',
-                        '&:hover': {
-                          backgroundColor: !question.showFeedback
-                            ? 'rgba(0,0,0,0.03)'
-                            : undefined
-                        }
-                      }}
-                    >
-                      <Box sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '50%',
-                        backgroundColor: isSelected
-                          ? (isCorrect ? '#4caf50' : '#ef5350')
-                          : '#1976d2',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: 500,
-                        flexShrink: 0,
-                        mr: 1.5
-                      }}>
-                        {String.fromCharCode(65 + optionIndex)}
+        case 'text':
+          return post.data?.questions?.map((question, index) => (
+            <Box
+              key={index}
+              sx={{
+                mb: 2,
+                p: 2,
+                border: '1px solid #e0e0e0',
+                borderRadius: 2,
+                backgroundColor: 'rgba(255,255,255,0.7)',
+              }}
+            >
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 500, color: '#2d3436' }}>
+                Questão {index + 1}: {question.statement}
+              </Typography>
+    
+              {/* Verifica se a questão tem opções (objetiva) ou não (discursiva) */}
+              {question.options ? (
+                <Box sx={{ ml: 1 }}>
+                  {question.options.map((option, optionIndex) => {
+                    const isCorrect = option.startsWith(question.correctAnswer); // Exemplo: "A : n" -> "A" === "A"
+                    const isSelected = question.userAnswer === optionIndex;
+    
+                    return (
+                      <Box
+                        key={optionIndex}
+                        onClick={() => handleObjectiveAnswer(post.id, index, optionIndex)}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          mb: 1,
+                          p: 1,
+                          borderRadius: 1,
+                          cursor: 'pointer',
+                          border: '1px solid',
+                          borderColor: isSelected ? (isCorrect ? '#4caf50' : '#ef5350') : '#e0e0e0',
+                          backgroundColor: isSelected ? (isCorrect ? '#e8f5e9' : '#ffebee') : 'transparent',
+                          '&:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            backgroundColor: isSelected ? (isCorrect ? '#4caf50' : '#ef5350') : '#1976d2',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 500,
+                            flexShrink: 0,
+                            mr: 1.5,
+                          }}
+                        >
+                          {option.split(":")[0]} {/* Exibe "A", "B", etc. */}
+                        </Box>
+                        <Typography variant="body2" sx={{ color: '#2d3436' }}>
+                          {option}
+                          {isSelected && isCorrect && (
+                            <span style={{ marginLeft: 8, color: '#4caf50' }}>✓ Resposta Correta</span>
+                          )}
+                          {isSelected && !isCorrect && (
+                            <span style={{ marginLeft: 8, color: '#ef5350' }}>✗ Sua Resposta</span>
+                          )}
+                        </Typography>
                       </Box>
-                      <Typography variant="body2" sx={{ color: '#2d3436' }}>
-                        {option}
-                        {question.showFeedback && isCorrect && (
-                          <span style={{ marginLeft: 8, color: '#4caf50' }}>
-                            ✓ Resposta Correta
-                          </span>
-                        )}
-                        {isSelected && !isCorrect && (
-                          <span style={{ marginLeft: 8, color: '#ef5350' }}>
-                            ✗ Sua Resposta
-                          </span>
-                        )}
-                      </Typography>
-                    </Box>
-                  );
-                })}
-              </Box>
-            )}
-
-
-          </Box>
-        ));
+                    );
+                  })}
+                </Box>
+              ) : (
+                // Caso seja uma questão discursiva, exibe apenas o campo de resposta
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>Resposta esperada:</Typography>
+                  <Typography variant="body2" sx={{ color: '#2d3436', ml: 1 }}>{question.expectedAnswer}</Typography>
+                </Box>
+              )}
+            </Box>
+          ));
 
       default:
         return null;
@@ -467,7 +469,8 @@ const Feed = () => {
   };
 
   const handleSubmitPost = async (event) => {
-          event.preventDefault();  
+          event.preventDefault();
+          console.log(newPost.questions)
           try {
             if (postType === "pdf") {
               const response = await axiosMultipart.post("/exam/upload/pdf", {
@@ -484,25 +487,44 @@ const Feed = () => {
                 file: newPost.image
             });}
             if (postType === "texto") {
-              const formattedQuestions = newPost.questions.map((question, index) => ({
-                question: index + 1,
-                statement: question.text,
-                options: question.options?.reduce((acc, option, i) => {
-                  acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
-                  return acc;
-                }, {})
-              }));
-              
+              const formattedQuestions = newPost.questions.map((question, index) => {
+                const formattedQuestion = {
+                  type: question.type === "objetiva" ? "objective" : "discursive",
+                  order: index + 1,
+                  statement: question.text
+                };
+            
+                if (question.type === "objetiva") {
+                  formattedQuestion.options = question.options?.reduce((acc, option, i) => {
+                    acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
+                    return acc;
+                  }, {});
+            
+                  // Se uma opção correta foi escolhida, associar ao seu identificador (A, B, C...)
+                  formattedQuestion.correctAnswer =
+                    question.correctOption !== undefined
+                      ? String.fromCharCode(65 + question.correctOption)
+                      : "";
+                } else {
+                  formattedQuestion.correctAnswer = question.correctAnswer || "";
+                }
+            
+                return formattedQuestion;
+              });
+            
               const finalPayload = {
                 text: formattedQuestions
               };
-              console.log(finalPayload)
+            
+              console.log(finalPayload);
+            
               const response = await axiosInstance.post("/exam/upload/text", {
                 title: newPost.title,
                 description: newPost.description,
                 tags: newPost.tags,
                 text: finalPayload.text
-            });}
+              });
+            }
           } catch (error) {
               setError("Erro ao enviar a prova. Tente novamente.");
               console.error("Erro no cadastro:", error);
@@ -537,8 +559,6 @@ const Feed = () => {
     </Typography>
   ) : (
     posts.map((post) => {
-      console.log("Post ID:", post.id); // Exibe o ID no console
-
       return (
         <PostCard key={post.id}>
           <CardContent>
@@ -1086,6 +1106,21 @@ const Feed = () => {
                                 </Button>
                               </Box>
                             </Box>
+                            {question.type === 'aberta' && (
+  <TextField
+    fullWidth
+    label="Resposta Correta"
+    value={question.correctAnswer || ''}
+    onChange={(e) => {
+      const newQuestions = [...newPost.questions];
+      newQuestions[index].correctAnswer = e.target.value;
+      setNewPost({ ...newPost, questions: newQuestions });
+    }}
+    variant="outlined"
+    size="small"
+    sx={{ mt: 2, backgroundColor: 'white' }}
+  />
+)}
 
                             {question.type === 'objetiva' && (
                               <Box sx={{ ml: 2, mt: 2 }}>
