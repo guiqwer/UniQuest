@@ -1,6 +1,7 @@
 package com.Uniquest.UniQuest.controllers;
 
 import com.Uniquest.UniQuest.domain.user.CommentUser;
+import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.CommentDTO;
 import com.Uniquest.UniQuest.dto.CommentResponseDTO;
 import com.Uniquest.UniQuest.dto.LikeDTO;
@@ -8,6 +9,7 @@ import com.Uniquest.UniQuest.service.InteractionUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,10 +20,10 @@ public class InteractionController {
     private final InteractionUserService interactionUserService;
 
     @PostMapping("/like")
-    public ResponseEntity<String> likeExam(@RequestBody LikeDTO likeDTO) {
+    public ResponseEntity<String> likeExam(@AuthenticationPrincipal User userPrincipal, @RequestBody LikeDTO likeDTO) {
         System.out.println("DTO recebido: " + likeDTO);
 
-        String userId = likeDTO.userId();
+        String userId = userPrincipal.getId();
         Long examId = likeDTO.examID();
 
         if (examId == null) {
@@ -34,10 +36,10 @@ public class InteractionController {
 
 
     @PostMapping("/comment")
-    public ResponseEntity<String> addComment(@RequestBody CommentDTO commentDTO) {
+    public ResponseEntity<String> addComment(@AuthenticationPrincipal User userPrincipal, @RequestBody CommentDTO commentDTO) {
         try {
             interactionUserService.addComment(
-                    commentDTO.userId(),
+                    userPrincipal.getId(),
                     commentDTO.examId(),
                     commentDTO.text()
             );
