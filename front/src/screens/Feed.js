@@ -332,7 +332,7 @@ const Feed = () => {
           </Card>
         );
 
-      case 'texto':
+      case 'text':
         return post.questions?.map((question, index) => (
           <Box key={index} sx={{
             mb: 2,
@@ -346,7 +346,7 @@ const Feed = () => {
               fontWeight: 500,
               color: '#2d3436'
             }}>
-              Questão {index + 1}: {question.text}
+              Questão {index + 1}: {question.statement}
             </Typography>
 
             {question.type === 'objetiva' && (
@@ -496,7 +496,7 @@ const Feed = () => {
               const finalPayload = {
                 text: formattedQuestions
               };
-              
+              console.log(finalPayload)
               const response = await axiosInstance.post("/exam/upload/text", {
                 title: newPost.title,
                 description: newPost.description,
