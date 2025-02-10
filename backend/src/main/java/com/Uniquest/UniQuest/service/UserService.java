@@ -4,6 +4,8 @@ import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.user.UserProfileAvatarDTO;
 import com.Uniquest.UniQuest.dto.user.UserEditProfileDTO;
 import com.Uniquest.UniQuest.dto.user.UserProfileDTO;
+import com.Uniquest.UniQuest.exceptions.ImageProcessingException;
+import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +24,13 @@ public class UserService {
         Optional<User> optionalUser = userRepository.findById(userID);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+            user.setUsername(updateUserProfile.username());
             user.setEducation(updateUserProfile.education());
             user.setFavoriteSubject(updateUserProfile.favoriteSubject());
             user.setAreaOfInterest(updateUserProfile.areaOfInterest());
             return userRepository.save(user); // Salva no banco de dados
         } else {
-            throw new RuntimeException("Perfil não encontrado para o usuário com ID " + userID);
+            throw new UserNotFoundException("Perfil não encontrado para o usuário com ID " + userID);
         }
     }
 
@@ -42,19 +45,19 @@ public class UserService {
                 byte[] avatarBytes = avatarFileDTO.avatarFile().getBytes();
                 userProfile.setAvatar(avatarBytes); // Converte a imagem para bytes
             } catch (IOException e) {
-                throw new RuntimeException("Erro ao processar a imagem", e);
+                throw new ImageProcessingException("Erro ao processar a imagem para o usuário com ID " + userProfile.getId());
             }
 
             // Salva o usuário atualizado no banco de dados
             return userRepository.save(userProfile);
         } else {
-            throw new RuntimeException("Perfil não encontrado para o usuário com ID " + userID);
+            throw new UserNotFoundException("Perfil não encontrado para o usuário com ID " + userID);
         }
     }
 
     public void deleteUserAvatar(String userID) {
         User userProfile = userRepository.findById(userID)
-                .orElseThrow(() -> new RuntimeException("Perfil não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Perfil não encontrado para o usuário com ID " + userID));;
         // Definir o avatar como null para "deletar" o avatar
         userProfile.setAvatar(null);
         // Salvar as alterações no banco de dados
@@ -62,7 +65,7 @@ public class UserService {
     }
 
     public UserProfileDTO getUserById(String id){
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
 
         return new UserProfileDTO(
                 user.getName(),

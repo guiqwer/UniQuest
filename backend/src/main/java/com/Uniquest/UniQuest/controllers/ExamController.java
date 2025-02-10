@@ -118,10 +118,14 @@ public class ExamController {
     }
 
     @PostMapping("/list")
-    public ResponseEntity<List<ExamListResponseDTO>> getAllExams(@RequestBody ExamListRequestDTO request) {
+    public ResponseEntity<List<ExamListResponseDTO>> getAllExams(@RequestBody ExamListRequestDTO request,
+                                                                 @AuthenticationPrincipal User user) {
+        String   userId = user != null ? user.getId() : null; // Se o usuário não estiver autenticado, userId será null
         List<Exam> exams = examService.getAllExamsWithFilters(request);
-        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams, userId);
         return ResponseEntity.ok(examDTOs);
     }
+
+
 
 }
