@@ -1,11 +1,12 @@
 package com.Uniquest.UniQuest.controllers;
 
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.LoginRequestDTO;
-import com.Uniquest.UniQuest.dto.ResponseDTO;
+import com.Uniquest.UniQuest.dto.auth.LoginRequestDTO;
+import com.Uniquest.UniQuest.dto.common.ResponseDTO;
 import com.Uniquest.UniQuest.exceptions.IncorrectPasswordException;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,20 +19,12 @@ import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
     private final UserRepository repository;
-    @Autowired
     private final PasswordEncoder passwordEncoder;
-    @Autowired
     private final TokenService tokenService;
-
-    public AuthController(UserRepository repository, PasswordEncoder passwordEncoder, TokenService tokenService) {
-        this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
-    }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginRequestDTO body){

@@ -1,44 +1,35 @@
 package com.Uniquest.UniQuest.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public void sendPasswordResetEmail(String to, String resetCode) {
+        sendEmail(to, "Código de Redefinição de Senha", "Seu código de redefinição de senha é: " + resetCode);
     }
 
-    //Codigo para trocar a senha
-    public void sendPasswordResetEmail(String to, String resetCode) {
+    public void sendCodeChangeEmail(String to, String code) {
+        sendEmail(to, "Código para Troca de Email", "Seu código de troca de email é: " + code);
+    }
+
+    private void sendEmail(String to, String subject, String content) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
             helper.setTo(to);
-            helper.setSubject("Código de Redefinição de Senha");
-            helper.setText("Seu código de redefinição de senha é: " + resetCode);
+            helper.setSubject(subject);
+            helper.setText(content);
             mailSender.send(message);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    //Código para trocar o email
-    public void sendCodeChangeEmail(String to, String code){
-        try{
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
-            helper.setTo(to);
-            helper.setSubject("Código para Troca de Email");
-            helper.setText("Seu código de Troca de Email é: " + code);
-            mailSender.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao enviar e-mail para: " + to, e);
         }
     }
 }

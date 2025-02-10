@@ -1,7 +1,7 @@
 package com.Uniquest.UniQuest.ai.service;
 
 import com.Uniquest.UniQuest.ai.client.GroqChatClient;
-import com.Uniquest.UniQuest.dto.QuestionDTO;
+import com.Uniquest.UniQuest.dto.question.QuestionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

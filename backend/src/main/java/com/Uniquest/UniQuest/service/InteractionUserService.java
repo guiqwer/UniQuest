@@ -4,7 +4,7 @@ import com.Uniquest.UniQuest.domain.exam.Exam;
 import com.Uniquest.UniQuest.domain.user.CommentUser;
 import com.Uniquest.UniQuest.domain.user.LikeUser;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.CommentResponseDTO;
+import com.Uniquest.UniQuest.dto.comment.CommentResponseDTO;
 import com.Uniquest.UniQuest.repositories.CommentRepository;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
 import com.Uniquest.UniQuest.repositories.LikeUserRepository;
@@ -25,7 +25,6 @@ public class InteractionUserService {
     private final UserRepository userRepository;
     private final ExamRepository examRepository;
     private final CommentRepository commentRepository;
-
 
     @Transactional
     public String toggleLike(String userId, Long examId) {
@@ -156,8 +155,6 @@ public class InteractionUserService {
                 ))
                 .collect(Collectors.toList());
     }
-
-
 }
 
 

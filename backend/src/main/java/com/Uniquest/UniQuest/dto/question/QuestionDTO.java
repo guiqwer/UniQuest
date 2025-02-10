@@ -1,11 +1,7 @@
-package com.Uniquest.UniQuest.dto;
+package com.Uniquest.UniQuest.dto.question;
 
-import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import jakarta.annotation.Nullable;
-import lombok.Data;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 
