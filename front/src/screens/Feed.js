@@ -128,31 +128,48 @@ const Feed = () => {
     }));
   };
 
-  const handleLike = (postId) => {
-    setPosts(
-      posts.map((post) =>
+  const handleLike = async (postId) => {
+    try {
+      // Faz a requisição para a API
+      const response = await axiosInstance.post("/interaction/like", { id: postId });
+  
+      // Atualiza o estado com base no retorno da API
+      setPosts(posts.map((post) =>
         post.id === postId
           ? {
             ...post,
-            liked: !post.liked,
-            likes: post.likes + (post.liked ? -1 : 1),
+            liked: response.data.isLiked, // Usa o valor retornado pela API
+            likes: response.data.isLiked ? post.likes + 1 : post.likes - 1, // Atualiza corretamente as curtidas
           }
           : post
-      )
-    );
+      ));
+    } catch (error) {
+      console.error("Erro ao curtir o post:", error);
+    }
   };
-
-  const handleAddComment = (postId, comment) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? {
-            ...post,
-            comments: [...(post.comments || []), comment],
-          }
-          : post
-      )
-    );
+  
+  const handleAddComment = async (postId, commentText) => {
+    try {
+      const response = await axiosInstance.post("/interaction/comment", {
+        examId: postId,
+        text: commentText,
+      });
+  
+      if (response.status === 200) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  comments: [...(post.comments || []), { text: commentText }],
+                }
+              : post
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar comentário:", error);
+    }
   };
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
@@ -181,74 +198,6 @@ const Feed = () => {
       }
       return post;
     }));
-  };
-  
-  
-  const handleOpenAnswer = (postId, questionIndex, answer) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        const updatedQuestions = post.data.questions.map((q, qIndex) => {
-          if (qIndex === questionIndex) {
-            return { ...q, userAnswer: answer };
-          }
-          return q;
-        });
-  
-        return { ...post, data: { ...post.data, questions: updatedQuestions } };
-      }
-      return post;
-    }));
-  };
-
-
-  const isPostValid = () => {
-    const hasInvalidQuestions = newPost.questions.some(question =>
-      question.type === 'objetiva' && question.correctOption === null
-    );
-    return !hasInvalidQuestions;
-  };
-
-  const handleAddPost = () => {
-    if (!isPostValid()) {
-      setError("Por favor, defina a resposta correta para todas as questões objetivas.");
-      return;
-    }
-
-    setError(null); // Limpa o erro
-
-    const hasContent =
-      newPost.title ||
-      newPost.description ||
-      newPost.image ||
-      newPost.file ||
-      (newPost.questions && newPost.questions.length > 0);
-
-    if (hasContent) {
-      const post = {
-        id: posts.length + 1,
-        user: "Usuário Atual",
-        avatar: "https://via.placeholder.com/150",
-        ...newPost,
-        type: postType,
-        fileName: newPost.file?.name || 'documento.pdf',
-        likes: 0,
-        comments: [],
-        liked: false,
-        date: "Agora mesmo",
-      };
-      setPosts([post, ...posts]);
-      setNewPost({
-        title: "",
-        image: "",
-        description: "",
-        tags: [],
-        questions: [],
-        file: null,
-        fileURL: ""
-      });
-      setOpenNewPostModal(false);
-      setPostType(null);
-    }
   };
 
   const renderPostContent = (post) => {
@@ -649,11 +598,7 @@ const Feed = () => {
               }}
             >
               <IconButton onClick={() => handleLike(post.id)}>
-                {post.liked ? (
-                  <Favorite sx={{ color: "#ff1744" }} />
-                ) : (
-                  <FavoriteBorder sx={{ color: "#636e72" }} />
-                )}
+                {post.liked ? <Favorite sx={{ color: "#ff1744" }} /> : <FavoriteBorder sx={{ color: "#636e72" }} />}
               </IconButton>
               <IconButton onClick={() => toggleComments(post.id)}>
                 <Comment sx={{ color: openComments[post.id] ? "#1976d2" : "#636e72" }} />
@@ -671,7 +616,7 @@ const Feed = () => {
                     <Avatar src={comment.avatar} sx={{ width: 40, height: 40 }} />
                     <Box>
                       <Typography variant="subtitle2" color="#2d3436">
-                        {comment.user}
+                        {comment.userName}
                       </Typography>
                       <Typography variant="body2" color="#636e72">
                         {comment.text}
@@ -686,12 +631,7 @@ const Feed = () => {
                   size="small"
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && e.target.value) {
-                      handleAddComment(post.id, {
-                        user: "Você",
-                        text: e.target.value,
-                        avatar: "https://via.placeholder.com/150",
-                      });
-                      e.target.value = "";
+                      handleAddComment(post.id, e.target.value);
                     }
                   }}
                   sx={{ mt: 1.5 }}
