@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   FavoriteBorder, Favorite, AddPhotoAlternate,
-  Comment, Close, MoreVert, Check, Clear
+  Comment, Close, MoreVert
 } from "@mui/icons-material";
 
 import { styled } from "@mui/material/styles";
@@ -16,7 +16,6 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import { axiosMultipart, axiosInstance } from "../axios";
-import { Newspaper } from "lucide-react";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PostCard = styled(Card)(({ theme }) => ({
@@ -26,9 +25,8 @@ const PostCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(3),
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-  },
+  transform: "translateY(-2px)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",},
 }));
 
 const Feed = ({ filter }) => {
@@ -50,14 +48,9 @@ const Feed = ({ filter }) => {
   const [openNewPostModal, setOpenNewPostModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
-  const [fileURL, setFileURL] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(false);
   
-  const normalizeTags = (tags) => {
-    return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
-  };
-  
-useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.post("/exam/list", {
@@ -105,6 +98,9 @@ useEffect(() => {
 }, [refreshTrigger, filter]); // O useEffect será executado sempre que refreshTrigger mudar
 
 
+  const normalizeTags = (tags) => {
+    return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
+  };
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
     setAnchorEl(null);
@@ -145,12 +141,12 @@ useEffect(() => {
         );
 
         setRefreshTrigger(prev => !prev); // Atualiza o feed automaticamente
-    } catch (error) {
+      } catch (error) {
         console.error("Erro ao curtir o post:", error);
-    }
-};
+      }
+  };
   
-const handleAddComment = async (postId, commentText) => {
+  const handleAddComment = async (postId, commentText) => {
   try {
       const response = await axiosInstance.post("/interaction/comment", {
           examId: postId,
@@ -170,11 +166,11 @@ const handleAddComment = async (postId, commentText) => {
           );
 
           setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
-      }
-  } catch (error) {
+        }
+      } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
-  }
-};
+    }
+  };
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
     setPosts(prevPosts => prevPosts.map(post => {
@@ -213,15 +209,15 @@ const handleAddComment = async (postId, commentText) => {
               position: 'relative',
               mb: 2,
               width: '100%',
-              maxWidth: '700px', // Largura máxima ajustada
-              height: '600px', // Altura ajustada
+              maxWidth: '700px', 
+              height: '600px', 
               overflow: 'hidden',
               borderRadius: '8px',
               backgroundColor: '#f8f9fa',
               display: 'flex',
-              justifyContent: 'center', // Centraliza horizontalmente
-              alignItems: 'center', // Centraliza verticalmente
-              margin: 'auto', // Garante centralização no contêiner pai
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              margin: 'auto', 
               }}
               >
             <CardMedia
@@ -231,7 +227,7 @@ const handleAddComment = async (postId, commentText) => {
               sx={{
                 maxWidth: '100%',
                 maxHeight: '100%',
-                objectFit: 'contain', // Mantém proporções sem cortar
+                objectFit: 'contain', 
               }}
             />
           </Box>);
