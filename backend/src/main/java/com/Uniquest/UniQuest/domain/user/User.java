@@ -22,7 +22,7 @@ public class User {
     private String areaOfInterest;
     private String favoriteSubject;
 
-    @Lob // Marcar que é binário
+    
     @Column(columnDefinition = "BYTEA") // Definição específica pro Postgres
     private byte[] avatar;
 
