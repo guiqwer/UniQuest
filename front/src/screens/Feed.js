@@ -51,12 +51,13 @@ const Feed = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [fileURL, setFileURL] = useState("");
-
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
+  
   const normalizeTags = (tags) => {
     return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
   };
   
-  useEffect(() => {
+useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.post("/exam/list", {
@@ -64,12 +65,11 @@ const Feed = () => {
           title: "",
           description: ""
         });
-  
+
         const formattedData = response.data.map(post => {
           let fileURL = "";
-  
+
           if (post.data && post.type === "pdf") {
-            // PDF: Converter base64 para Blob e criar URL
             const byteCharacters = atob(post.data);
             const byteNumbers = new Uint8Array(byteCharacters.length);
             for (let i = 0; i < byteCharacters.length; i++) {
@@ -78,12 +78,11 @@ const Feed = () => {
             const blob = new Blob([byteNumbers], { type: "application/pdf" });
             fileURL = URL.createObjectURL(blob);
           }
-  
+
           if (post.data && post.type === "image") {
-            // Imagem: Criar Data URL
-            fileURL = `data:image/png;base64,${post.data}`; // Substitua "png" conforme necessário
+            fileURL = `data:image/png;base64,${post.data}`;
           }
-  
+
           return {
             ...post,
             tags: normalizeTags(post.tags),
@@ -92,18 +91,19 @@ const Feed = () => {
             likes: post.likesCount,
             liked: false,
             date: "Agora mesmo",
-            fileURL, // URL do arquivo gerado
+            fileURL,
           };
         });
-  
+
         setPosts(formattedData);
       } catch (error) {
         console.error("Erro ao buscar os dados:", error);
       }
     };
-  
+
     fetchData();
-  }, []);
+}, [refreshTrigger]); // O useEffect será executado sempre que refreshTrigger mudar
+
 
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
@@ -130,47 +130,51 @@ const Feed = () => {
 
   const handleLike = async (postId) => {
     try {
-      // Faz a requisição para a API
-      const response = await axiosInstance.post("/interaction/like", { id: postId });
-  
-      // Atualiza o estado com base no retorno da API
-      setPosts(posts.map((post) =>
-        post.id === postId
-          ? {
-            ...post,
-            liked: response.data.isLiked, // Usa o valor retornado pela API
-            likes: response.data.isLiked ? post.likes + 1 : post.likes - 1, // Atualiza corretamente as curtidas
-          }
-          : post
-      ));
-    } catch (error) {
-      console.error("Erro ao curtir o post:", error);
-    }
-  };
-  
-  const handleAddComment = async (postId, commentText) => {
-    try {
-      const response = await axiosInstance.post("/interaction/comment", {
-        examId: postId,
-        text: commentText,
-      });
-  
-      if (response.status === 200) {
+        const response = await axiosInstance.post("/interaction/like", { examID: postId });
+
         setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  comments: [...(post.comments || []), { text: commentText }],
-                }
-              : post
-          )
+            prevPosts.map((post) =>
+                post.id === postId
+                    ? {
+                        ...post,
+                        liked: response.data.isLiked,
+                        likes: response.data.isLiked ? post.likes + 1 : post.likes - 1,
+                    }
+                    : post
+            )
         );
-      }
+
+        setRefreshTrigger(prev => !prev); // Atualiza o feed automaticamente
     } catch (error) {
-      console.error("Erro ao adicionar comentário:", error);
+        console.error("Erro ao curtir o post:", error);
     }
-  };
+};
+  
+const handleAddComment = async (postId, commentText) => {
+  try {
+      const response = await axiosInstance.post("/interaction/comment", {
+          examId: postId,
+          text: commentText,
+      });
+
+      if (response.status === 200) {
+          setPosts((prevPosts) =>
+              prevPosts.map((post) =>
+                  post.id === postId
+                      ? {
+                          ...post,
+                          comments: [...(post.comments || []), { text: commentText }],
+                      }
+                      : post
+              )
+          );
+
+          setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
+      }
+  } catch (error) {
+      console.error("Erro ao adicionar comentário:", error);
+  }
+};
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
     setPosts(prevPosts => prevPosts.map(post => {
@@ -418,78 +422,82 @@ const Feed = () => {
   };
 
   const handleSubmitPost = async (event) => {
-          event.preventDefault();
-          console.log(newPost.questions)
-          try {
-            if (postType === "pdf") {
-              const response = await axiosMultipart.post("/exam/upload/pdf", {
+    event.preventDefault();
+
+    try {
+        let response;
+
+        if (postType === "pdf") {
+            response = await axiosMultipart.post("/exam/upload/pdf", {
                 title: newPost.title,
                 description: newPost.description,
                 tags: newPost.tags,
                 file: newPost.file
-            });}
-            if (postType === "imagem") {
-              const response = await axiosMultipart.post("/exam/upload/image", {
+            });
+        } else if (postType === "imagem") {
+            response = await axiosMultipart.post("/exam/upload/image", {
                 title: newPost.title,
                 description: newPost.description,
                 tags: newPost.tags,
                 file: newPost.image
-            });}
-            if (postType === "texto") {
-              const formattedQuestions = newPost.questions.map((question, index) => {
+            });
+        } else if (postType === "texto") {
+            const formattedQuestions = newPost.questions.map((question, index) => {
                 const formattedQuestion = {
-                  type: question.type === "objetiva" ? "objective" : "discursive",
-                  order: index + 1,
-                  statement: question.text
+                    type: question.type === "objetiva" ? "objective" : "discursive",
+                    order: index + 1,
+                    statement: question.text
                 };
-            
+
                 if (question.type === "objetiva") {
-                  formattedQuestion.options = question.options?.reduce((acc, option, i) => {
-                    acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
-                    return acc;
-                  }, {});
-            
-                  // Se uma opção correta foi escolhida, associar ao seu identificador (A, B, C...)
-                  formattedQuestion.correctAnswer =
-                    question.correctOption !== undefined
-                      ? String.fromCharCode(65 + question.correctOption)
-                      : "";
+                    formattedQuestion.options = question.options?.reduce((acc, option, i) => {
+                        acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
+                        return acc;
+                    }, {});
+
+                    formattedQuestion.correctAnswer =
+                        question.correctOption !== undefined
+                            ? String.fromCharCode(65 + question.correctOption)
+                            : "";
                 } else {
-                  formattedQuestion.correctAnswer = question.correctAnswer || "";
+                    formattedQuestion.correctAnswer = question.correctAnswer || "";
                 }
-            
+
                 return formattedQuestion;
-              });
-            
-              const finalPayload = {
-                text: formattedQuestions
-              };
-            
-              console.log(finalPayload);
-            
-              const response = await axiosInstance.post("/exam/upload/text", {
+            });
+
+            response = await axiosInstance.post("/exam/upload/text", {
                 title: newPost.title,
                 description: newPost.description,
                 tags: newPost.tags,
-                text: finalPayload.text
-              });
-            }
-          } catch (error) {
-              setError("Erro ao enviar a prova. Tente novamente.");
-              console.error("Erro no cadastro:", error);
-          }
-          setNewPost({
-            title: "",
-            image: "",
-            description: "",
-            tags: [],
-            questions: [],
-            file: null,
-            fileURL: ""
-          });
-          setOpenNewPostModal(false);
-          setPostType(null);
-      };
+                text: formattedQuestions
+            });
+        }
+
+        if (response.status === 200) {
+            setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
+        }
+
+    } catch (error) {
+        setError("Erro ao enviar a prova. Tente novamente.");
+        console.error("Erro no cadastro:", error);
+    }
+
+    setNewPost({
+        title: "",
+        image: "",
+        description: "",
+        tags: [],
+        questions: [],
+        file: null,
+        fileURL: ""
+    });
+
+    setOpenNewPostModal(false);
+    setPostType(null);
+};
+
+
   return (
     <Box
       sx={{
@@ -632,6 +640,7 @@ const Feed = () => {
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && e.target.value) {
                       handleAddComment(post.id, e.target.value);
+                      e.target.value=""
                     }
                   }}
                   sx={{ mt: 1.5 }}
