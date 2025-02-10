@@ -31,7 +31,7 @@ const PostCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const Feed = () => {
+const Feed = ({ filter }) => {
   const [error, setError] = useState(null);
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({
@@ -62,10 +62,10 @@ useEffect(() => {
       try {
         const response = await axiosInstance.post("/exam/list", {
           tags: [],
-          title: "",
-          description: ""
+          title: filter || "",
+          description: "",
         });
-
+        console.log(filter)
         const formattedData = response.data.map(post => {
           let fileURL = "";
 
@@ -102,7 +102,7 @@ useEffect(() => {
     };
 
     fetchData();
-}, [refreshTrigger]); // O useEffect será executado sempre que refreshTrigger mudar
+}, [refreshTrigger, filter]); // O useEffect será executado sempre que refreshTrigger mudar
 
 
   const handleDeletePost = (postId) => {

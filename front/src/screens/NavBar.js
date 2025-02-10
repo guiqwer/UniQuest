@@ -44,7 +44,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function NavBar({ navigate }) {
+export default function NavBar({ navigate, setFilter }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openProfile, setOpenProfile] = useState(false);
 
@@ -59,6 +59,11 @@ export default function NavBar({ navigate }) {
   const handleCloseProfile = () => {
     setOpenProfile(false);
   };
+
+  const handleInputChange = (event) => {
+    setFilter(event.target.value); // Atualiza o estado do filtro
+  };
+
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -99,6 +104,7 @@ export default function NavBar({ navigate }) {
                 placeholder="Buscar provas, matérias ou usuários..."
                 inputProps={{ 'aria-label': 'search' }}
                 sx={{ color: '#333', flexGrow: 1 }}
+                onChange={handleInputChange}
               />
             </SearchContainer>
           </Box>

@@ -9,6 +9,7 @@ import Profile from "./screens/components/Profile";
 
 const App = () => {
   const [screen, setScreen] = useState("feed");
+  const [filter, setFilter] = useState(null);
 
   const navigate = (page) => {
     setScreen(page);
@@ -21,8 +22,8 @@ const App = () => {
       {screen === "signup" && <SignUp navigate={navigate} />}
       {screen === "feed" && (
         <>
-          <NavBar navigate={navigate} />
-          <Feed />
+          <NavBar navigate={navigate} setFilter={setFilter} />
+          <Feed filter={filter}/>
         </>
       )}
       {screen === "navbar" && <NavBar navigate={navigate} />}
