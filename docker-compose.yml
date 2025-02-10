@@ -1,0 +1,36 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend:/backend
+    logging:
+      options:
+        max-size: 10m
+    networks: 
+      - uninet
+  
+  psql:
+    container_name: psql
+    image: postgres:alpine3.19
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_DB: uniquestdb
+      POSTGRES_PASSWORD: 123456
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    networks: 
+      - uninet
+
+networks:  
+  uninet:
+    driver: bridge
