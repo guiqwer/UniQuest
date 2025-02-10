@@ -16,6 +16,7 @@ import com.Uniquest.UniQuest.dto.question.QuestionDTO;
 import com.Uniquest.UniQuest.exceptions.ServerErrorException;
 import com.Uniquest.UniQuest.repositories.ExamCustomRepository;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
+import com.Uniquest.UniQuest.repositories.LikeUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +37,7 @@ public class ExamService {
     private final ExamCustomRepository examCustomRepository;
     private final InteractionUserService interactionUserService;
     private final GroqChatService groqChatService;
+    private final LikeUserRepository likeUserRepository;
 
 
     public void uploadImageExam(String title, String description, List<String> tags, MultipartFile file, User loggedUser) throws IOException {
@@ -134,13 +136,12 @@ public class ExamService {
         return type;
     }
 
-    public List<ExamListResponseDTO> convertExamsToDTOs(List<Exam> exams) {
+    public List<ExamListResponseDTO> convertExamsToDTOs(List<Exam> exams, String userId) {
         return exams.stream().map(exam -> {
             List<CommentResponseDTO> comments = interactionUserService.getCommentsByExam(exam.getId()); // Busca os comentários
             String typeExam = getTypeExam(exam);
 
             Object examData = null;
-            
             if (exam instanceof ExamText) {
                 examData = exam;
             } else if (exam instanceof ExamImage) {
@@ -154,6 +155,10 @@ public class ExamService {
                     examData = Base64.getEncoder().encodeToString(examPdf.getPdfData());
                 }
             }
+
+            // Verifica se o usuário deu like na prova
+            boolean itsLiked = userId != null && likeUserRepository.hasUserLikedExam(userId, exam.getId());
+
             return new ExamListResponseDTO(
                     exam.getId(),
                     exam.getTitle(),
@@ -163,10 +168,15 @@ public class ExamService {
                     exam.getLikesCount(),
                     comments,
                     typeExam,
+                    itsLiked,
                     examData
+                     // Adicionando no DTO
             );
         }).collect(Collectors.toList());
     }
+
+
+
 
 //    private ObjectiveQuestion convertToQuestion(QuestionDTO dto, ExamText examText) {
 //        ObjectiveQuestion question = new ObjectiveQuestion();
