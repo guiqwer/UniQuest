@@ -1,10 +1,8 @@
 package com.Uniquest.UniQuest.controllers;
 
-import com.Uniquest.UniQuest.domain.user.CommentUser;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.CommentDTO;
-import com.Uniquest.UniQuest.dto.CommentResponseDTO;
-import com.Uniquest.UniQuest.dto.LikeDTO;
+import com.Uniquest.UniQuest.dto.comment.CommentDTO;
+import com.Uniquest.UniQuest.dto.like.LikeDTO;
 import com.Uniquest.UniQuest.service.InteractionUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,7 +32,6 @@ public class InteractionController {
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/comment")
     public ResponseEntity<String> addComment(@AuthenticationPrincipal User userPrincipal, @RequestBody CommentDTO commentDTO) {
         try {
@@ -51,15 +48,5 @@ public class InteractionController {
                     .body("Erro ao adicionar comentário: " + e.getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-
 }
 

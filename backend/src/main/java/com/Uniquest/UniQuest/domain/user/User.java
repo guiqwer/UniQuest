@@ -8,8 +8,6 @@ import java.util.Optional;
 @Entity
 @Data
 @Table(name = "\"user\"")
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {

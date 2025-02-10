@@ -1,4 +1,4 @@
-package com.Uniquest.UniQuest.dto;
+package com.Uniquest.UniQuest.dto.question;
 
 import lombok.Data;
 

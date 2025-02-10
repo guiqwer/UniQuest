@@ -30,6 +30,8 @@ public class UserNotFoundException extends RuntimeException implements HttpExcep
         super(message, cause);
     }
 
+
+
     @Override
     public HttpStatus getDefaultCode() {
         return DEFAULT_CODE;

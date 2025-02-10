@@ -1,6 +1,6 @@
-package com.Uniquest.UniQuest.dto;
+package com.Uniquest.UniQuest.dto.exam;
 
-import com.Uniquest.UniQuest.domain.exam.Exam;
+import com.Uniquest.UniQuest.dto.comment.CommentResponseDTO;
 
 import java.util.List;
 
