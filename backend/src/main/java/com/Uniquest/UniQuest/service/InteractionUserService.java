@@ -5,6 +5,9 @@ import com.Uniquest.UniQuest.domain.user.CommentUser;
 import com.Uniquest.UniQuest.domain.user.LikeUser;
 import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.comment.CommentResponseDTO;
+import com.Uniquest.UniQuest.exceptions.InvalidInputException;
+import com.Uniquest.UniQuest.exceptions.ExamNotFoundException;
+import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 import com.Uniquest.UniQuest.repositories.CommentRepository;
 import com.Uniquest.UniQuest.repositories.ExamRepository;
 import com.Uniquest.UniQuest.repositories.LikeUserRepository;
@@ -28,31 +31,21 @@ public class InteractionUserService {
 
     @Transactional
     public String toggleLike(String userId, Long examId) {
-        // Verificação de null ou vazio para userId e examId
         if (userId == null || userId.isEmpty()) {
-            return "O userId não pode ser nulo ou vazio.";
+            throw new InvalidInputException("O userId não pode ser nulo ou vazio.");
         }
         if (examId == null) {
-            return "O examId não pode ser nulo.";
+            throw new InvalidInputException("O examId não pode ser nulo.");
         }
 
-        // Busca o usuário e o exame no banco de dados
-        Optional<User> userOpt = userRepository.findById(userId);
-        Optional<Exam> examOpt = examRepository.findById(examId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new ExamNotFoundException("Exame não encontrado."));
 
-        // Verifica se o usuário e o exame existem
-        if (userOpt.isEmpty() || examOpt.isEmpty()) {
-            return "Usuário ou exame não encontrado.";
-        }
-
-        User user = userOpt.get();
-        Exam exam = examOpt.get();
-
-        // Verifica se já existe uma interação entre o usuário e o exame
         Optional<LikeUser> interactionOpt = likeUserRepository.findByUserAndExam(user, exam);
 
         if (interactionOpt.isPresent()) {
-            // Se já existe uma interação, atualiza o status do "like"
             LikeUser interaction = interactionOpt.get();
             if (interaction.isLiked()) {
                 interaction.setLiked(false);
@@ -61,29 +54,27 @@ public class InteractionUserService {
                 interaction.setLiked(true);
                 exam.setLikesCount(exam.getLikesCount() + 1);
             }
-            likeUserRepository.save(interaction);  // Salva a interação atualizada
+            likeUserRepository.save(interaction);
         } else {
-            // Se não existe interação, cria uma nova
             LikeUser newInteraction = new LikeUser();
             newInteraction.setUser(user);
             newInteraction.setExam(exam);
-            newInteraction.setLiked(true);  // Define que o usuário curtiu
+            newInteraction.setLiked(true);
             exam.setLikesCount(exam.getLikesCount() + 1);
-            likeUserRepository.save(newInteraction);  // Salva a nova interação
+            likeUserRepository.save(newInteraction);
         }
 
-        // Salva o exame com o número atualizado de likes
         examRepository.save(exam);
-
         return "Like atualizado com sucesso!";
     }
+
 
     @Transactional
     public CommentUser addComment(String userId, Long examId, String text) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new RuntimeException("Exame não encontrado"));
+                .orElseThrow(() -> new ExamNotFoundException("Exame não encontrado."));
 
         CommentUser commentUser = new CommentUser();
         commentUser.setUser(user);
@@ -121,7 +112,7 @@ public class InteractionUserService {
 
     public List<Exam> getExamsLikedByUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
 
         List<LikeUser> likes = likeUserRepository.findByUserAndLikedTrue(user);
 
@@ -131,7 +122,7 @@ public class InteractionUserService {
 
     public List<Exam> getExamsCommentedByUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
 
         List<CommentUser> comments = commentRepository.findByUser(user);
 
@@ -143,7 +134,7 @@ public class InteractionUserService {
 
     public List<CommentResponseDTO> getCommentsByExam(Long examId) {
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new RuntimeException("Exame não encontrado"));
+                .orElseThrow(() -> new ExamNotFoundException("Exame não encontrado."));
 
         List<CommentUser> comments = commentRepository.findByExam(exam);
 
