@@ -126,6 +126,15 @@ public class UserController {
         return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        var codeOpt = passwordResetService.createPasswordResetCode(email);
+        if (codeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Email não encontrado.");
+        }
+        return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
+    }
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
@@ -140,31 +149,34 @@ public class UserController {
 
     @GetMapping("/my-exams")
     public ResponseEntity<List<ExamListResponseDTO>> getUserExams(@AuthenticationPrincipal User userPrincipal) {
-        List<Exam> exams = examService.getExamsByUser(userPrincipal.getId()); // Busca as provas do usuário
+        String userId = userPrincipal.getId(); // Agora garantindo que é String
+        List<Exam> exams = examService.getExamsByUser(userId); // Busca as provas do usuário
 
-        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(exams, userId);
 
         return ResponseEntity.ok(examDTOs);
     }
 
     @GetMapping("my-liked-exams")
     public ResponseEntity<List<ExamListResponseDTO>> getLikedExams(@AuthenticationPrincipal User userPrincipal) {
-        List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userPrincipal.getId());
+        String userId = userPrincipal.getId();
+        List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
 
-        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(likedExams, userId);
 
         return ResponseEntity.ok(examDTOs);
-
     }
 
     @GetMapping("/my-comments-exams")
     public ResponseEntity<List<ExamListResponseDTO>> getCommentedExams(@AuthenticationPrincipal User userPrincipal) {
-        List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userPrincipal.getId());
+        String userId = userPrincipal.getId();
+        List<Exam> commentedExams = interactionUserService.getExamsCommentedByUser(userId);
 
-        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams);
+        List<ExamListResponseDTO> examDTOs = examService.convertExamsToDTOs(commentedExams, userId);
 
         return ResponseEntity.ok(examDTOs);
     }
+
 
     // Endpoint para iniciar a solicitação de troca de e-mail
     @PostMapping("/request-change")

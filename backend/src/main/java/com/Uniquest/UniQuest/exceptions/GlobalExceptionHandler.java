@@ -25,7 +25,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEmailAlreadyExists(EmailAlreadyExistsException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
-
     @ExceptionHandler(EmailChangeProcessException.class)
     public ResponseEntity<String> handleEmailChangeProcess(EmailChangeProcessException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -39,9 +38,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEmailMismatch(EmailMismatchException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
-
     @ExceptionHandler(EmailChangeFailedException.class)
     public ResponseEntity<String> handleEmailChangeFailed(EmailChangeFailedException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    }
+    @ExceptionHandler(PasswordResetCodeNotFoundException.class)
+    public ResponseEntity<String> handlePasswordResetCodeNotFoundException(PasswordResetCodeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+    @ExceptionHandler(ExpiredResetCodeException.class)
+    public ResponseEntity<String> handleExpiredResetCodeException(ExpiredResetCodeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+    @ExceptionHandler(PasswordResetEmailException.class)
+    public ResponseEntity<String> handlePasswordResetEmailException(PasswordResetEmailException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<String> handleInvalidInputException(InvalidInputException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+    @ExceptionHandler(ExamNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFoundException(ExamNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor: " + ex.getMessage());
     }
 }

@@ -2,12 +2,13 @@ package com.Uniquest.UniQuest.service;
 
 import com.Uniquest.UniQuest.domain.user.PasswordResetCode;
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.exceptions.*;
 import com.Uniquest.UniQuest.repositories.PasswordResetCodeRepository;
 import com.Uniquest.UniQuest.repositories.UserRepository;
-import com.Uniquest.UniQuest.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
@@ -19,10 +20,11 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    // Método para criar o código de redefinição de senha
     public Optional<PasswordResetCode> createPasswordResetCode(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            return Optional.empty();
+            throw new UserNotFoundException("Usuário com e-mail " + email + " não encontrado.");
         }
 
         User user = userOpt.get();
@@ -33,21 +35,22 @@ public class PasswordResetService {
             emailService.sendPasswordResetEmail(user.getEmail(), code.getResetCode());
             return Optional.of(code);
         } catch (Exception e) {
-            e.printStackTrace();
-            return Optional.empty();
+            throw new PasswordResetEmailException("Erro ao enviar o e-mail de redefinição de senha.");
         }
     }
 
+    // Método para redefinir a senha
     public boolean resetPassword(String resetCode, String newPassword) {
         Optional<PasswordResetCode> codeOpt = codeRepository.findByResetCode(resetCode);
         if (codeOpt.isEmpty()) {
-            return false;
+            throw new PasswordResetCodeNotFoundException("Código de redefinição de senha não encontrado.");
         }
 
         PasswordResetCode resetCodeObj = codeOpt.get();
 
+        // Verificando se o código expirou
         if (resetCodeObj.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
-            return false;
+            throw new ExpiredResetCodeException("O código de redefinição de senha expirou.");
         }
 
         User user = resetCodeObj.getUser();
