@@ -6,7 +6,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
     const [error, setError] = useState("");
     const [userData, setUserData] = useState({
         name: "",
-        displayName: "@",
+        displayName: "",
         email: "",
         confirmEmail: "",
         password:"",
@@ -97,7 +97,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                         {userData.name}
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500, color: '#2e7d32', mb: 2 }}>
-                        {userData.displayName}
+                        @{userData.displayName}
                     </Typography>
                     <Avatar 
                         src={userData.avatar}
@@ -158,17 +158,20 @@ const Profile = ({ navigate, handleCloseModal }) => {
                     <TextField fullWidth label="Confirmar Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={editData.confirmPassword} onChange={(e) => setEditData({ ...editData, confirmPassword: e.target.value })} />
                     
                     <TextField select fullWidth label="Escolaridade" variant="outlined" sx={{ mb: 2 }} value={editData.education} onChange={(e) => setEditData({ ...editData, education: e.target.value })}>
+                    <MenuItem value=""></MenuItem>
                         <MenuItem value="Ensino Fundamental">Ensino Fundamental</MenuItem>
                         <MenuItem value="Ensino Médio">Ensino Médio</MenuItem>
                         <MenuItem value="Ensino Superior">Ensino Superior</MenuItem>
                     </TextField>
                     <TextField select fullWidth label="Área de Interesse" variant="outlined" sx={{ mb: 2 }} value={editData.areaOfInterest} onChange={(e) => setEditData({ ...editData, areaOfInterest: e.target.value })}>
+                        <MenuItem value=""></MenuItem>
                         <MenuItem value="Ciências da Computação">Ciências da Computação</MenuItem>
                         <MenuItem value="Eng. da Computação">Eng. da Computação</MenuItem>
                         <MenuItem value="Eng. Ambiental">Eng. Ambiental</MenuItem>
                         <MenuItem value="Ciências Sociais">Ciências Sociais</MenuItem>
                     </TextField>
                     <TextField select fullWidth label="Disciplina favorita" variant="outlined" sx={{ mb: 2 }} value={editData.favoriteSubject} onChange={(e) => setEditData({ ...editData, favoriteSubject: e.target.value })}>
+                        <MenuItem value=""></MenuItem>
                         <MenuItem value="Arq. Computadores">Arq. Computadores</MenuItem>
                         <MenuItem value="Probabilidade e Estatística">Probabilidade e Estatística</MenuItem>
                         <MenuItem value="Programação Orientada a Objetos">Programação Orientada a Objetos</MenuItem>
