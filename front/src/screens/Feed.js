@@ -103,10 +103,10 @@ const Feed = ({ filter }) => {
 
     fetchData();
   }, [refreshTrigger, filter]);
-  
+
   const generateExam = async (postId) => {
     setIsGenerating(true);
-    
+
     try {
       const response = await axiosInstance.post("/exam/generate/text", { id: postId });
       console.log(response.data.ID)
@@ -127,11 +127,11 @@ const Feed = ({ filter }) => {
       setIsGenerating(false);
     }
   };
-  
+
   const normalizeTags = (tags) => {
     return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, ""));
   };
-  
+
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
     setAnchorEl(null);
@@ -541,6 +541,17 @@ const Feed = ({ filter }) => {
               <PostCard key={post.id}>
                 <CardContent>
                   {/* Exibe o ID do post na interface */}
+                  <IconButton
+                    onClick={() => generateExam(post.id)}
+                    disabled={isGenerating}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      "&:hover": { backgroundColor: "rgba(255, 255, 255, 1)" },
+                    }}
+                  ></IconButton>
                   <Typography
                     variant="caption"
                     sx={{ color: "#b2bec3", fontWeight: 600, position: "absolute", top: 8, left: 16 }}
@@ -588,7 +599,7 @@ const Feed = ({ filter }) => {
                     variant="contained"
                     color="primary"
                     onClick={() => generateExam(post.id)}
-                    disabled={isGenerating}
+                    
                     sx={{ mt: 1 }}
                   >
                     {isGenerating ? "Gerando..." : "Gerar Prova"}
