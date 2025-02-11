@@ -125,16 +125,6 @@ public class UserController {
         return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
     }
 
-    @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        var codeOpt = passwordResetService.createPasswordResetCode(email);
-        if (codeOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email não encontrado.");
-        }
-        return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
-    }
-
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
         String resetCode = request.get("resetCode");

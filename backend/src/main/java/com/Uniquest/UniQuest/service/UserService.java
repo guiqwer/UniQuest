@@ -6,6 +6,7 @@ import com.Uniquest.UniQuest.dto.user.UserEditProfileDTO;
 import com.Uniquest.UniQuest.dto.user.UserProfileDTO;
 import com.Uniquest.UniQuest.exceptions.ImageProcessingException;
 import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
+import com.Uniquest.UniQuest.infra.security.SecurityConfig;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +20,26 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final SecurityConfig securityConfig;
 
     //Método para atualizar o perfil do usuário
     public User updateUserProfile(String userID, UserEditProfileDTO updateUserProfile) {
         Optional<User> optionalUser = userRepository.findById(userID);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+
+            // Atualiza os campos do perfil
             user.setUsername(updateUserProfile.username());
             user.setEducation(updateUserProfile.education());
             user.setFavoriteSubject(updateUserProfile.favoriteSubject());
             user.setAreaOfInterest(updateUserProfile.areaOfInterest());
+
+            // Atualiza a senha se fornecida
+            if (updateUserProfile.password() != null && !updateUserProfile.password().isBlank()) {
+                String hashedPassword = securityConfig.passwordEncoder().encode(updateUserProfile.password());
+                user.setPassword(hashedPassword);
+            }
+
             return userRepository.save(user); // Salva no banco de dados
         } else {
             throw new UserNotFoundException("Perfil não encontrado para o usuário com ID " + userID);
