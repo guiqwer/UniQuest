@@ -48,25 +48,28 @@ public class InteractionUserService {
         if (interactionOpt.isPresent()) {
             LikeUser interaction = interactionOpt.get();
             if (interaction.isLiked()) {
-                interaction.setLiked(false);
-                exam.setLikesCount(exam.getLikesCount() - 1);
+                likeUserRepository.delete(interaction); // Remove o like do banco
             } else {
                 interaction.setLiked(true);
-                exam.setLikesCount(exam.getLikesCount() + 1);
+                likeUserRepository.save(interaction);
             }
-            likeUserRepository.save(interaction);
         } else {
             LikeUser newInteraction = new LikeUser();
             newInteraction.setUser(user);
             newInteraction.setExam(exam);
             newInteraction.setLiked(true);
-            exam.setLikesCount(exam.getLikesCount() + 1);
             likeUserRepository.save(newInteraction);
         }
 
+        // Atualiza corretamente o número de likes baseado no banco
+        int likeCount = (int) likeUserRepository.countByExamAndLikedTrue(exam.getId());
+        exam.setLikesCount(likeCount);
         examRepository.save(exam);
+
         return "Like atualizado com sucesso!";
     }
+
+
 
 
     @Transactional
@@ -80,6 +83,7 @@ public class InteractionUserService {
         commentUser.setUser(user);
         commentUser.setExam(exam);
         commentUser.setText(text);
+        commentUser.setAvatar(user.getAvatar());
 
         return commentRepository.save(commentUser);
     }
@@ -142,7 +146,8 @@ public class InteractionUserService {
                 .map(comment -> new CommentResponseDTO(
                         comment.getId(),
                         comment.getUser().getName(),  // Obtém o nome do usuário que fez o comentário
-                        comment.getText()
+                        comment.getText(),
+                        comment.getAvatar()
                 ))
                 .collect(Collectors.toList());
     }
