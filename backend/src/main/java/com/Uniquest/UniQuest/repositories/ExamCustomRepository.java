@@ -32,12 +32,11 @@ public class ExamCustomRepository {
         }
 
         if (tags != null && !tags.isEmpty()) {
-            Join<Exam, String> tagsJoin = root.join("tags");  // 🔥 Corrigindo o erro com JOIN
+            Join<Exam, String> tagsJoin = root.join("tags", JoinType.LEFT);
             predicates.add(tagsJoin.in(tags));
         }
 
-        query.where(cb.and(predicates.toArray(new Predicate[0])));
-
+        query.where(cb.or(predicates.toArray(new Predicate[0])));
         return entityManager.createQuery(query).getResultList();
     }
 
