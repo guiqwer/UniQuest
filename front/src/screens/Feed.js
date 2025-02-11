@@ -16,6 +16,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import { axiosMultipart, axiosInstance } from "../axios";
+import ExamModal from "./components/models/ExamModal";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PostCard = styled(Card)(({ theme }) => ({
@@ -25,8 +26,9 @@ const PostCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(3),
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
-  transform: "translateY(-2px)",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",},
+    transform: "translateY(-2px)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+  },
 }));
 
 const Feed = ({ filter }) => {
@@ -49,8 +51,10 @@ const Feed = ({ filter }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
-  
-  
+  const [openExamModal, setOpenExamModal] = useState(false);
+  const [generatedExam, setGeneratedExam] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,10 +64,10 @@ const Feed = ({ filter }) => {
           title: filter || "",
           description: filter || "",
         });
-  
+
         const formattedData = response.data.map((post) => {
           let fileURL = "";
-  
+
           if (post.data) {
             if (post.type === "pdf") {
               const byteCharacters = atob(post.data);
@@ -83,26 +87,51 @@ const Feed = ({ filter }) => {
             tags: normalizeTags(post.tags),
             user: post.authorName,
             avatar: post.avatarUser ? `data:image/${post.avatarUser.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${post.avatarUser}`
-            : "https://via.placeholder.com/150",
+              : "https://via.placeholder.com/150",
             likes: post.likesCount,
             itsLiked: post.itsLiked,
             date: "Agora mesmo",
             fileURL,
           };
         });
-  
+
         setPosts(formattedData);
       } catch (error) {
         console.error("Erro ao buscar os dados:", error);
       }
     };
-  
+
     fetchData();
   }, [refreshTrigger, filter]);
+  
+  const generateExam = async (postId) => {
+    setIsGenerating(true);
+    
+    try {
+      const response = await axiosInstance.post("/exam/generate/text", { id: postId });
+      console.log(response.data.ID)
+      const examData = await axiosInstance.get(`/exam/view/${response.data.ID}`);
 
-  const normalizeTags = (tags) => {
-    return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
+      const formattedExam = {
+        id: examData.data.id,
+        title: examData.data.title,
+        description: examData.data.description,
+        questions: examData.data.questions,
+      };
+
+      setGeneratedExam(formattedExam);
+      setOpenExamModal(true);
+    } catch (error) {
+      console.error("Erro ao gerar a prova:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
+  
+  const normalizeTags = (tags) => {
+    return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, ""));
+  };
+  
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
     setAnchorEl(null);
@@ -128,68 +157,68 @@ const Feed = ({ filter }) => {
 
   const handleLike = async (postId) => {
     try {
-        await axiosInstance.post("/interaction/like", { examID: postId });
+      await axiosInstance.post("/interaction/like", { examID: postId });
 
-        setPosts((prevPosts) =>
-            prevPosts.map(post =>
-                post.id === postId
-                    ? { ...post, itsLiked: !post.itsLiked, likes: post.itsLiked ? post.likes - 1 : post.likes + 1 }
-                    : post
-            )
-        );
+      setPosts((prevPosts) =>
+        prevPosts.map(post =>
+          post.id === postId
+            ? { ...post, itsLiked: !post.itsLiked, likes: post.itsLiked ? post.likes - 1 : post.likes + 1 }
+            : post
+        )
+      );
     } catch (error) {
-        console.error("Erro ao curtir o post:", error);
+      console.error("Erro ao curtir o post:", error);
     }
-};
-  
+  };
+
   const handleAddComment = async (postId, commentText) => {
-  try {
+    try {
       const response = await axiosInstance.post("/interaction/comment", {
-          examId: postId,
-          text: commentText,
+        examId: postId,
+        text: commentText,
       });
 
       if (response.status === 200) {
-          setPosts((prevPosts) =>
-              prevPosts.map((post) =>
-                  post.id === postId
-                      ? {
-                          ...post,
-                          comments: [...(post.comments || []), { text: commentText }],
-                      }
-                      : post
-              )
-          );
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                ...post,
+                comments: [...(post.comments || []), { text: commentText }],
+              }
+              : post
+          )
+        );
 
-          setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
-        }
-      } catch (error) {
+        setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
+      }
+    } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
     }
   };
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
     setPosts(prevPosts => prevPosts.map(post => {
-      if (post.id === postId) {  
+      if (post.id === postId) {
         // Garante que `post.data.questions` existe antes de modificar
         if (!post.data || !post.data.questions) {
           return post;
         }
-  
+
         const updatedQuestions = post.data.questions.map((q, qIndex) => {
           if (qIndex === questionIndex) {
-            return { 
-              ...q, 
-              userAnswer: selectedOptionIndex, 
-              showFeedback: true 
+            return {
+              ...q,
+              userAnswer: selectedOptionIndex,
+              showFeedback: true
             };
           }
           return q;
         });
-  
-        return { 
-          ...post, 
-          data: { ...post.data, questions: updatedQuestions } 
+
+        return {
+          ...post,
+          data: { ...post.data, questions: updatedQuestions }
         };
       }
       return post;
@@ -205,17 +234,17 @@ const Feed = ({ filter }) => {
               position: 'relative',
               mb: 2,
               width: '100%',
-              maxWidth: '700px', 
-              height: '600px', 
+              maxWidth: '700px',
+              height: '600px',
               overflow: 'hidden',
               borderRadius: '8px',
               backgroundColor: '#f8f9fa',
               display: 'flex',
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              margin: 'auto', 
-              }}
-              >
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: 'auto',
+            }}
+          >
             <CardMedia
               component="img"
               image={post.fileURL}
@@ -223,7 +252,7 @@ const Feed = ({ filter }) => {
               sx={{
                 maxWidth: '100%',
                 maxHeight: '100%',
-                objectFit: 'contain', 
+                objectFit: 'contain',
               }}
             />
           </Box>);
@@ -257,115 +286,115 @@ const Feed = ({ filter }) => {
                   {((post.data.length * 3) / 4 / 1024).toFixed(1)} KB
                 </Typography>
               </Box>
-              
+
               <embed
-              src={post.fileURL}
-              type="application/pdf"
-              width="100%"
-              height="500px"
+                src={post.fileURL}
+                type="application/pdf"
+                width="100%"
+                height="500px"
               />
-              
+
               <Button
-              variant="contained"
-              component="a"
-              href={post.fileURL}
-              download={post.fileName || "arquivo.pdf"}
-              target="_blank"
-              rel="noopener noreferrer"
-              startIcon={<DownloadIcon />}
-              sx={{
-                background: 'linear-gradient(135deg, #2e7d32 0%, #1976d2 100%)',
-                color: '#fff',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #1b5e20 0%, #1565c0 100%)',
-                },
+                variant="contained"
+                component="a"
+                href={post.fileURL}
+                download={post.fileName || "arquivo.pdf"}
+                target="_blank"
+                rel="noopener noreferrer"
+                startIcon={<DownloadIcon />}
+                sx={{
+                  background: 'linear-gradient(135deg, #2e7d32 0%, #1976d2 100%)',
+                  color: '#fff',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #1b5e20 0%, #1565c0 100%)',
+                  },
                 }}
-                >
-                  Baixar
-                </Button>
+              >
+                Baixar
+              </Button>
             </CardContent>
           </Card>
         );
 
-        case 'text':
-          return post.data?.questions?.map((question, index) => (
-            <Box
-              key={index}
-              sx={{
-                mb: 2,
-                p: 2,
-                border: '1px solid #e0e0e0',
-                borderRadius: 2,
-                backgroundColor: 'rgba(255,255,255,0.7)',
-              }}
-            >
-              <Typography variant="body1" sx={{ mb: 1, fontWeight: 500, color: '#2d3436' }}>
-                Questão {index + 1}: {question.statement}
-              </Typography>
-    
-              {/* Verifica se a questão tem opções (objetiva) ou não (discursiva) */}
-              {question.options ? (
-                <Box sx={{ ml: 1 }}>
-                  {question.options.map((option, optionIndex) => {
-                    const isCorrect = option.startsWith(question.correctAnswer); // Exemplo: "A : n" -> "A" === "A"
-                    const isSelected = question.userAnswer === optionIndex;
-    
-                    return (
+      case 'text':
+        return post.data?.questions?.map((question, index) => (
+          <Box
+            key={index}
+            sx={{
+              mb: 2,
+              p: 2,
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              backgroundColor: 'rgba(255,255,255,0.7)',
+            }}
+          >
+            <Typography variant="body1" sx={{ mb: 1, fontWeight: 500, color: '#2d3436' }}>
+              Questão {index + 1}: {question.statement}
+            </Typography>
+
+            {/* Verifica se a questão tem opções (objetiva) ou não (discursiva) */}
+            {question.options ? (
+              <Box sx={{ ml: 1 }}>
+                {question.options.map((option, optionIndex) => {
+                  const isCorrect = option.startsWith(question.correctAnswer); // Exemplo: "A : n" -> "A" === "A"
+                  const isSelected = question.userAnswer === optionIndex;
+
+                  return (
+                    <Box
+                      key={optionIndex}
+                      onClick={() => handleObjectiveAnswer(post.id, index, optionIndex)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 1,
+                        p: 1,
+                        borderRadius: 1,
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderColor: isSelected ? (isCorrect ? '#4caf50' : '#ef5350') : '#e0e0e0',
+                        backgroundColor: isSelected ? (isCorrect ? '#e8f5e9' : '#ffebee') : 'transparent',
+                        '&:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
+                      }}
+                    >
                       <Box
-                        key={optionIndex}
-                        onClick={() => handleObjectiveAnswer(post.id, index, optionIndex)}
                         sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          backgroundColor: isSelected ? (isCorrect ? '#4caf50' : '#ef5350') : '#1976d2',
                           display: 'flex',
                           alignItems: 'center',
-                          mb: 1,
-                          p: 1,
-                          borderRadius: 1,
-                          cursor: 'pointer',
-                          border: '1px solid',
-                          borderColor: isSelected ? (isCorrect ? '#4caf50' : '#ef5350') : '#e0e0e0',
-                          backgroundColor: isSelected ? (isCorrect ? '#e8f5e9' : '#ffebee') : 'transparent',
-                          '&:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 500,
+                          flexShrink: 0,
+                          mr: 1.5,
                         }}
                       >
-                        <Box
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            backgroundColor: isSelected ? (isCorrect ? '#4caf50' : '#ef5350') : '#1976d2',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontWeight: 500,
-                            flexShrink: 0,
-                            mr: 1.5,
-                          }}
-                        >
-                          {option.split(":")[0]} {/* Exibe "A", "B", etc. */}
-                        </Box>
-                        <Typography variant="body2" sx={{ color: '#2d3436' }}>
-                          {option}
-                          {isSelected && isCorrect && (
-                            <span style={{ marginLeft: 8, color: '#4caf50' }}>✓ Resposta Correta</span>
-                          )}
-                          {isSelected && !isCorrect && (
-                            <span style={{ marginLeft: 8, color: '#ef5350' }}>✗ Sua Resposta</span>
-                          )}
-                        </Typography>
+                        {option.split(":")[0]} {/* Exibe "A", "B", etc. */}
                       </Box>
-                    );
-                  })}
-                </Box>
-              ) : (
-                // Caso seja uma questão discursiva, exibe apenas o campo de resposta
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>Resposta esperada:</Typography>
-                  <Typography variant="body2" sx={{ color: '#2d3436', ml: 1 }}>{question.expectedAnswer}</Typography>
-                </Box>
-              )}
-            </Box>
-          ));
+                      <Typography variant="body2" sx={{ color: '#2d3436' }}>
+                        {option}
+                        {isSelected && isCorrect && (
+                          <span style={{ marginLeft: 8, color: '#4caf50' }}>✓ Resposta Correta</span>
+                        )}
+                        {isSelected && !isCorrect && (
+                          <span style={{ marginLeft: 8, color: '#ef5350' }}>✗ Sua Resposta</span>
+                        )}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+            ) : (
+              // Caso seja uma questão discursiva, exibe apenas o campo de resposta
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>Resposta esperada:</Typography>
+                <Typography variant="body2" sx={{ color: '#2d3436', ml: 1 }}>{question.expectedAnswer}</Typography>
+              </Box>
+            )}
+          </Box>
+        ));
 
       default:
         return null;
@@ -404,7 +433,7 @@ const Feed = ({ filter }) => {
     const file = e.target.files[0];
     if (file) {
       setNewPost({ ...newPost, image: file }); // Armazena o arquivo original no estado
-  
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewPost((prev) => ({ ...prev, preview: reader.result })); // Apenas para pré-visualização
@@ -417,77 +446,77 @@ const Feed = ({ filter }) => {
     event.preventDefault();
 
     try {
-        let response;
+      let response;
 
-        if (postType === "pdf") {
-            response = await axiosMultipart.post("/exam/upload/pdf", {
-                title: newPost.title,
-                description: newPost.description,
-                tags: newPost.tags,
-                file: newPost.file
-            });
-        } else if (postType === "imagem") {
-            response = await axiosMultipart.post("/exam/upload/image", {
-                title: newPost.title,
-                description: newPost.description,
-                tags: newPost.tags,
-                file: newPost.image
-            });
-        } else if (postType === "texto") {
-            const formattedQuestions = newPost.questions.map((question, index) => {
-                const formattedQuestion = {
-                    type: question.type === "objetiva" ? "objective" : "discursive",
-                    order: index + 1,
-                    statement: question.text
-                };
+      if (postType === "pdf") {
+        response = await axiosMultipart.post("/exam/upload/pdf", {
+          title: newPost.title,
+          description: newPost.description,
+          tags: newPost.tags,
+          file: newPost.file
+        });
+      } else if (postType === "imagem") {
+        response = await axiosMultipart.post("/exam/upload/image", {
+          title: newPost.title,
+          description: newPost.description,
+          tags: newPost.tags,
+          file: newPost.image
+        });
+      } else if (postType === "texto") {
+        const formattedQuestions = newPost.questions.map((question, index) => {
+          const formattedQuestion = {
+            type: question.type === "objetiva" ? "objective" : "discursive",
+            order: index + 1,
+            statement: question.text
+          };
 
-                if (question.type === "objetiva") {
-                    formattedQuestion.options = question.options?.reduce((acc, option, i) => {
-                        acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
-                        return acc;
-                    }, {});
+          if (question.type === "objetiva") {
+            formattedQuestion.options = question.options?.reduce((acc, option, i) => {
+              acc[String.fromCharCode(65 + i)] = option; // A, B, C, D...
+              return acc;
+            }, {});
 
-                    formattedQuestion.correctAnswer =
-                        question.correctOption !== undefined
-                            ? String.fromCharCode(65 + question.correctOption)
-                            : "";
-                } else {
-                    formattedQuestion.correctAnswer = question.correctAnswer || "";
-                }
+            formattedQuestion.correctAnswer =
+              question.correctOption !== undefined
+                ? String.fromCharCode(65 + question.correctOption)
+                : "";
+          } else {
+            formattedQuestion.correctAnswer = question.correctAnswer || "";
+          }
 
-                return formattedQuestion;
-            });
+          return formattedQuestion;
+        });
 
-            response = await axiosInstance.post("/exam/upload/text", {
-                title: newPost.title,
-                description: newPost.description,
-                tags: newPost.tags,
-                text: formattedQuestions
-            });
-        }
+        response = await axiosInstance.post("/exam/upload/text", {
+          title: newPost.title,
+          description: newPost.description,
+          tags: newPost.tags,
+          text: formattedQuestions
+        });
+      }
 
-        if (response.status === 200) {
-            setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
-        }
+      if (response.status === 200) {
+        setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
+      }
 
     } catch (error) {
-        setError("Erro ao enviar a prova. Tente novamente.");
-        console.error("Erro no cadastro:", error);
+      setError("Erro ao enviar a prova. Tente novamente.");
+      console.error("Erro no cadastro:", error);
     }
 
     setNewPost({
-        title: "",
-        image: "",
-        description: "",
-        tags: [],
-        questions: [],
-        file: null,
-        fileURL: ""
+      title: "",
+      image: "",
+      description: "",
+      tags: [],
+      questions: [],
+      file: null,
+      fileURL: ""
     });
 
     setOpenNewPostModal(false);
     setPostType(null);
-};
+  };
 
 
   return (
@@ -502,150 +531,159 @@ const Feed = ({ filter }) => {
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-  {posts.length === 0 ? (
-    <Typography variant="h6" align="center" sx={{ color: "#636e72" }}>
-      Nenhum post disponível. Adicione um novo post!
-    </Typography>
-  ) : (
-    posts.map((post) => {
-      return (
-        <PostCard key={post.id}>
-          <CardContent>
-            {/* Exibe o ID do post na interface */}
-            <Typography
-              variant="caption"
-              sx={{ color: "#b2bec3", fontWeight: 600, position: "absolute", top: 8, left: 16 }}
-            >
-              ID: {post.id}
-            </Typography>
+        {posts.length === 0 ? (
+          <Typography variant="h6" align="center" sx={{ color: "#636e72" }}>
+            Nenhum post disponível. Adicione um novo post!
+          </Typography>
+        ) : (
+          posts.map((post) => {
+            return (
+              <PostCard key={post.id}>
+                <CardContent>
+                  {/* Exibe o ID do post na interface */}
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "#b2bec3", fontWeight: 600, position: "absolute", top: 8, left: 16 }}
+                  >
+                    ID: {post.id}
+                  </Typography>
 
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mb: 2,
-                padding: 2,
-                background: "rgba(255,255,255,0.7)",
-                borderRadius: 3,
-                position: "relative",
-              }}
-            >
-              <Avatar
-                src={post.avatar}
-                sx={{
-                  width: 56,
-                  height: 56,
-                  mr: 2,
-                  border: "2px solid #fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                }}
-              />
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="subtitle1" fontWeight="700" color="#2d3436">
-                  {post.authorName}
-                </Typography>
-                <Typography variant="caption" color="#636e72">
-                  {post.date}
-                </Typography>
-              </Box>
-              <IconButton
-                onClick={(e) => handleMenuOpen(e, post.id)}
-                sx={{ position: "absolute", right: 16, top: 16, color: "#636e72" }}
-              >
-                <MoreVert />
-              </IconButton>
-            </Box>
-
-            {post.title && (
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: "#2d3436" }}>
-                {post.title}
-              </Typography>
-            )}
-
-            {renderPostContent(post)}
-
-            <Typography variant="body1" sx={{ mb: 2, color: "#2d3436" }}>
-              {post.description}
-            </Typography>
-
-            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-              {post.tags?.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={`#${tag}`}
-                  size="small"
-                  sx={{
-                    background: "rgba(45, 52, 54, 0.08)",
-                    color: "#2d3436",
-                    fontWeight: 500,
-                    "&:hover": {
-                      background: "rgba(45, 52, 54, 0.12)",
-                    },
-                  }}
-                />
-              ))}
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: 2,
-                padding: 1,
-                background: "rgba(255,255,255,0.7)",
-                borderRadius: 4,
-              }}
-            >
-              <IconButton onClick={() => handleLike(post.id)}>
-                {post.itsLiked ? <Favorite sx={{ color: "#ff1744" }} /> : <FavoriteBorder sx={{ color: "#636e72" }} />}
-              </IconButton>
-              <IconButton onClick={() => toggleComments(post.id)}>
-                <Comment sx={{ color: openComments[post.id] ? "#1976d2" : "#636e72" }} />
-              </IconButton>
-              <Typography variant="body2" sx={{ color: "#636e72", ml: 0.5, fontWeight: 500 }}>
-                {post.likes} curtidas • {post.comments?.length || 0} comentários
-              </Typography>
-            </Box>
-
-            <Collapse in={openComments[post.id]}>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ maxHeight: 200, overflow: "auto" }}>
-                {post.comments?.map((comment, index) => (
-                  <Box key={index} sx={{ display: "flex", gap: 1.5, mb: 2, padding: 1.5 }}>
-                    <Avatar src={comment.Avatar ? `data:image/${comment.Avatar.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${comment.Avatar}` : "https://via.placeholder.com/150"} />
-                    <Box>
-                      <Typography variant="subtitle2" color="#2d3436">
-                        {comment.userName}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mb: 2,
+                      padding: 2,
+                      background: "rgba(255,255,255,0.7)",
+                      borderRadius: 3,
+                      position: "relative",
+                    }}
+                  >
+                    <Avatar
+                      src={post.avatar}
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        mr: 2,
+                        border: "2px solid #fff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                      }}
+                    />
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="700" color="#2d3436">
+                        {post.authorName}
                       </Typography>
-                      <Typography variant="body2" color="#636e72">
-                        {comment.text}
+                      <Typography variant="caption" color="#636e72">
+                        {post.date}
                       </Typography>
                     </Box>
+                    <IconButton
+                      onClick={(e) => handleMenuOpen(e, post.id)}
+                      sx={{ position: "absolute", right: 16, top: 16, color: "#636e72" }}
+                    >
+                      <MoreVert />
+                    </IconButton>
                   </Box>
-                ))}
-                <TextField
-                  fullWidth
-                  placeholder="Adicione um comentário..."
-                  variant="outlined"
-                  size="small"
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && e.target.value) {
-                      handleAddComment(post.id, e.target.value);
-                      e.target.value=""
-                    }
-                  }}
-                  sx={{ mt: 1.5 }}
-                />
-              </Box>
-            </Collapse>
-          </CardContent>
-        </PostCard>
-      );
-    })
-  )}
-</Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => generateExam(post.id)}
+                    disabled={isGenerating}
+                    sx={{ mt: 1 }}
+                  >
+                    {isGenerating ? "Gerando..." : "Gerar Prova"}
+                  </Button>
 
+                  {post.title && (
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: "#2d3436" }}>
+                      {post.title}
+                    </Typography>
+                  )}
+
+                  {renderPostContent(post)}
+
+                  <Typography variant="body1" sx={{ mb: 2, color: "#2d3436" }}>
+                    {post.description}
+                  </Typography>
+
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    {post.tags?.map((tag, index) => (
+                      <Chip
+                        key={index}
+                        label={`#${tag}`}
+                        size="small"
+                        sx={{
+                          background: "rgba(45, 52, 54, 0.08)",
+                          color: "#2d3436",
+                          fontWeight: 500,
+                          "&:hover": {
+                            background: "rgba(45, 52, 54, 0.12)",
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      mb: 2,
+                      padding: 1,
+                      background: "rgba(255,255,255,0.7)",
+                      borderRadius: 4,
+                    }}
+                  >
+                    <IconButton onClick={() => handleLike(post.id)}>
+                      {post.itsLiked ? <Favorite sx={{ color: "#ff1744" }} /> : <FavoriteBorder sx={{ color: "#636e72" }} />}
+                    </IconButton>
+                    <IconButton onClick={() => toggleComments(post.id)}>
+                      <Comment sx={{ color: openComments[post.id] ? "#1976d2" : "#636e72" }} />
+                    </IconButton>
+                    <Typography variant="body2" sx={{ color: "#636e72", ml: 0.5, fontWeight: 500 }}>
+                      {post.likes} curtidas • {post.comments?.length || 0} comentários
+                    </Typography>
+                  </Box>
+
+                  <Collapse in={openComments[post.id]}>
+                    <Divider sx={{ mb: 2 }} />
+                    <Box sx={{ maxHeight: 200, overflow: "auto" }}>
+                      {post.comments?.map((comment, index) => (
+                        <Box key={index} sx={{ display: "flex", gap: 1.5, mb: 2, padding: 1.5 }}>
+                          <Avatar src={comment.Avatar ? `data:image/${comment.Avatar.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${comment.Avatar}` : "https://via.placeholder.com/150"} />
+                          <Box>
+                            <Typography variant="subtitle2" color="#2d3436">
+                              {comment.userName}
+                            </Typography>
+                            <Typography variant="body2" color="#636e72">
+                              {comment.text}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))}
+                      <TextField
+                        fullWidth
+                        placeholder="Adicione um comentário..."
+                        variant="outlined"
+                        size="small"
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter" && e.target.value) {
+                            handleAddComment(post.id, e.target.value);
+                            e.target.value = ""
+                          }
+                        }}
+                        sx={{ mt: 1.5 }}
+                      />
+                    </Box>
+                  </Collapse>
+                </CardContent>
+              </PostCard>
+            );
+          })
+        )}
+      </Box>
+      <ExamModal open={openExamModal} onClose={() => setOpenExamModal(false)} exam={generatedExam} />
 
       {/* Menu de três pontos */}
       <Menu
@@ -1048,20 +1086,20 @@ const Feed = ({ filter }) => {
                               </Box>
                             </Box>
                             {question.type === 'aberta' && (
-  <TextField
-    fullWidth
-    label="Resposta Correta"
-    value={question.correctAnswer || ''}
-    onChange={(e) => {
-      const newQuestions = [...newPost.questions];
-      newQuestions[index].correctAnswer = e.target.value;
-      setNewPost({ ...newPost, questions: newQuestions });
-    }}
-    variant="outlined"
-    size="small"
-    sx={{ mt: 2, backgroundColor: 'white' }}
-  />
-)}
+                              <TextField
+                                fullWidth
+                                label="Resposta Correta"
+                                value={question.correctAnswer || ''}
+                                onChange={(e) => {
+                                  const newQuestions = [...newPost.questions];
+                                  newQuestions[index].correctAnswer = e.target.value;
+                                  setNewPost({ ...newPost, questions: newQuestions });
+                                }}
+                                variant="outlined"
+                                size="small"
+                                sx={{ mt: 2, backgroundColor: 'white' }}
+                              />
+                            )}
 
                             {question.type === 'objetiva' && (
                               <Box sx={{ ml: 2, mt: 2 }}>
@@ -1236,7 +1274,7 @@ const Feed = ({ filter }) => {
                     renderTags={(value, getTagProps) =>
                       value.map((option, index) => {
                         const { key, ...tagProps } = getTagProps({ index }); // Extrai a key antes de espalhar as props
-                    
+
                         return (
                           <Chip
                             key={key} // ✅ Passa a key diretamente
@@ -1255,7 +1293,7 @@ const Feed = ({ filter }) => {
                           />
                         );
                       })
-                    }                    
+                    }
                     componentsProps={{
                       popper: {
                         sx: {
