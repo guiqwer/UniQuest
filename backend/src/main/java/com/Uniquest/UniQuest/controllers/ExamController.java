@@ -24,6 +24,7 @@ import com.Uniquest.UniQuest.repositories.ExamRepository;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -63,7 +64,7 @@ public class ExamController {
     }
 
     @PostMapping("/upload/text")
-    public ResponseEntity<String> uploadTextExam(@RequestBody ExamTextRequestDTO request,
+    public ResponseEntity<?> uploadTextExam(@RequestBody ExamTextRequestDTO request,
                                                  @AuthenticationPrincipal User loggedUser) {
         try {
             Long id = examService.uploadTextExam(
@@ -73,7 +74,7 @@ public class ExamController {
                     (List<QuestionDTO>) request.getText(),
                     loggedUser
             );
-            return ResponseEntity.ok("ID: " + id);
+            return ResponseEntity.ok(Map.of("ID", id));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao salvar prova textual: " + e.getMessage());
@@ -82,8 +83,9 @@ public class ExamController {
 
     @PostMapping("/generate/text")
     public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
-        try{
-            return ResponseEntity.ok("ID: " + examService.generateTextExam(request.getId()));
+        try {
+            Long id = examService.generateTextExam(request.getId());
+            return ResponseEntity.ok(Map.of("ID", id));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
