@@ -104,6 +104,5 @@ docker-compose up --build
 - `src/components`: Componentes React reutilizáveis.
 - `src/pages`: Páginas da aplicação.
 - `src/services`: Chamadas à API do backend.
-- 
 ---
 
