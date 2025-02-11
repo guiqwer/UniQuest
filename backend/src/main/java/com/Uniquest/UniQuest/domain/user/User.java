@@ -22,6 +22,8 @@ public class User {
     private String education; //escolaridade
     private String areaOfInterest;
     private String favoriteSubject;
+    private String confirmationCode;
+    private boolean confirmed;
 
     
     @Column(columnDefinition = "BYTEA") // Definição específica pro Postgres

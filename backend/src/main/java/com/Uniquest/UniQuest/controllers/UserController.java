@@ -1,25 +1,19 @@
 package com.Uniquest.UniQuest.controllers;
 
 import com.Uniquest.UniQuest.domain.exam.Exam;
-import com.Uniquest.UniQuest.domain.user.EmailChangeCode;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.auth.RegisterRequestDTO;
-import com.Uniquest.UniQuest.dto.common.ResponseDTO;
+import com.Uniquest.UniQuest.dto.auth.ConfirmEmailDTO;
 import com.Uniquest.UniQuest.dto.exam.ExamListResponseDTO;
 import com.Uniquest.UniQuest.dto.user.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
-import com.Uniquest.UniQuest.service.EmailChangeService;
-import com.Uniquest.UniQuest.service.ExamService;
-import com.Uniquest.UniQuest.service.InteractionUserService;
-import com.Uniquest.UniQuest.service.UserService;
+import com.Uniquest.UniQuest.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.Uniquest.UniQuest.service.PasswordResetService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +33,7 @@ public class UserController {
     private final ExamService examService;
     private final InteractionUserService interactionUserService;
     private final EmailChangeService emailChangeService;
+    private final EmailService emailService;
 
 
     @GetMapping
@@ -56,20 +51,21 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterRequestDTO body) {
+    public ResponseEntity register(@RequestBody ConfirmRegisterDTO body) {
         Optional<User> user = this.repository.findByEmail(body.email());
+        if (user.isPresent()) {
+            return ResponseEntity.ok(userService.confirmUserRegister(body.email(), body.code(), body.name(), body.password()));
+        }
+        return ResponseEntity.notFound().build();
+    }
 
+    @PostMapping("/confirm-email")
+    public ResponseEntity confirmEmail(@RequestBody ConfirmEmailDTO request) {
+        Optional<User> user = this.repository.findByEmail(request.email());
         if (user.isEmpty()) {
-            User newUser = new User();
-            newUser.setPassword(passwordEncoder.encode(body.password()));
-            newUser.setEmail(body.email());
-            newUser.setName(body.name());
-            this.repository.save(newUser);
-
-            String token = this.tokenService.generateToken(newUser);
-            return ResponseEntity.ok(new ResponseDTO(newUser.getName(), token));
+            userService.preConfirmUser(request.email());
+            return ResponseEntity.ok("Email enviado para confirmação.");
         }
         return ResponseEntity.badRequest().build();
     }
@@ -80,12 +76,16 @@ public class UserController {
         return userService.getUserById(userPrincipal.getId());
     }
 
-    //Endpoint para editar o perfil do usuário
+
     @PutMapping("/edit-profile")
-    public ResponseEntity<User> updateUser(@AuthenticationPrincipal User userPrincipal, @RequestBody UserEditProfileDTO updateUserProfile) {
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @AuthenticationPrincipal User userPrincipal,
+            @RequestBody UserEditProfileDTO updateUserProfile
+    ) {
         User updatedUser = userService.updateUserProfile(userPrincipal.getId(), updateUserProfile);
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(UserResponseDTO.from(updatedUser));
     }
+
 
     // Endpoint para Adicionar o avatar do usuário
     @PutMapping("/avatar")
@@ -125,16 +125,6 @@ public class UserController {
         return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
     }
 
-    @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        var codeOpt = passwordResetService.createPasswordResetCode(email);
-        if (codeOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email não encontrado.");
-        }
-        return ResponseEntity.ok("Código de redefinição enviado para o seu email.");
-    }
-
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
         String resetCode = request.get("resetCode");
@@ -156,7 +146,7 @@ public class UserController {
         return ResponseEntity.ok(examDTOs);
     }
 
-    @GetMapping("my-liked-exams")
+    @GetMapping("/my-liked-exams")
     public ResponseEntity<List<ExamListResponseDTO>> getLikedExams(@AuthenticationPrincipal User userPrincipal) {
         String userId = userPrincipal.getId();
         List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);

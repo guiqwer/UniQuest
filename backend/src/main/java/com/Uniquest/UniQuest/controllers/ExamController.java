@@ -24,6 +24,7 @@ import com.Uniquest.UniQuest.repositories.ExamRepository;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -37,9 +38,9 @@ public class ExamController {
     @PostMapping("/upload/image")
     public ResponseEntity<String> uploadImageExam(@RequestParam String title,
                                                   @RequestParam String description,
-                                                  @RequestParam List<String> tags, // Adiciona a lista de tags
+                                                  @RequestParam List<String> tags,
                                                   @RequestParam("file") MultipartFile file,
-                                                  @AuthenticationPrincipal User loggedUser) { // Recebe o usuário logado
+                                                  @AuthenticationPrincipal User loggedUser) {
         try {
             examService.uploadImageExam(title, description, tags, file, loggedUser);
             return ResponseEntity.ok("Imagem enviada com sucesso!");
@@ -51,9 +52,9 @@ public class ExamController {
     @PostMapping("/upload/pdf")
     public ResponseEntity<String> uploadPDFExam(@RequestParam String title,
                                                 @RequestParam String description,
-                                                @RequestParam List<String> tags, // Adiciona a lista de tags
+                                                @RequestParam List<String> tags,
                                                 @RequestParam("file") MultipartFile file,
-                                                @AuthenticationPrincipal User loggedUser) { // Recebe o usuário logado
+                                                @AuthenticationPrincipal User loggedUser) {
         try {
             examService.uploadPDFExam(title, description, tags, file, loggedUser);
             return ResponseEntity.ok("PDF enviado com sucesso!");
@@ -63,7 +64,7 @@ public class ExamController {
     }
 
     @PostMapping("/upload/text")
-    public ResponseEntity<String> uploadTextExam(@RequestBody ExamTextRequestDTO request,
+    public ResponseEntity<?> uploadTextExam(@RequestBody ExamTextRequestDTO request,
                                                  @AuthenticationPrincipal User loggedUser) {
         try {
             Long id = examService.uploadTextExam(
@@ -73,7 +74,7 @@ public class ExamController {
                     (List<QuestionDTO>) request.getText(),
                     loggedUser
             );
-            return ResponseEntity.ok("ID: " + id);
+            return ResponseEntity.ok(Map.of("ID", id));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao salvar prova textual: " + e.getMessage());
@@ -82,8 +83,9 @@ public class ExamController {
 
     @PostMapping("/generate/text")
     public ResponseEntity<?> generateTextExam(@RequestBody ExamGenerateRequestDTO request){
-        try{
-            return ResponseEntity.ok("ID: " + examService.generateTextExam(request.getId()));
+        try {
+            Long id = examService.generateTextExam(request.getId());
+            return ResponseEntity.ok(Map.of("ID", id));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -108,10 +110,10 @@ public class ExamController {
                     .body(((ExamPdf) foundExam).getPdfData());
         } else if (foundExam instanceof ExamImage) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_PNG) // Ajuste conforme o tipo da imagem
+                    .contentType(MediaType.IMAGE_PNG)
                     .body(((ExamImage) foundExam).getImageData());
         } else if (foundExam instanceof ExamText) {
-            return ResponseEntity.ok(foundExam); // Retorna JSON para provas textuais
+            return ResponseEntity.ok(foundExam);
         } else {
             return ResponseEntity.badRequest().body("Tipo de prova desconhecido.");
         }
