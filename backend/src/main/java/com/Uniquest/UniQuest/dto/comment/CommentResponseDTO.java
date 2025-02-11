@@ -1,5 +1,5 @@
 package com.Uniquest.UniQuest.dto.comment;
 
 
-public record CommentResponseDTO(Long id, String userName, String text) {}
+public record CommentResponseDTO(Long id, String userName, String text, byte[] Avatar) {}
 
