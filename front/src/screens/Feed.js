@@ -55,8 +55,8 @@ const Feed = ({ filter }) => {
       try {
         const response = await axiosInstance.post("/exam/list", {
           tags: [],
-          title: "",
-          description: filter || "",
+          title: filter,
+          description: filter,
         });
         console.log(filter)
         const formattedData = response.data.map(post => {
