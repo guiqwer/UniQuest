@@ -14,6 +14,7 @@ import com.Uniquest.UniQuest.utils.GenerateRandomCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Optional;
@@ -26,12 +27,15 @@ public class UserService {
     private final SecurityConfig securityConfig;
     private final EmailService emailService;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public ResponseDTO confirmUserRegister(String email, String code){
+    public ResponseDTO confirmUserRegister(String email, String code, String name, String password) {
         Optional<User> user = this.userRepository.findByEmail(email);
         User existingUser = user.get();
         if (existingUser.getConfirmationCode().equals(code)) {
+            existingUser.setPassword(passwordEncoder.encode(password));
+            existingUser.setName(name);
             existingUser.setConfirmed(true);
             this.userRepository.save(existingUser);
             String token = this.tokenService.generateToken(existingUser);
@@ -41,12 +45,11 @@ public class UserService {
         }
     }
 
-    public void preConfirmUser(String email, String name){
+    public void preConfirmUser(String email){
         String confirmationCode = GenerateRandomCodeUtil.generateRandomCode();
         emailService.sendConfirmEmail(email, confirmationCode);
         User newUser = new User();
         newUser.setEmail(email);
-        newUser.setName(name);
         newUser.setConfirmationCode(confirmationCode);
         newUser.setConfirmed(false);
         this.userRepository.save(newUser);

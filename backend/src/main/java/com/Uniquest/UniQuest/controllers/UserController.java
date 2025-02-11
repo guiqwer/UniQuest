@@ -1,16 +1,13 @@
 package com.Uniquest.UniQuest.controllers;
 
 import com.Uniquest.UniQuest.domain.exam.Exam;
-import com.Uniquest.UniQuest.domain.user.EmailChangeCode;
 import com.Uniquest.UniQuest.domain.user.User;
-import com.Uniquest.UniQuest.dto.auth.RegisterRequestDTO;
-import com.Uniquest.UniQuest.dto.common.ResponseDTO;
+import com.Uniquest.UniQuest.dto.auth.ConfirmEmailDTO;
 import com.Uniquest.UniQuest.dto.exam.ExamListResponseDTO;
 import com.Uniquest.UniQuest.dto.user.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.*;
-import com.Uniquest.UniQuest.utils.GenerateRandomCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,19 +52,19 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody ConfirmEmailRequestDTO body) {
+    public ResponseEntity register(@RequestBody ConfirmRegisterDTO body) {
         Optional<User> user = this.repository.findByEmail(body.email());
         if (user.isPresent()) {
-            return ResponseEntity.ok(userService.confirmUserRegister(body.email(), body.code()));
+            return ResponseEntity.ok(userService.confirmUserRegister(body.email(), body.code(), body.name(), body.password()));
         }
         return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/confirm-email")
-    public ResponseEntity confirmEmail(@RequestBody RegisterRequestDTO request) {
+    public ResponseEntity confirmEmail(@RequestBody ConfirmEmailDTO request) {
         Optional<User> user = this.repository.findByEmail(request.email());
         if (user.isEmpty()) {
-            userService.preConfirmUser(request.email(), request.name());
+            userService.preConfirmUser(request.email());
             return ResponseEntity.ok("Email enviado para confirmação.");
         }
         return ResponseEntity.badRequest().build();
