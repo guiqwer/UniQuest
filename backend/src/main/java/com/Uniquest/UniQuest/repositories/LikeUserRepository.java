@@ -13,7 +13,10 @@ import java.util.Optional;
 public interface LikeUserRepository extends JpaRepository<LikeUser, Long> {
     Optional<LikeUser> findByUserAndExam(User user, Exam exam); // Verifica se o usuário já interagiu com a prova
     List<LikeUser> findByUserAndLikedTrue(User user);
-    @Query("SELECT COUNT(l) > 0 FROM LikeUser l WHERE l.user.id = :userId AND l.exam.id = :examId")
+    @Query("SELECT COUNT(l) > 0 FROM LikeUser l WHERE l.user.id = :userId AND l.exam.id = :examId AND l.liked = true")
     boolean hasUserLikedExam(@Param("userId") String userId, @Param("examId") Long examId);
+    @Query("SELECT COUNT(l) FROM LikeUser l WHERE l.exam.id = :examId AND l.liked = true")
+    long countByExamAndLikedTrue(@Param("examId") Long examId);
+
 
 }
