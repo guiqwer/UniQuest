@@ -20,6 +20,10 @@ public class EmailService {
         sendEmail(to, "Código para Troca de Email", "Seu código de troca de email é: " + code);
     }
 
+    public void sendConfirmEmail(String to, String code) {
+        sendEmail(to, "Código para Confirmação de Email", "Seu código de confirmação é: " + code);
+    }
+
     private void sendEmail(String to, String subject, String content) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

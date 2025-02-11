@@ -9,17 +9,14 @@ import com.Uniquest.UniQuest.dto.exam.ExamListResponseDTO;
 import com.Uniquest.UniQuest.dto.user.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
-import com.Uniquest.UniQuest.service.EmailChangeService;
-import com.Uniquest.UniQuest.service.ExamService;
-import com.Uniquest.UniQuest.service.InteractionUserService;
-import com.Uniquest.UniQuest.service.UserService;
+import com.Uniquest.UniQuest.service.*;
+import com.Uniquest.UniQuest.utils.GenerateRandomCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.Uniquest.UniQuest.service.PasswordResetService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +36,7 @@ public class UserController {
     private final ExamService examService;
     private final InteractionUserService interactionUserService;
     private final EmailChangeService emailChangeService;
+    private final EmailService emailService;
 
 
     @GetMapping
@@ -56,22 +54,45 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterRequestDTO body) {
         Optional<User> user = this.repository.findByEmail(body.email());
 
         if (user.isEmpty()) {
+            // Gerar código de confirmação
+            String confirmationCode = GenerateRandomCodeUtil.generateRandomCode();
+
+            // Enviar e-mail de confirmação
+            emailService.sendConfirmEmail(body.email(), confirmationCode);
+
+            // Salvar o usuário com um estado "pendente" ou "não confirmado"
             User newUser = new User();
-            newUser.setPassword(passwordEncoder.encode(body.password()));
             newUser.setEmail(body.email());
             newUser.setName(body.name());
+            newUser.setConfirmationCode(confirmationCode); // Atribuir o código de confirmação
+            newUser.setConfirmed(false);  // Marcar como não confirmado
             this.repository.save(newUser);
 
-            String token = this.tokenService.generateToken(newUser);
-            return ResponseEntity.ok(new ResponseDTO(newUser.getName(), token));
+            return ResponseEntity.ok("Email enviado para confirmação.");
         }
         return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping("/confirm-email")
+    public ResponseEntity confirmEmail(@RequestBody ConfirmEmailRequestDTO request) {
+        Optional<User> user = this.repository.findByEmail(request.email());
+        if (user.isPresent()) {
+            User existingUser = user.get();
+            if (existingUser.getConfirmationCode().equals(request.code())) {
+                existingUser.setConfirmed(true);
+                this.repository.save(existingUser);
+                String token = this.tokenService.generateToken(existingUser);
+                return ResponseEntity.ok(new ResponseDTO(existingUser.getName(), token));
+            } else {
+                return ResponseEntity.badRequest().body("Código de confirmação inválido.");
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 
 
