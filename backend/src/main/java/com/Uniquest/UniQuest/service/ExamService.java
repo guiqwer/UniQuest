@@ -44,22 +44,22 @@ public class ExamService {
         ExamImage examImage = new ExamImage();
         examImage.setTitle(title);
         examImage.setDescription(description);
-        examImage.setTags(tags); // Define as tags
-        examImage.setAuthor(loggedUser); // Define o autor como o usuário logado
-        examImage.setImageData(file.getBytes()); // Salva os dados da imagem
+        examImage.setTags(tags);
+        examImage.setAuthor(loggedUser);
+        examImage.setImageData(file.getBytes());
 
-        examRepository.save(examImage); // Salva a prova no banco
+        examRepository.save(examImage);
     }
 
     public void uploadPDFExam(String title, String description, List<String> tags, MultipartFile file, User loggedUser) throws IOException {
         ExamPdf examPdf = new ExamPdf();
         examPdf.setTitle(title);
         examPdf.setDescription(description);
-        examPdf.setTags(tags); // Define as tags
-        examPdf.setAuthor(loggedUser); // Define o autor como o usuário logado
-        examPdf.setPdfData(file.getBytes()); // Salva os dados do PDF
+        examPdf.setTags(tags);
+        examPdf.setAuthor(loggedUser);
+        examPdf.setPdfData(file.getBytes());
 
-        examRepository.save(examPdf); // Salva a prova no banco
+        examRepository.save(examPdf);
     }
 
     public Long uploadTextExam(String title, String description, List<String> tags,
@@ -76,7 +76,7 @@ public class ExamService {
         }
 
         Exam foundExam = examOptional.get();
-        List<String> tags = foundExam.getTags();  // Pegando as tags do exame
+        List<String> tags = foundExam.getTags();
 
         if (tags == null || tags.isEmpty()) {
             throw new ServerErrorException("Exam has no tags to generate questions.");
@@ -156,21 +156,16 @@ public class ExamService {
                 }
             }
 
-            // Verifica se o usuário deu like na prova
+
             boolean itsLiked = userId != null && likeUserRepository.hasUserLikedExam(userId, exam.getId());
 
-            // Obtém informações do autor
             String authorName = null;
             String authorAvatar = null;
             if (exam.getAuthor() != null) {
-                authorName = exam.getAuthor().getName();  // Obtém o nome do autor
+                authorName = exam.getAuthor().getName();
 
-                // Aqui, estou verificando se o avatar existe
                 if (exam.getAuthor().getAvatar() != null) {
-                    // Se o avatar for um array de bytes (byte[]), faço a conversão para Base64
                     authorAvatar = Base64.getEncoder().encodeToString(exam.getAuthor().getAvatar());
-                    // Caso o avatar seja uma URL ou string, pode apenas atribuir assim:
-                    // authorAvatar = exam.getAuthor().getAvatar();
                 }
             }
 
