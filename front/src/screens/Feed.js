@@ -82,7 +82,7 @@ const Feed = ({ filter }) => {
             user: post.authorName,
             avatar: "https://via.placeholder.com/150",
             likes: post.likesCount,
-            liked: false,
+            itsLiked: post.itsLiked,
             date: "Agora mesmo",
             fileURL,
           };
@@ -127,19 +127,6 @@ const Feed = ({ filter }) => {
   const handleLike = async (postId) => {
     try {
         const response = await axiosInstance.post("/interaction/like", { examID: postId });
-
-        setPosts((prevPosts) =>
-            prevPosts.map((post) =>
-                post.id === postId
-                    ? {
-                        ...post,
-                        liked: response.data.isLiked,
-                        likes: response.data.isLiked ? post.likes + 1 : post.likes - 1,
-                    }
-                    : post
-            )
-        );
-
         setRefreshTrigger(prev => !prev); // Atualiza o feed automaticamente
       } catch (error) {
         console.error("Erro ao curtir o post:", error);
@@ -546,7 +533,7 @@ const Feed = ({ filter }) => {
               />
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1" fontWeight="700" color="#2d3436">
-                  {post.user}
+                  {post.authorName}
                 </Typography>
                 <Typography variant="caption" color="#636e72">
                   {post.date}
@@ -602,7 +589,7 @@ const Feed = ({ filter }) => {
               }}
             >
               <IconButton onClick={() => handleLike(post.id)}>
-                {post.liked ? <Favorite sx={{ color: "#ff1744" }} /> : <FavoriteBorder sx={{ color: "#636e72" }} />}
+                {post.itsLiked ? <Favorite sx={{ color: "#ff1744" }} /> : <FavoriteBorder sx={{ color: "#636e72" }} />}
               </IconButton>
               <IconButton onClick={() => toggleComments(post.id)}>
                 <Comment sx={{ color: openComments[post.id] ? "#1976d2" : "#636e72" }} />
