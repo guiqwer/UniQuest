@@ -1,0 +1,50 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend:/backend
+    logging:
+      options:
+        max-size: 10m
+    networks: 
+      - uninet
+  
+  frontend:
+    container_name: frontend
+    build:
+      context: ./front
+    ports:
+      - "3000:3000"
+    networks: 
+      - uninet
+    environment:
+      - REACT_APP_API_URL=http://backend:8080
+    depends_on:
+      - backend
+
+  
+  psql:
+    container_name: psql
+    image: postgres:alpine3.19
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_DB: uniquestdb
+      POSTGRES_PASSWORD: 123456
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    networks: 
+      - uninet
+
+networks:  
+  uninet:
+    driver: bridge

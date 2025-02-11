@@ -14,6 +14,6 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class ExamImage extends Exam {
 
-    @Lob
+    
     private byte[] imageData;
 }

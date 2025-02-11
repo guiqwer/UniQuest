@@ -14,6 +14,6 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class ExamPdf extends Exam {
 
-    @Lob
+    
     private byte[] pdfData;
 }
