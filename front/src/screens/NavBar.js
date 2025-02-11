@@ -1,9 +1,9 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { AppBar, Box, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Button } from "@mui/material";
+import { AppBar, Box, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Button, Avatar } from "@mui/material";
 import { AccountCircle, Search } from "@mui/icons-material";
 import ProfileModal from './ProfileModal';
-import { useState } from 'react';
+import { axiosInstance } from '../axios';
 
 const SearchContainer = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -47,10 +47,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function NavBar({ navigate, setFilter }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openProfile, setOpenProfile] = useState(false);
-
+  const [userAvatar, setUserAvatar] = useState(null)
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
-  
+
   const handleOpenProfile = () => {
     setOpenProfile(true);
     handleMenuClose();
@@ -64,12 +64,28 @@ export default function NavBar({ navigate, setFilter }) {
     setFilter(event.target.value); // Atualiza o estado do filtro
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const responseAvatar = await axiosInstance.get("/user/profile");
+        setUserAvatar(
+          responseAvatar.data.avatar
+            ? `data:image/${responseAvatar.data.avatar.startsWith("/9j/") ? "jpeg" : "png"};base64,${responseAvatar.data.avatar}`
+            : "https://via.placeholder.com/150"
+        );
+      } catch (error) {
+        console.error("Erro ao buscar os dados do avatar:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar 
-        position="static" 
-        sx={{ 
+      <AppBar
+        position="static"
+        sx={{
           backgroundColor: '#fff',
           boxShadow: 'none',
           borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
@@ -80,7 +96,7 @@ export default function NavBar({ navigate, setFilter }) {
             variant="h6"
             noWrap
             component="div"
-            sx={{ 
+            sx={{
               mr: 2,
               fontFamily: 'Inter, sans-serif',
               fontWeight: 700,
@@ -116,14 +132,18 @@ export default function NavBar({ navigate, setFilter }) {
             aria-controls="primary-search-account-menu"
             aria-haspopup="true"
             onClick={handleMenuOpen}
-            sx={{ 
+            sx={{
               color: '#333',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
           >
-            <AccountCircle sx={{ fontSize: 32 }} />
+            {userAvatar ? (
+              <Avatar src={userAvatar} sx={{ width: 40, height: 40 }} />
+            ) : (
+              <AccountCircle sx={{ fontSize: 32 }} />
+            )}
           </IconButton>
         </Toolbar>
 
@@ -131,7 +151,7 @@ export default function NavBar({ navigate, setFilter }) {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          sx={{ 
+          sx={{
             '& .MuiPaper-root': {
               backgroundColor: '#fff',
               color: '#333',
@@ -143,18 +163,18 @@ export default function NavBar({ navigate, setFilter }) {
           <MenuItem onClick={handleOpenProfile} sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}>
             Perfil
           </MenuItem>
-          <MenuItem 
+          <MenuItem
             onClick={() => {
               handleMenuClose();
-              sessionStorage.removeItem("token"); 
-              navigate("login"); 
-            }} 
+              sessionStorage.removeItem("token");
+              navigate("login");
+            }}
             sx={{ '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
           >
             Sair
           </MenuItem>
         </Menu>
-        
+
         <ProfileModal openModal={openProfile} handleCloseModal={handleCloseProfile} />
       </AppBar>
     </Box>

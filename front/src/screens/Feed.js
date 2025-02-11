@@ -50,53 +50,55 @@ const Feed = ({ filter }) => {
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
   
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Obtém os dados da API
         const response = await axiosInstance.post("/exam/list", {
-          tags: [],
-          title: filter,
-          description: filter,
+          tags: filter ? [filter] : [],
+          title: filter || "",
+          description: filter || "",
         });
-        console.log(filter)
-        const formattedData = response.data.map(post => {
+  
+        const formattedData = response.data.map((post) => {
           let fileURL = "";
-
-          if (post.data && post.type === "pdf") {
-            const byteCharacters = atob(post.data);
-            const byteNumbers = new Uint8Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
+  
+          if (post.data) {
+            if (post.type === "pdf") {
+              const byteCharacters = atob(post.data);
+              const byteNumbers = new Uint8Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const blob = new Blob([byteNumbers], { type: "application/pdf" });
+              fileURL = URL.createObjectURL(blob);
+            } else if (post.type === "image") {
+              fileURL = `data:image/png;base64,${post.data}`;
             }
-            const blob = new Blob([byteNumbers], { type: "application/pdf" });
-            fileURL = URL.createObjectURL(blob);
-          }
-
-          if (post.data && post.type === "image") {
-            fileURL = `data:image/png;base64,${post.data}`;
           }
 
           return {
             ...post,
             tags: normalizeTags(post.tags),
             user: post.authorName,
-            avatar: "https://via.placeholder.com/150",
+            avatar: post.data.author.avatar ? `data:image/${post.data.author.avatar.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${post.data.author.avatar}`
+            : "https://via.placeholder.com/150",
             likes: post.likesCount,
             itsLiked: post.itsLiked,
             date: "Agora mesmo",
             fileURL,
           };
         });
-
+  
         setPosts(formattedData);
       } catch (error) {
         console.error("Erro ao buscar os dados:", error);
       }
     };
-
+  
     fetchData();
-}, [refreshTrigger, filter]); // O useEffect será executado sempre que refreshTrigger mudar
-
+  }, [refreshTrigger, filter]);
 
   const normalizeTags = (tags) => {
     return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, "")); 
