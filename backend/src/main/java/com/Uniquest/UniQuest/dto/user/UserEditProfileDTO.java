@@ -5,5 +5,6 @@ public record UserEditProfileDTO(
         String favoriteSubject,
         String areaOfInterest,
         String username,
-        String password
+        String oldPassword,
+        String newPassword
 ) {}

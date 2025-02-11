@@ -25,25 +25,30 @@ public class UserService {
     //Método para atualizar o perfil do usuário
     public User updateUserProfile(String userID, UserEditProfileDTO updateUserProfile) {
         Optional<User> optionalUser = userRepository.findById(userID);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-
-            // Atualiza os campos do perfil
-            user.setUsername(updateUserProfile.username());
-            user.setEducation(updateUserProfile.education());
-            user.setFavoriteSubject(updateUserProfile.favoriteSubject());
-            user.setAreaOfInterest(updateUserProfile.areaOfInterest());
-
-            // Atualiza a senha se fornecida
-            if (updateUserProfile.password() != null && !updateUserProfile.password().isBlank()) {
-                String hashedPassword = securityConfig.passwordEncoder().encode(updateUserProfile.password());
-                user.setPassword(hashedPassword);
-            }
-
-            return userRepository.save(user); // Salva no banco de dados
-        } else {
+        if (optionalUser.isEmpty()) {
             throw new UserNotFoundException("Perfil não encontrado para o usuário com ID " + userID);
         }
+
+        User user = optionalUser.get();
+
+            user.setUsername(updateUserProfile.username());
+        user.setEducation(updateUserProfile.education());
+        user.setFavoriteSubject(updateUserProfile.favoriteSubject());
+        user.setAreaOfInterest(updateUserProfile.areaOfInterest());
+
+        if (updateUserProfile.oldPassword() != null && updateUserProfile.newPassword() != null) {
+            if (updateUserProfile.oldPassword().isBlank() || updateUserProfile.newPassword().isBlank()) {
+                throw new IllegalArgumentException("As senhas não podem estar em branco.");
+            }
+
+            if (!securityConfig.passwordEncoder().matches(updateUserProfile.oldPassword(), user.getPassword())) {
+                throw new IllegalArgumentException("Senha antiga incorreta.");
+            }
+
+            user.setPassword(securityConfig.passwordEncoder().encode(updateUserProfile.newPassword()));
+        }
+
+        return userRepository.save(user);
     }
 
     public ResponseEntity<Void> updateUserAvatar(String userID, UserProfileAvatarDTO avatarFileDTO) {

@@ -82,10 +82,14 @@ public class UserController {
 
     //Endpoint para editar o perfil do usuário
     @PutMapping("/edit-profile")
-    public ResponseEntity<User> updateUser(@AuthenticationPrincipal User userPrincipal, @RequestBody UserEditProfileDTO updateUserProfile) {
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @AuthenticationPrincipal User userPrincipal,
+            @RequestBody UserEditProfileDTO updateUserProfile
+    ) {
         User updatedUser = userService.updateUserProfile(userPrincipal.getId(), updateUserProfile);
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(UserResponseDTO.from(updatedUser));
     }
+
 
     // Endpoint para Adicionar o avatar do usuário
     @PutMapping("/avatar")
