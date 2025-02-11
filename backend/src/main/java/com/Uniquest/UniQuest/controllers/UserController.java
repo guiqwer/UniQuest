@@ -6,9 +6,7 @@ import com.Uniquest.UniQuest.domain.user.User;
 import com.Uniquest.UniQuest.dto.auth.RegisterRequestDTO;
 import com.Uniquest.UniQuest.dto.common.ResponseDTO;
 import com.Uniquest.UniQuest.dto.exam.ExamListResponseDTO;
-import com.Uniquest.UniQuest.dto.user.UserEditProfileDTO;
-import com.Uniquest.UniQuest.dto.user.UserProfileAvatarDTO;
-import com.Uniquest.UniQuest.dto.user.UserProfileDTO;
+import com.Uniquest.UniQuest.dto.user.*;
 import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import com.Uniquest.UniQuest.service.EmailChangeService;
@@ -181,17 +179,19 @@ public class UserController {
 
     // Endpoint para iniciar a solicitação de troca de e-mail
     @PostMapping("/request-change")
-    public ResponseEntity<String> requestEmailChange(@RequestParam String currentEmail, @RequestParam String newEmail) {
-        emailChangeService.createEmailChangeCode(currentEmail, newEmail);
-        return ResponseEntity.ok("Código de troca de e-mail enviado com sucesso.");
+    public ResponseEntity<Map<String, String>> requestEmailChange(@RequestBody EmailChangeRequestDTO request) {
+        emailChangeService.createEmailChangeCode(request.currentEmail() , request.newEmail());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "E-mail enviado com sucesso");
+        return ResponseEntity.ok(response);
     }
 
-
-    // Endpoint para confirmar a troca de e-mail com o código
+    // Endpoint para confirmar a troca
     @PostMapping("/confirm-change")
-    public ResponseEntity<String> confirmEmailChange(@RequestParam String currentEmail, @RequestParam String code, @RequestParam String newEmail) {
-        emailChangeService.confirmEmailChange(currentEmail, code, newEmail);
-        return ResponseEntity.ok("E-mail alterado com sucesso.");
+    public ResponseEntity<Map<String, String>> confirmEmailChange(@RequestBody ConfirmEmailChangeDTO request) {
+        emailChangeService.confirmEmailChange(request.currentEmail(), request.code(), request.newEmail());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "E-mail alterado com sucesso.");
+        return ResponseEntity.ok(response);
     }
-
 }
