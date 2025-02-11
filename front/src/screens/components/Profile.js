@@ -3,17 +3,19 @@ import { TextField, Button, Typography, Paper, Box, MenuItem, Avatar } from "@mu
 import { axiosInstance } from '../../axios';
 import AvatarUploadModal from './models/AvatarUploadModal';
 import EmailUpdateModal from './models/EmailUpdateModal';
+import PasswordUpdateModal from './models/PasswordUpdateModal';
 
 const Profile = ({ navigate, handleCloseModal }) => {
     const [error, setError] = useState("");
     const [avatarModalOpen, setAvatarModalOpen] = useState(false);
     const [emailModalOpen, setEmailModalOpen] = useState(false);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
     const [userData, setUserData] = useState({
         name: "",
         displayName: "",
         email: "",
-        password:"",
-        confirmPassword:"",
+        password: "",
+        confirmPassword: "",
         education: "",
         areaOfInterest: "",
         favoriteSubject: "",
@@ -26,7 +28,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
         axiosInstance.get("/user/profile")
             .then((response) => {
                 const data = response.data;
-    
+
                 const updatedData = {
                     name: data.name,
                     email: data.email,
@@ -35,7 +37,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                     favoriteSubject: data.favoriteSubject || "",
                     avatar: data.avatar ? `data:image/${data.avatar.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${data.avatar}` : "https://via.placeholder.com/150",
                 };
-    
+
                 setUserData(updatedData);
                 setEditData(updatedData);
             })
@@ -78,24 +80,26 @@ const Profile = ({ navigate, handleCloseModal }) => {
     const handleCloseAvatarModal = () => {
         setAvatarModalOpen(false);
         axiosInstance.get("/user/profile")
-        .then((response) => {
-            const data = response.data;
-            setUserData({
-                ...userData,
-                avatar: data.avatar !== null ? data.avatar : "https://via.placeholder.com/150",
+            .then((response) => {
+                const data = response.data;
+                setUserData({
+                    ...userData,
+                    avatar: data.avatar !== null ? data.avatar : "https://via.placeholder.com/150",
+                });
+            })
+            .catch((error) => {
+                console.error("Erro ao buscar os dados:", error);
             });
-        })
-        .catch((error) => {
-            console.error("Erro ao buscar os dados:", error);
-        });};
-        
+    };
+
     return (
-        
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             <Paper elevation={6} sx={{
                 display: 'flex',
                 width: '100%',
                 maxWidth: '800px',
+                overflow: 'hidden',
                 p: 4,
                 borderRadius: 4,
                 background: 'rgba(255, 255, 255, 0.95)',
@@ -105,8 +109,8 @@ const Profile = ({ navigate, handleCloseModal }) => {
                 {error && (
                     <Typography color="error" sx={{ mb: 2 }}>
                         {error}
-                        </Typography>
-                    )}
+                    </Typography>
+                )}
                 {/* Lado Esquerdo - Exibição */}
                 <Box sx={{ width: '30%', textAlign: 'center', pr: 3, borderRight: '1px solid #ddd' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#2e7d32' }}>
@@ -115,11 +119,11 @@ const Profile = ({ navigate, handleCloseModal }) => {
                     <Typography variant="body1" sx={{ fontWeight: 500, color: '#2e7d32', mb: 2 }}>
                         @{userData.displayName}
                     </Typography>
-                    <Avatar 
+                    <Avatar
                         src={userData.avatar}
                         sx={{ width: 120, height: 120, margin: '0 auto', mb: 2 }}
                     />
-                    <Button 
+                    <Button
                         variant="contained"
                         onClick={() => setAvatarModalOpen(true)}
                         sx={{
@@ -130,7 +134,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                         Alterar Avatar
                     </Button>
                     {avatarModalOpen && <AvatarUploadModal handleClose={handleCloseAvatarModal} />}
-                    
+
                     {/* Informações abaixo do avatar */}
                     <Box sx={{ mt: 3, textAlign: 'left', pl: 4 }}>
                         <Typography variant="body1" sx={{ fontWeight: 600, color: '#333', mb: 1 }}>
@@ -140,7 +144,7 @@ const Profile = ({ navigate, handleCloseModal }) => {
                             {userData.email || "Não informado."}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: '#333', mb: 2 }}>
-                            🎓 Escolaridade: 
+                            🎓 Escolaridade:
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#333', mb: 2 }}>
                             {userData.education || "Não informado."}
@@ -165,16 +169,16 @@ const Profile = ({ navigate, handleCloseModal }) => {
                         </Typography>
                     </Box>
                 </Box>
-                
+
                 {/* Lado Direito - Edição */}
                 <Box sx={{ width: '70%', pl: 3 }}>
-                    <TextField fullWidth label="Nome" variant="outlined" sx={{ mb: 2 }} placeholder='' value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })}  />
+                    <TextField fullWidth label="Nome" variant="outlined" sx={{ mb: 2 }} placeholder='' value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })} />
                     <TextField fullWidth label="Nome de exibição" variant="outlined" sx={{ mb: 2 }} value={editData.displayName} onChange={(e) => setEditData({ ...editData, displayName: e.target.value })} />
                     <TextField fullWidth label="Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={editData.password} onChange={(e) => setEditData({ ...editData, password: e.target.value })} />
                     <TextField fullWidth label="Confirmar Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={editData.confirmPassword} onChange={(e) => setEditData({ ...editData, confirmPassword: e.target.value })} />
-                    
+
                     <TextField select fullWidth label="Escolaridade" variant="outlined" sx={{ mb: 2 }} value={editData.education || ""} onChange={(e) => setEditData({ ...editData, education: e.target.value })}>
-                    <MenuItem value="">Selecione</MenuItem>
+                        <MenuItem value="">Selecione</MenuItem>
                         <MenuItem value="Ensino Fundamental">Ensino Fundamental</MenuItem>
                         <MenuItem value="Ensino Médio">Ensino Médio</MenuItem>
                         <MenuItem value="Ensino Superior">Ensino Superior</MenuItem>
@@ -194,24 +198,43 @@ const Profile = ({ navigate, handleCloseModal }) => {
                         <MenuItem value="Programação Linear">Programação Linear</MenuItem>
                         <MenuItem value="Física II">Física II</MenuItem>
                     </TextField>
-                    
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                        <Button variant="contained" size="large" sx={{
-                            background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
-                            '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' }
-                        }}>
+
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            sx={{
+                                background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
+                                '&:hover': { background: 'linear-gradient(135deg, #1976d2, #2e7d32)' },
+                                minWidth: 125
+                            }}
+                        >
                             Atualizar Perfil
                         </Button>
-                        <Button variant="outlined" onClick={() => setEmailModalOpen(true)}>
+
+                        <Button
+                            variant="outlined"
+                            size="large"
+                            onClick={() => setEmailModalOpen(true)}
+                            sx={{ minWidth: 125 }}
+                        >
                             Alterar E-mail
                         </Button>
-                        <Button variant="outlined" size="large" color="error">
-                            Excluir Conta
+
+                        <Button
+                            variant="outlined"
+                            size="large"
+                            onClick={() => setPasswordModalOpen(true)}
+                            sx={{ minWidth: 125 }}
+                        >
+                            Alterar Senha
                         </Button>
-                        
-                        
+
+                        {/* Modais */}
+                        {passwordModalOpen && <PasswordUpdateModal open={passwordModalOpen} handleClose={() => setPasswordModalOpen(false)} />}
                         {emailModalOpen && <EmailUpdateModal open={emailModalOpen} handleClose={() => setEmailModalOpen(false)} />}
                     </Box>
+
                 </Box>
             </Paper>
         </Box>
