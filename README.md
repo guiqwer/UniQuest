@@ -1,17 +1,14 @@
 # UniQuest
 
 ## Descrição
-O **UniQuest** é uma plataforma online que funciona como uma rede social acadêmica, permitindo que estudantes compartilhem provas, questões e materiais de estudo. A plataforma facilita a organização e categorização desses materiais por disciplina, nível de dificuldade e outros critérios, promovendo a colaboração e a troca de conhecimento entre os usuários.
-
-Além disso, o **UniQuest** oferece um sistema de pontuação para engajar os usuários e integra um modelo de linguagem avançado para suporte ao aprendizado personalizado.
+O **UniQuest** é uma plataforma online que funciona como uma rede social acadêmica, permitindo que estudantes compartilhem provas, questões e materiais de estudo. A plataforma facilita a organização promovendo a colaboração e a troca de conhecimento entre os usuários.
 
 ---
 
 ## Funcionalidades
 - **Compartilhamento de Provas e Questões:** Os usuários podem compartilhar provas e questões, classificando-as por disciplina e nível de dificuldade.
 - **Avaliação de Conteúdo:** Os usuários podem avaliar o conteúdo publicado por outros, ajudando a identificar materiais de qualidade.
-- **Sistema de Pontuação:** Promove o engajamento e a colaboração na plataforma.
-- **Integração com IA:** Utiliza um modelo de linguagem avançado para gerar questões personalizadas e analisar o desempenho dos usuários.
+- **Integração com IA:** Utiliza um modelo de linguagem avançado para gerar questões personalizadas.
 - **Comentários e Curtidas:** Os usuários podem interagir com os materiais publicados, deixando comentários e curtindo os conteúdos.
 - **Redefinição de Senha e Alteração de Email:** Funcionalidades de segurança para gerenciamento de conta.
 - **Upload de Materiais:** Suporte para upload de provas em formato de texto, PDF e imagem.
