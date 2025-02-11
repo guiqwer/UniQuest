@@ -83,7 +83,6 @@ public class InteractionUserService {
         commentUser.setUser(user);
         commentUser.setExam(exam);
         commentUser.setText(text);
-        commentUser.setAvatar(user.getAvatar());
 
         return commentRepository.save(commentUser);
     }
@@ -147,7 +146,7 @@ public class InteractionUserService {
                         comment.getId(),
                         comment.getUser().getName(),  // Obtém o nome do usuário que fez o comentário
                         comment.getText(),
-                        comment.getAvatar()
+                        comment.getUser().getAvatar()
                 ))
                 .collect(Collectors.toList());
     }

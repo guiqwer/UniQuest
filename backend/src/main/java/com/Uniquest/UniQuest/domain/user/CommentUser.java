@@ -23,8 +23,4 @@ public class CommentUser {
 
     private String text;
 
-    @Lob // Marcar que é binário
-    @Column(columnDefinition = "BYTEA") // Definição específica pro Postgres
-    private byte[] avatar;
-
 }
