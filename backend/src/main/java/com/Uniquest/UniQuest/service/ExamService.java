@@ -159,16 +159,32 @@ public class ExamService {
             // Verifica se o usuário deu like na prova
             boolean itsLiked = userId != null && likeUserRepository.hasUserLikedExam(userId, exam.getId());
 
+            // Obtém informações do autor
+            String authorName = null;
+            String authorAvatar = null;
+            if (exam.getAuthor() != null) {
+                authorName = exam.getAuthor().getName();  // Obtém o nome do autor
+
+                // Aqui, estou verificando se o avatar existe
+                if (exam.getAuthor().getAvatar() != null) {
+                    // Se o avatar for um array de bytes (byte[]), faço a conversão para Base64
+                    authorAvatar = Base64.getEncoder().encodeToString(exam.getAuthor().getAvatar());
+                    // Caso o avatar seja uma URL ou string, pode apenas atribuir assim:
+                    // authorAvatar = exam.getAuthor().getAvatar();
+                }
+            }
+
             return new ExamListResponseDTO(
                     exam.getId(),
                     exam.getTitle(),
                     exam.getDescription(),
                     exam.getTags(),
-                    exam.getAuthor() != null ? exam.getAuthor().getName() : null, // Adicionando o nome do autor
+                    authorName,
                     exam.getLikesCount(),
                     comments,
                     typeExam,
                     itsLiked,
+                    authorAvatar,
                     examData
                      // Adicionando no DTO
             );
