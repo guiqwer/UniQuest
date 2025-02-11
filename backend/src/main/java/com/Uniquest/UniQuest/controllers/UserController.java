@@ -91,18 +91,19 @@ public class UserController {
 
     // Endpoint para Adicionar o avatar do usuário
     @PutMapping("/avatar")
-    public ResponseEntity<User> updateUserAvatar(
+    public ResponseEntity<String> updateUserAvatar(
             @AuthenticationPrincipal User userPrincipal,
             @RequestParam("avatarFile") MultipartFile avatarFile
     ) {
         try {
             UserProfileAvatarDTO dto = new UserProfileAvatarDTO(avatarFile);
-            User updatedUser = userService.updateUserAvatar(userPrincipal.getId(), dto);
-            return ResponseEntity.ok(updatedUser);
+            userService.updateUserAvatar(userPrincipal.getId(), dto);
+            return ResponseEntity.ok("Avatar atualizado");
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("Erro ao atualizar o avatar");
         }
     }
+
 
     // Endpoint para deletar o avatar do usuário
     @DeleteMapping("/avatar")

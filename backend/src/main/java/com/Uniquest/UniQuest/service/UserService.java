@@ -9,6 +9,7 @@ import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 import com.Uniquest.UniQuest.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Optional;
@@ -34,26 +35,23 @@ public class UserService {
         }
     }
 
-    //Método para dar upload no avatar.
-    public User updateUserAvatar(String userID, UserProfileAvatarDTO avatarFileDTO) {
+    public ResponseEntity<Void> updateUserAvatar(String userID, UserProfileAvatarDTO avatarFileDTO) {
         Optional<User> optionalUserProfile = userRepository.findById(userID);
-
         if (optionalUserProfile.isPresent()) {
             User userProfile = optionalUserProfile.get();
             try {
-                // Obtém os bytes do arquivo MultipartFile a partir do DTO
                 byte[] avatarBytes = avatarFileDTO.avatarFile().getBytes();
-                userProfile.setAvatar(avatarBytes); // Converte a imagem para bytes
+                userProfile.setAvatar(avatarBytes);
             } catch (IOException e) {
                 throw new ImageProcessingException("Erro ao processar a imagem para o usuário com ID " + userProfile.getId());
             }
-
-            // Salva o usuário atualizado no banco de dados
-            return userRepository.save(userProfile);
+            userRepository.save(userProfile);
+            return ResponseEntity.noContent().build();
         } else {
             throw new UserNotFoundException("Perfil não encontrado para o usuário com ID " + userID);
         }
     }
+
 
     public void deleteUserAvatar(String userID) {
         User userProfile = userRepository.findById(userID)
@@ -70,6 +68,7 @@ public class UserService {
         return new UserProfileDTO(
                 user.getName(),
                 user.getEmail(),
+                user.getUsername(),
                 user.getEducation(),
                 user.getAreaOfInterest(),
                 user.getFavoriteSubject(),
