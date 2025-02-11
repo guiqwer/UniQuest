@@ -11,7 +11,10 @@ const EmailUpdateModal = ({ open, handleClose, currentEmail }) => {
   
   const handleEmailSubmit = async () => {
     try {
-      const response = await axiosInstance.post(`/user/request-change?currentEmail=${currentEmail}&newEmail=${email}`);
+      const response = await axiosInstance.post("/user/request-change",{
+        currentEmail: currentEmail,
+        newEmail:email
+      });
 
       if (response.status === 200) {
         setStep(2); // Avança para o passo de verificação do código
@@ -24,7 +27,10 @@ const EmailUpdateModal = ({ open, handleClose, currentEmail }) => {
 
   const handleCodeSubmit = async () => {
     try {
-      const response = await axiosInstance.post(`/user/confirm-change?currentEmail=${currentEmail}&newEmail=${email}&code=${verificationCode}`, { email, verificationCode });
+      const response = await axiosInstance.post("/user/confirm-change", { 
+        currentEmail:currentEmail, 
+        newEmail:email, 
+        code:verificationCode});
 
       if (response.status === 200) {
         handleClose(); // Fecha o modal após confirmação
