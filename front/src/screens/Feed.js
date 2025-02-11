@@ -82,7 +82,7 @@ const Feed = ({ filter }) => {
             ...post,
             tags: normalizeTags(post.tags),
             user: post.authorName,
-            avatar: post.data.author.avatar ? `data:image/${post.data.author.avatar.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${post.data.author.avatar}`
+            avatar: post.avatarUser ? `data:image/${post.avatarUser.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${post.avatarUser}`
             : "https://via.placeholder.com/150",
             likes: post.likesCount,
             itsLiked: post.itsLiked,
@@ -128,12 +128,19 @@ const Feed = ({ filter }) => {
 
   const handleLike = async (postId) => {
     try {
-        const response = await axiosInstance.post("/interaction/like", { examID: postId });
-        setRefreshTrigger(prev => !prev); // Atualiza o feed automaticamente
-      } catch (error) {
+        await axiosInstance.post("/interaction/like", { examID: postId });
+
+        setPosts((prevPosts) =>
+            prevPosts.map(post =>
+                post.id === postId
+                    ? { ...post, itsLiked: !post.itsLiked, likes: post.itsLiked ? post.likes - 1 : post.likes + 1 }
+                    : post
+            )
+        );
+    } catch (error) {
         console.error("Erro ao curtir o post:", error);
-      }
-  };
+    }
+};
   
   const handleAddComment = async (postId, commentText) => {
   try {
@@ -606,7 +613,7 @@ const Feed = ({ filter }) => {
               <Box sx={{ maxHeight: 200, overflow: "auto" }}>
                 {post.comments?.map((comment, index) => (
                   <Box key={index} sx={{ display: "flex", gap: 1.5, mb: 2, padding: 1.5 }}>
-                    <Avatar src={comment.avatar} sx={{ width: 40, height: 40 }} />
+                    <Avatar src={comment.Avatar ? `data:image/${comment.Avatar.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${comment.Avatar}` : "https://via.placeholder.com/150"} />
                     <Box>
                       <Typography variant="subtitle2" color="#2d3436">
                         {comment.userName}
