@@ -1,13 +1,16 @@
 package com.Uniquest.UniQuest.service;
 
 import com.Uniquest.UniQuest.domain.user.User;
+import com.Uniquest.UniQuest.dto.common.ResponseDTO;
 import com.Uniquest.UniQuest.dto.user.UserProfileAvatarDTO;
 import com.Uniquest.UniQuest.dto.user.UserEditProfileDTO;
 import com.Uniquest.UniQuest.dto.user.UserProfileDTO;
 import com.Uniquest.UniQuest.exceptions.ImageProcessingException;
 import com.Uniquest.UniQuest.exceptions.UserNotFoundException;
 import com.Uniquest.UniQuest.infra.security.SecurityConfig;
+import com.Uniquest.UniQuest.infra.security.TokenService;
 import com.Uniquest.UniQuest.repositories.UserRepository;
+import com.Uniquest.UniQuest.utils.GenerateRandomCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,33 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final SecurityConfig securityConfig;
+    private final EmailService emailService;
+    private final TokenService tokenService;
+
+
+    public ResponseDTO confirmUserRegister(String email, String code){
+        Optional<User> user = this.userRepository.findByEmail(email);
+        User existingUser = user.get();
+        if (existingUser.getConfirmationCode().equals(code)) {
+            existingUser.setConfirmed(true);
+            this.userRepository.save(existingUser);
+            String token = this.tokenService.generateToken(existingUser);
+            return new ResponseDTO(existingUser.getName(), token);
+        } else {
+            throw new UserNotFoundException("Código Inválido.");
+        }
+    }
+
+    public void preConfirmUser(String email, String name){
+        String confirmationCode = GenerateRandomCodeUtil.generateRandomCode();
+        emailService.sendConfirmEmail(email, confirmationCode);
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setName(name);
+        newUser.setConfirmationCode(confirmationCode);
+        newUser.setConfirmed(false);
+        this.userRepository.save(newUser);
+    }
 
     //Método para atualizar o perfil do usuário
     public User updateUserProfile(String userID, UserEditProfileDTO updateUserProfile) {

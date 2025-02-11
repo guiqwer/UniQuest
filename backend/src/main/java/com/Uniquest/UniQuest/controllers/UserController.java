@@ -55,44 +55,22 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterRequestDTO body) {
+    public ResponseEntity register(@RequestBody ConfirmEmailRequestDTO body) {
         Optional<User> user = this.repository.findByEmail(body.email());
-
-        if (user.isEmpty()) {
-            // Gerar código de confirmação
-            String confirmationCode = GenerateRandomCodeUtil.generateRandomCode();
-
-            // Enviar e-mail de confirmação
-            emailService.sendConfirmEmail(body.email(), confirmationCode);
-
-            // Salvar o usuário com um estado "pendente" ou "não confirmado"
-            User newUser = new User();
-            newUser.setEmail(body.email());
-            newUser.setName(body.name());
-            newUser.setConfirmationCode(confirmationCode); // Atribuir o código de confirmação
-            newUser.setConfirmed(false);  // Marcar como não confirmado
-            this.repository.save(newUser);
-
-            return ResponseEntity.ok("Email enviado para confirmação.");
+        if (user.isPresent()) {
+            return ResponseEntity.ok(userService.confirmUserRegister(body.email(), body.code()));
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/confirm-email")
-    public ResponseEntity confirmEmail(@RequestBody ConfirmEmailRequestDTO request) {
+    public ResponseEntity confirmEmail(@RequestBody RegisterRequestDTO request) {
         Optional<User> user = this.repository.findByEmail(request.email());
-        if (user.isPresent()) {
-            User existingUser = user.get();
-            if (existingUser.getConfirmationCode().equals(request.code())) {
-                existingUser.setConfirmed(true);
-                this.repository.save(existingUser);
-                String token = this.tokenService.generateToken(existingUser);
-                return ResponseEntity.ok(new ResponseDTO(existingUser.getName(), token));
-            } else {
-                return ResponseEntity.badRequest().body("Código de confirmação inválido.");
-            }
+        if (user.isEmpty()) {
+            userService.preConfirmUser(request.email(), request.name());
+            return ResponseEntity.ok("Email enviado para confirmação.");
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.badRequest().build();
     }
 
 
@@ -101,7 +79,7 @@ public class UserController {
         return userService.getUserById(userPrincipal.getId());
     }
 
-    //Endpoint para editar o perfil do usuário
+
     @PutMapping("/edit-profile")
     public ResponseEntity<UserResponseDTO> updateUser(
             @AuthenticationPrincipal User userPrincipal,
@@ -171,7 +149,7 @@ public class UserController {
         return ResponseEntity.ok(examDTOs);
     }
 
-    @GetMapping("my-liked-exams")
+    @GetMapping("/my-liked-exams")
     public ResponseEntity<List<ExamListResponseDTO>> getLikedExams(@AuthenticationPrincipal User userPrincipal) {
         String userId = userPrincipal.getId();
         List<Exam> likedExams = interactionUserService.getExamsLikedByUser(userId);
