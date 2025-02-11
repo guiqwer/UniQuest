@@ -32,8 +32,16 @@ public class ExamCustomRepository {
         }
 
         if (tags != null && !tags.isEmpty()) {
-            Join<Exam, String> tagsJoin = root.join("tags", JoinType.LEFT);
-            predicates.add(tagsJoin.in(tags));
+            Join<Exam, String> tagsJoin = root.join("tags", JoinType.INNER); // Usa INNER JOIN para evitar exames sem tags
+            List<Predicate> tagPredicates = new ArrayList<>();
+
+            for (String tag : tags) {
+                String likePattern = "%" + tag.toLowerCase() + "%";
+                tagPredicates.add(cb.like(cb.lower(tagsJoin), likePattern));
+            }
+
+            //Vai combinar as condições das tags com OR (qualquer tag parcialmente correspondente)
+            predicates.add(cb.or(tagPredicates.toArray(new Predicate[0])));
         }
 
         if (!predicates.isEmpty()) {
