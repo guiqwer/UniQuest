@@ -37,9 +37,9 @@ public class ExamController {
     @PostMapping("/upload/image")
     public ResponseEntity<String> uploadImageExam(@RequestParam String title,
                                                   @RequestParam String description,
-                                                  @RequestParam List<String> tags, // Adiciona a lista de tags
+                                                  @RequestParam List<String> tags,
                                                   @RequestParam("file") MultipartFile file,
-                                                  @AuthenticationPrincipal User loggedUser) { // Recebe o usuário logado
+                                                  @AuthenticationPrincipal User loggedUser) {
         try {
             examService.uploadImageExam(title, description, tags, file, loggedUser);
             return ResponseEntity.ok("Imagem enviada com sucesso!");
@@ -51,9 +51,9 @@ public class ExamController {
     @PostMapping("/upload/pdf")
     public ResponseEntity<String> uploadPDFExam(@RequestParam String title,
                                                 @RequestParam String description,
-                                                @RequestParam List<String> tags, // Adiciona a lista de tags
+                                                @RequestParam List<String> tags,
                                                 @RequestParam("file") MultipartFile file,
-                                                @AuthenticationPrincipal User loggedUser) { // Recebe o usuário logado
+                                                @AuthenticationPrincipal User loggedUser) {
         try {
             examService.uploadPDFExam(title, description, tags, file, loggedUser);
             return ResponseEntity.ok("PDF enviado com sucesso!");
@@ -108,10 +108,10 @@ public class ExamController {
                     .body(((ExamPdf) foundExam).getPdfData());
         } else if (foundExam instanceof ExamImage) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_PNG) // Ajuste conforme o tipo da imagem
+                    .contentType(MediaType.IMAGE_PNG)
                     .body(((ExamImage) foundExam).getImageData());
         } else if (foundExam instanceof ExamText) {
-            return ResponseEntity.ok(foundExam); // Retorna JSON para provas textuais
+            return ResponseEntity.ok(foundExam);
         } else {
             return ResponseEntity.badRequest().body("Tipo de prova desconhecido.");
         }
