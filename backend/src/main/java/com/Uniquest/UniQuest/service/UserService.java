@@ -68,6 +68,7 @@ public class UserService {
         return new UserProfileDTO(
                 user.getName(),
                 user.getEmail(),
+                user.getUsername(),
                 user.getEducation(),
                 user.getAreaOfInterest(),
                 user.getFavoriteSubject(),
