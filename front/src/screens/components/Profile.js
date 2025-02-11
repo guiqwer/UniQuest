@@ -12,7 +12,6 @@ const Profile = ({ navigate, handleCloseModal }) => {
         name: "",
         displayName: "",
         email: "",
-        confirmEmail: "",
         password:"",
         confirmPassword:"",
         education: "",
@@ -171,8 +170,6 @@ const Profile = ({ navigate, handleCloseModal }) => {
                 <Box sx={{ width: '70%', pl: 3 }}>
                     <TextField fullWidth label="Nome" variant="outlined" sx={{ mb: 2 }} placeholder='' value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })}  />
                     <TextField fullWidth label="Nome de exibição" variant="outlined" sx={{ mb: 2 }} value={editData.displayName} onChange={(e) => setEditData({ ...editData, displayName: e.target.value })} />
-                    <TextField fullWidth label="Email" type="email" variant="outlined" sx={{ mb: 2 }} value={editData.email} onChange={(e) => setEditData({ ...editData, email: e.target.value })} />
-                    <TextField fullWidth label="Confirmar Email" type="email" variant="outlined" sx={{ mb: 2 }} value={editData.confirmEmail} onChange={(e) => setEditData({ ...editData, confirmEmail: e.target.value })} />
                     <TextField fullWidth label="Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={editData.password} onChange={(e) => setEditData({ ...editData, password: e.target.value })} />
                     <TextField fullWidth label="Confirmar Senha" type="password" variant="outlined" sx={{ mb: 2 }} value={editData.confirmPassword} onChange={(e) => setEditData({ ...editData, confirmPassword: e.target.value })} />
                     
