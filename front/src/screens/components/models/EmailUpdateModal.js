@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import { Modal, Box, TextField, Button, Typography } from "@mui/material";
 import { axiosInstance } from "../../../axios";
 
-const EmailUpdateModal = ({ open, handleClose }) => {
+const EmailUpdateModal = ({ open, handleClose, currentEmail }) => {
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [step, setStep] = useState(1); // 1: Inserir e-mail, 2: Inserir código
   const [error, setError] = useState("");
-
+  const [oldEmail, setOldEmail] = useState(currentEmail);
+  
   const handleEmailSubmit = async () => {
     try {
-      const response = await axiosInstance.post("/user/update-email", { email });
+      const response = await axiosInstance.post("/user/request-change",{
+        currentEmail: currentEmail,
+        newEmail:email
+      });
 
       if (response.status === 200) {
         setStep(2); // Avança para o passo de verificação do código
@@ -23,7 +27,10 @@ const EmailUpdateModal = ({ open, handleClose }) => {
 
   const handleCodeSubmit = async () => {
     try {
-      const response = await axiosInstance.post("/user/verify-email-code", { email, verificationCode });
+      const response = await axiosInstance.post("/user/confirm-change", { 
+        currentEmail:currentEmail, 
+        newEmail:email, 
+        code:verificationCode});
 
       if (response.status === 200) {
         handleClose(); // Fecha o modal após confirmação
