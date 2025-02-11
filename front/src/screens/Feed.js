@@ -563,7 +563,7 @@ const Feed = ({ filter }) => {
                     <Avatar
                       src={post.avatar}
                       sx={{
-                        width: 56,
+                        width: 56,  
                         height: 56,
                         mr: 2,
                         border: "2px solid #fff",
