@@ -59,7 +59,7 @@ const SignUp = ({ navigate }) => {
             <Paper elevation={6} sx={{ width: '100%', maxWidth: '450px', p: 4, borderRadius: 4, background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', textAlign: 'center' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                     <img
-                        src="https://i.imgur.com/zLPjYXW.png"
+                        src="https://i.imgur.com/HQmgv84.png"
                         alt="Logo UniQuest"
                         style={{ height: '100px', objectFit: 'contain' }}
                     />

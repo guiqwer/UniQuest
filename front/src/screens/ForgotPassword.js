@@ -45,7 +45,7 @@ const ForgotPassword = ({ navigate }) => {
                     mb: 4
                 }}>
                     <img
-                        src="https://i.imgur.com/zLPjYXW.png"
+                        src="https://i.imgur.com/HQmgv84.png"
                         alt="Logo UniQuest"
                         style={{ height: '100px', objectFit: 'contain' }}
                     />

@@ -72,7 +72,7 @@ const Login = ({ navigate }) => {
                 }}>
                     <Box sx={{ mb: 3, textAlign: 'center' }}>
                         <img
-                            src="https://i.imgur.com/zLPjYXW.png"
+                            src="https://i.imgur.com/HQmgv84.png"
                             alt="Logo UniQuest"
                             style={{ width: '100%', maxWidth: '150px' }}
                         />
