@@ -22,45 +22,45 @@ const ForgotPassword = ({ navigate }) => {
         }
     };
     return (
-        <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
+        <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             minHeight: '100vh',
             background: 'linear-gradient(135deg, #2e7d32, #1976d2)',
             p: 2
         }}>
-            <Paper elevation={6} sx={{ 
-                width: '100%', 
-                maxWidth: '450px', 
-                p: 4, 
-                borderRadius: 4, 
-                background: 'rgba(255, 255, 255, 0.95)', 
+            <Paper elevation={6} sx={{
+                width: '100%',
+                maxWidth: '450px',
+                p: 4,
+                borderRadius: 4,
+                background: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(8px)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
             }}>
-                <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    mb: 4 
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    mb: 4
                 }}>
-                    <img 
-                        src="https://ifce.edu.br/prpi/documentos-1/semic/2018/logo-ifce-vertical.png" 
-                        alt="Logo IFCE" 
-                        style={{ height: '100px', objectFit: 'contain' }} 
+                    <img
+                        src="https://i.imgur.com/zLPjYXW.png"
+                        alt="Logo UniQuest"
+                        style={{ height: '100px', objectFit: 'contain' }}
                     />
                 </Box>
-                <Typography variant="h4" sx={{ 
-                    fontWeight: 700, 
+                <Typography variant="h4" sx={{
+                    fontWeight: 700,
                     color: '#2e7d32',
                     textAlign: 'center',
                     mb: 1
                 }}>
                     Redefinir Senha
                 </Typography>
-                <Typography variant="body1" sx={{ 
-                    color: '#616161', 
-                    textAlign: 'center', 
+                <Typography variant="body1" sx={{
+                    color: '#616161',
+                    textAlign: 'center',
                     mb: 4,
                     fontSize: '1.1rem'
                 }}>
@@ -69,10 +69,10 @@ const ForgotPassword = ({ navigate }) => {
                 {error && (
                     <Typography color="error" sx={{ mb: 2 }}>
                         {error}
-                        </Typography>
-                    )}
+                    </Typography>
+                )}
                 <form onSubmit={handleResetPassword}>
-                    <TextField 
+                    <TextField
                         fullWidth
                         label="E-mail"
                         type="email"
@@ -80,7 +80,7 @@ const ForgotPassword = ({ navigate }) => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        sx={{ 
+                        sx={{
                             mb: 3,
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -88,12 +88,12 @@ const ForgotPassword = ({ navigate }) => {
                         }}
                     />
 
-                    <Button 
+                    <Button
                         fullWidth
                         variant="contained"
                         size="large"
                         type="submit"
-                        sx={{ 
+                        sx={{
                             mt: 1,
                             py: 1.5,
                             borderRadius: 2,
@@ -111,8 +111,8 @@ const ForgotPassword = ({ navigate }) => {
                         Enviar email
                     </Button>
                 </form>
-                <Box sx={{ 
-                    textAlign: 'center', 
+                <Box sx={{
+                    textAlign: 'center',
                     mt: 4,
                     '& a': {
                         color: '#1976d2',
@@ -123,8 +123,8 @@ const ForgotPassword = ({ navigate }) => {
                         }
                     }
                 }}>
-                    <Link 
-                        component="button" 
+                    <Link
+                        component="button"
                         onClick={() => navigate("login")}
                     >
                         Voltar para o login

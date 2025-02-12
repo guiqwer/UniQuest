@@ -72,8 +72,8 @@ const Login = ({ navigate }) => {
                 }}>
                     <Box sx={{ mb: 3, textAlign: 'center' }}>
                         <img
-                            src="https://ifce.edu.br/prpi/documentos-1/semic/2018/logo-ifce-vertical.png"
-                            alt="Logo IFCE"
+                            src="https://i.imgur.com/zLPjYXW.png"
+                            alt="Logo UniQuest"
                             style={{ width: '100%', maxWidth: '150px' }}
                         />
                     </Box>
@@ -83,9 +83,6 @@ const Login = ({ navigate }) => {
                         textAlign: 'center',
                         mb: 1
                     }}>
-                        UniQuest
-                    </Typography>
-                    <Typography variant="body1" gutterBottom sx={{ color: '#555', mb: 3 }}>
                         Acesse sua conta
                     </Typography>
 

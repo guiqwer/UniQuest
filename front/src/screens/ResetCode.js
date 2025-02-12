@@ -31,7 +31,7 @@ const PinInput = ({ navigate }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     try {
       const resetCode = pin.join('');
       const response = await axiosInstance.post('/user/reset-password', {
@@ -65,8 +65,8 @@ const PinInput = ({ navigate }) => {
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
           <img
-            src="https://ifce.edu.br/prpi/documentos-1/semic/2018/logo-ifce-vertical.png"
-            alt="Logo IFCE"
+            src="https://i.imgur.com/zLPjYXW.png"
+            alt="Logo UniQuest"
             style={{ height: '100px', objectFit: 'contain' }}
           />
         </Box>
@@ -165,22 +165,22 @@ const PinInput = ({ navigate }) => {
             Confirmar Código
           </Button>
           <Button
-          fullWidth
-          variant="text"
-          sx={{
-            mt: 2,
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: '#1976d2',
-            textTransform: 'none',
-            '&:hover': {
-              textDecoration: 'underline',
-            },
-          }}
-          onClick={() => navigate("forgotPassword")}
+            fullWidth
+            variant="text"
+            sx={{
+              mt: 2,
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: '#1976d2',
+              textTransform: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
+            onClick={() => navigate("forgotPassword")}
           >
             Não recebeu o código? Reenviar
-            </Button>
+          </Button>
         </form>
       </Paper>
     </Box>

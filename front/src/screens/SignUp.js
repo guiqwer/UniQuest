@@ -59,8 +59,8 @@ const SignUp = ({ navigate }) => {
             <Paper elevation={6} sx={{ width: '100%', maxWidth: '450px', p: 4, borderRadius: 4, background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', textAlign: 'center' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                     <img
-                        src="https://ifce.edu.br/prpi/documentos-1/semic/2018/logo-ifce-vertical.png"
-                        alt="Logo IFCE"
+                        src="https://i.imgur.com/zLPjYXW.png"
+                        alt="Logo UniQuest"
                         style={{ height: '100px', objectFit: 'contain' }}
                     />
                 </Box>
@@ -73,6 +73,7 @@ const SignUp = ({ navigate }) => {
                     <form onSubmit={handleSendCode}>
                         <TextField fullWidth label="Email" type="email" variant="outlined" required value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mb: 3 }} />
                         <Button fullWidth variant="contained" size="large" type="submit">Enviar Código</Button>
+                        <Button fullWidth variant="outlined" sx={{ mt: 2 }} onClick={() => navigate("login")}>Logar</Button>
                     </form>
                 )}
                 {step === 2 && (
