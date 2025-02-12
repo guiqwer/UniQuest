@@ -6,9 +6,9 @@ import {
 } from "@mui/material";
 import {
   FavoriteBorder, Favorite, AddPhotoAlternate,
-  Comment, Close, MoreVert
+  Comment, Close, MoreVert, Stars, AutoAwesome
 } from "@mui/icons-material";
-
+import CircularProgress from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { pdfjs } from 'react-pdf';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -103,10 +103,10 @@ const Feed = ({ filter }) => {
 
     fetchData();
   }, [refreshTrigger, filter]);
-  
+
   const generateExam = async (postId) => {
     setIsGenerating(true);
-    
+
     try {
       const response = await axiosInstance.post("/exam/generate/text", { id: postId });
       console.log(response.data.ID)
@@ -117,6 +117,7 @@ const Feed = ({ filter }) => {
         title: examData.data.title,
         description: examData.data.description,
         questions: examData.data.questions,
+        type:examData.type,
       };
 
       setGeneratedExam(formattedExam);
@@ -127,11 +128,11 @@ const Feed = ({ filter }) => {
       setIsGenerating(false);
     }
   };
-  
+
   const normalizeTags = (tags) => {
     return tags.map(tag => tag.replace(/^\[?"|"?\]$/g, ""));
   };
-  
+
   const handleDeletePost = (postId) => {
     setPosts(posts.filter(post => post.id !== postId));
     setAnchorEl(null);
@@ -177,25 +178,27 @@ const Feed = ({ filter }) => {
         examId: postId,
         text: commentText,
       });
-
+  
       if (response.status === 200) {
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
             post.id === postId
               ? {
-                ...post,
-                comments: [...(post.comments || []), { text: commentText }],
-              }
+                  ...post,
+                  comments: [...post.comments, { text: commentText }],
+                }
               : post
           )
         );
-
+  
         setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
       }
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
     }
   };
+  
+  
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
     setPosts(prevPosts => prevPosts.map(post => {
@@ -538,9 +541,10 @@ const Feed = ({ filter }) => {
         ) : (
           posts.map((post) => {
             return (
-              <PostCard key={post.id}>
+              <PostCard key={post.id} sx={{ position: "relative" }}>
                 <CardContent>
-                  {/* Exibe o ID do post na interface */}
+                  {/* Botão de gerar prova no canto superior direito */}
+
                   <Typography
                     variant="caption"
                     sx={{ color: "#b2bec3", fontWeight: 600, position: "absolute", top: 8, left: 16 }}
@@ -562,7 +566,7 @@ const Feed = ({ filter }) => {
                     <Avatar
                       src={post.avatar}
                       sx={{
-                        width: 56,
+                        width: 56,  
                         height: 56,
                         mr: 2,
                         border: "2px solid #fff",
@@ -578,21 +582,20 @@ const Feed = ({ filter }) => {
                       </Typography>
                     </Box>
                     <IconButton
-                      onClick={(e) => handleMenuOpen(e, post.id)}
-                      sx={{ position: "absolute", right: 16, top: 16, color: "#636e72" }}
+                      onClick={() => generateExam(post.id)}
+                      disabled={isGenerating}
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        "&:hover": { backgroundColor: "rgba(255, 255, 255, 1)" },
+                      }}
                     >
-                      <MoreVert />
+                      <AutoAwesome sx={{ fontSize: 20 }} />
                     </IconButton>
                   </Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => generateExam(post.id)}
-                    disabled={isGenerating}
-                    sx={{ mt: 1 }}
-                  >
-                    {isGenerating ? "Gerando..." : "Gerar Prova"}
-                  </Button>
+
 
                   {post.title && (
                     <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: "#2d3436" }}>
@@ -684,30 +687,6 @@ const Feed = ({ filter }) => {
         )}
       </Box>
       <ExamModal open={openExamModal} onClose={() => setOpenExamModal(false)} exam={generatedExam} />
-
-      {/* Menu de três pontos */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        PaperProps={{
-          sx: {
-            mt: 1,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            minWidth: 140
-          }
-        }}
-      >
-        <MenuItem
-          onClick={() => handleDeletePost(selectedPostId)}
-          sx={{
-            color: '#ff4444',
-            '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.08)' }
-          }}
-        >
-          Excluir Post
-        </MenuItem>
-      </Menu>
 
       <SpeedDial
         ariaLabel="Novo post"
