@@ -178,25 +178,27 @@ const Feed = ({ filter }) => {
         examId: postId,
         text: commentText,
       });
-
+  
       if (response.status === 200) {
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
             post.id === postId
               ? {
-                ...post,
-                comments: [...(post.comments || []), { text: commentText }],
-              }
+                  ...post,
+                  comments: [...post.comments, { text: commentText }],
+                }
               : post
           )
         );
-
+  
         setRefreshTrigger(prev => !prev); // Atualiza automaticamente o feed
       }
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
     }
   };
+  
+  
 
   const handleObjectiveAnswer = (postId, questionIndex, selectedOptionIndex) => {
     setPosts(prevPosts => prevPosts.map(post => {

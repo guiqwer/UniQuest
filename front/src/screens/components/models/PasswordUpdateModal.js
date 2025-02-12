@@ -15,7 +15,7 @@ const PasswordUpdateModal = ({ open, handleClose }) => {
     }
 
     try {
-      const response = await axiosInstance.post("/user/update-password", {
+      const response = await axiosInstance.put("/user/edit-profile", {
         oldPassword,
         newPassword,
       });
