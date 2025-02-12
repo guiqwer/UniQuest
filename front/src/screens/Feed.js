@@ -117,6 +117,7 @@ const Feed = ({ filter }) => {
         title: examData.data.title,
         description: examData.data.description,
         questions: examData.data.questions,
+        type:examData.type,
       };
 
       setGeneratedExam(formattedExam);
