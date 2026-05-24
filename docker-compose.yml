@@ -22,7 +22,7 @@ services:
     networks: 
       - uninet
     environment:
-      - REACT_APP_API_URL=http://backend:8080
+      - REACT_APP_API_URL: 'https://api.uniquest.projetos.ltap.ifce.edu.br'
     depends_on:
       - backend
 
